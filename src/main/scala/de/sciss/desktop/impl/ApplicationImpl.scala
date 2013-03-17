@@ -1,0 +1,23 @@
+package de.sciss.desktop
+package impl
+
+trait ApplicationImpl extends Application {
+  private lazy val _systemPrefs = Preferences.system(getClass)
+  private lazy val _userPrefs   = Preferences.user  (getClass)
+
+  final def systemPrefs: Preferences = _systemPrefs
+  final def userPrefs  : Preferences = _userPrefs
+
+  private val sync          = new AnyRef
+  private var componentMap  = Map.empty[String, Any]
+
+  def addComponent(key: String, component: Any) {
+    sync.synchronized(componentMap += key -> component)
+  }
+
+  def removeComponent(key: String) {
+    sync.synchronized(componentMap -= key)
+  }
+
+  def getComponent[A](key: String): Option[A] = sync.synchronized(componentMap.get(key).asInstanceOf[Option[A]])
+}
