@@ -3,61 +3,10 @@ package de.sciss.desktop
 import java.util.{prefs => j}
 import impl.{PreferencesImpl => Impl}
 import scala.util.control.NonFatal
+import java.io.File
+import java.awt.Dimension
 
 object Preferences {
-  object Type {
-    import java.lang.{String => SString}
-
-    implicit object String extends Type[SString] {
-      private[desktop] def toString(value: SString) = value
-      private[desktop] def valueOf(string: SString): Option[SString] = Some(string)
-    }
-
-    implicit object File extends Type[java.io.File] {
-      private[desktop] def toString(value: java.io.File) = value.getPath
-      private[desktop] def valueOf(string: SString): Option[java.io.File] = Some(new java.io.File(string))
-    }
-
-    implicit object Int extends Type[scala.Int] {
-      private[desktop] def toString(value: scala.Int) = value.toString
-      private[desktop] def valueOf(string: SString): Option[scala.Int] = try {
-        Some(string.toInt)
-      } catch {
-        case NonFatal(_) => None
-      }
-    }
-
-    implicit object Boolean extends Type[scala.Boolean] {
-      private[desktop] def toString(value: scala.Boolean) = value.toString
-      private[desktop] def valueOf(string: SString): Option[scala.Boolean] = try {
-        Some(string.toBoolean)
-      } catch {
-        case NonFatal(_) => None
-      }
-    }
-
-    implicit object Dimension extends Preferences.Type[java.awt.Dimension] {
-      private[desktop] def toString(value: java.awt.Dimension): String = s"${value.width} ${value.height}"
-      private[desktop] def valueOf(string: String): Option[java.awt.Dimension] = try {
-        val i = string.indexOf(' ')
-        if (i < 0) return None
-        val width   = string.substring(0, i).toInt
-        val height  = string.substring(i +1).toInt
-        Some(new java.awt.Dimension(width, height))
-      }
-      catch {
-        case NonFatal(_) => None
-      }
-    }
-  }
-  trait Type[A] {
-    private[desktop] def toString(value: A): String
-    private[desktop] def valueOf(string: String): Option[A]
-
-//    private[desktop] def put(prefs: j.Preferences, key: String, value: A): Unit
-//    private[desktop] def get(prefs: j.Preferences, key: String): Option[A]
-//    private[desktop] def getOrElse(prefs: j.Preferences, key: String, default: A): A
-  }
 
   def user  (clazz: Class[_]): Preferences = Impl.user  (clazz)
   def system(clazz: Class[_]): Preferences = Impl.system(clazz)
@@ -102,6 +51,54 @@ object Preferences {
     def get: Option[A] = prefs.get(key)
     def getOrElse(default: => A): A = prefs.getOrElse(key, default)
     def put(value: A) { prefs.put(key, value) }
+  }
+
+  object Type {
+    implicit object string extends Type[String] {
+      def toString(value: String) = value
+      def valueOf(string: String): Option[String] = Some(string)
+    }
+
+    implicit object file extends Type[File] {
+      def toString(value: File) = value.getPath
+      def valueOf(string: String): Option[File] = Some(new File(string))
+    }
+
+    implicit object int extends Type[Int] {
+      def toString(value: Int) = value.toString
+      def valueOf(string: String): Option[Int] = try {
+        Some(string.toInt)
+      } catch {
+        case NonFatal(_) => None
+      }
+    }
+
+    implicit object boolean extends Type[Boolean] {
+      def toString(value: Boolean) = value.toString
+      def valueOf(string: String): Option[Boolean] = try {
+        Some(string.toBoolean)
+      } catch {
+        case NonFatal(_) => None
+      }
+    }
+
+    implicit object dimension extends Type[Dimension] {
+      def toString(value: Dimension): String = s"${value.width} ${value.height}"
+      def valueOf(string: String): Option[Dimension] = try {
+        val i = string.indexOf(' ')
+        if (i < 0) return None
+        val width   = string.substring(0, i).toInt
+        val height  = string.substring(i +1).toInt
+        Some(new Dimension(width, height))
+      }
+      catch {
+        case NonFatal(_) => None
+      }
+    }
+  }
+  trait Type[A] {
+    def toString(value: A): String
+    def valueOf(string: String): Option[A]
   }
 }
 trait Preferences {
