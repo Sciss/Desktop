@@ -10,6 +10,10 @@ package impl
 //  }
 //}
 final class WindowHandlerImpl(val application: SwingApplication) extends WindowHandler {
+  private var _windows = Vector.empty[Window]
+
+  private val isMac = sys.props("os.name").contains("Mac OS")
+
   def showDialog[A](window: Window, source: DialogSource[A]): A = {
  		// temporarily disable alwaysOnTop
  		val wasOnTop = if (!usesInternalFrames && usesFloatingPalettes) windows.filter { w =>
@@ -26,22 +30,23 @@ final class WindowHandlerImpl(val application: SwingApplication) extends WindowH
  	}
 
   def addWindow(w: Window) {
-    ???
+    _windows :+= w
   }
 
   def removeWindow(w: Window) {
-    ???
+    val i = _windows.indexOf(w)
+    if (i >= 0) _windows = _windows.patch(i, Vector.empty, 1)
   }
 
-  def windows: Iterator[Window] = ???
+  def windows: Iterator[Window] = _windows.iterator
 
-  def usesInternalFrames: Boolean = ???
+  def usesInternalFrames: Boolean = false // XXX TODO
 
-  def usesScreenMenuBar: Boolean = ???
+  def usesScreenMenuBar: Boolean = isMac
 
-  def usesFloatingPalettes: Boolean = ???
+  def usesFloatingPalettes: Boolean = true  // XXX TODO
 
   def setDefaultBorrower(w: Window) {
-    ???
+    // XXX TODO
   }
 }

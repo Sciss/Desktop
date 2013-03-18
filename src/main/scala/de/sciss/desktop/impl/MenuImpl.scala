@@ -137,13 +137,13 @@ private[desktop] object MenuImpl {
     var map   = Map.empty[String, Menu.NodeLike]
 
     def create(c: swing.SequentialContainer, w: Frame) {
-      if (window.isDefined) require(window.get == w)  // ???
+      if (window.isDefined) require(window.get == w)  // XXX TODO -- correct?
 
       seq.foreach { n => c.contents += n.create(w)}
     }
 
     def destroy(w: Frame) {
-      if (window.isDefined) require(window.get == w)  // ???
+      if (window.isDefined) require(window.get == w)  // XXX TODO -- correct?
 
       seq.foreach(_.destroy(w))
     }

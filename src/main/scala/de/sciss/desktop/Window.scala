@@ -1,6 +1,6 @@
 package de.sciss.desktop
 
-import swing.{Action, Reactions, Component}
+import swing.{RootPanel, Action, Reactions, Component}
 import javax.swing.{RootPaneContainer, SwingUtilities, WindowConstants}
 import java.awt._
 import java.awt.event.WindowEvent
@@ -17,11 +17,19 @@ object Window {
   /** Supplementary window which is a (possibly floating) palette. */
   case object Palette   extends Style
 
+  object CloseOperation {
+    def apply(id: Int): CloseOperation = (id: @switch) match {
+      case CloseIgnore .id => CloseIgnore
+      case CloseExit   .id => CloseExit
+      case CloseHide   .id => CloseHide
+      case CloseDispose.id => CloseDispose
+    }
+  }
   sealed trait CloseOperation { def id: Int }
-  case object CloseIgnore  extends CloseOperation { val id = WindowConstants.DO_NOTHING_ON_CLOSE  }
-  case object CloseExit    extends CloseOperation { val id = WindowConstants.EXIT_ON_CLOSE        }
-  case object CloseHide    extends CloseOperation { val id = WindowConstants.HIDE_ON_CLOSE        }
-  case object CloseDispose extends CloseOperation { val id = WindowConstants.DISPOSE_ON_CLOSE     }
+  case object CloseIgnore  extends CloseOperation { final val id = WindowConstants.DO_NOTHING_ON_CLOSE  }
+  case object CloseExit    extends CloseOperation { final val id = WindowConstants.EXIT_ON_CLOSE        }
+  case object CloseHide    extends CloseOperation { final val id = WindowConstants.HIDE_ON_CLOSE        }
+  case object CloseDispose extends CloseOperation { final val id = WindowConstants.DISPOSE_ON_CLOSE     }
 
   object Event {
     def apply(window: Window, peer: WindowEvent): Event = {
@@ -80,45 +88,6 @@ object Window {
     source.show()
   }
 
-//  def showDialog(parent: Component, pane: JOptionPane, title: String): Any = {
-//    findWindow(parent) match {
-//      case Some(w)  => w.handler.showDialog(w, pane, title)
-//      case _        => showDialog(pane, title)
-//    }
-//  }
-//
-//  def showDialog(pane: JOptionPane, title: String): Any = {
-//    val jdlg  = pane.createDialog(title)
-//    val dlg   = new Dialog(null) {
-//      override lazy val peer = jdlg
-//    }
-//    showDialog(dlg)
-//    pane.getValue
-//  }
-//
-//  def showErrorDialog(exception: Exception, title: String) {
-//    val strBuf = new StringBuffer("Exception: ")
-//    val message = if (exception == null) "null" else (exception.getClass.getName + " - " + exception.getLocalizedMessage)
-//    var lineLen = 0
-//    val options = Array[AnyRef]("Ok", "Show Stack Trace")
-//    val tok = new StringTokenizer(message)
-//    strBuf.append(":\n")
-//    while (tok.hasMoreTokens) {
-//      val word = tok.nextToken()
-//      if (lineLen > 0 && lineLen + word.length() > 40) {
-//        strBuf.append("\n")
-//        lineLen = 0
-//      }
-//      strBuf.append(word)
-//      strBuf.append(' ')
-//      lineLen += word.length() + 1
-//    }
-//    val op = new JOptionPane(strBuf.toString, JOptionPane.ERROR_MESSAGE, JOptionPane.YES_NO_OPTION, null, options, options(0))
-//    if (showDialog(op, title) == 1) {
-//      exception.printStackTrace()
-//    }
-//  }
-
   def menuShortcut: Int = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
 
   def availableSpace: Rectangle = GraphicsEnvironment.getLocalGraphicsEnvironment.getMaximumWindowBounds
@@ -130,7 +99,7 @@ object Window {
       case Window.Activated(_) =>
 //				if( !disposed ) {
           // ((BasicApplication) AbstractApplication.getApplication()).getMenuFactory().setSelectedWindow( ShowWindowAction.this );
-          ???
+          // XXX TODO
 //			  }
     }
 
@@ -153,7 +122,7 @@ trait Window {
   def title: String
   var visible: Boolean
 
-  def component: Component
+  def component: RootPanel
 
   def dispose(): Unit
   def front(): Unit
