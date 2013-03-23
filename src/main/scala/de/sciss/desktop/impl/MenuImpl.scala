@@ -2,7 +2,7 @@ package de.sciss.desktop
 package impl
 
 import javax.swing.KeyStroke
-import swing.{Frame, Action}
+import swing.Action
 import scalaswingcontrib.PopupMenu
 
 private[desktop] object MenuImpl {
@@ -66,16 +66,16 @@ private[desktop] object MenuImpl {
   private trait Realizable[C <: swing.Component] extends Node {
     _: Menu.NodeLike =>
 
-    private var mapRealized = Map.empty[Frame, C]
+    private var mapRealized = Map.empty[Window, C]
 
-    final protected def getRealized(w: Frame): Option[C] = mapRealized.get(w)
-    final protected def realizedIterator: Iterator[(Frame, C)] = mapRealized.iterator
+    final protected def getRealized(w: Window): Option[C] = mapRealized.get(w)
+    final protected def realizedIterator: Iterator[(Window, C)] = mapRealized.iterator
 
-    final protected def addRealized(w: Frame, c: C) {
+    final protected def addRealized(w: Window, c: C) {
       mapRealized += w -> c // Realized(w, c)
     }
 
-    final protected def removeRealized(w: Frame) {
+    final protected def removeRealized(w: Window) {
       mapRealized -= w
     }
   }
@@ -98,22 +98,22 @@ private[desktop] object MenuImpl {
   private trait ItemLike /* [C <: swing.MenuItem] extends Node[C] with Menu.ItemLike[C] with */ extends CanEnable {
     _: Menu.ItemLike[_ <: swing.MenuItem] =>
 
-    private var mapWindowActions = Map.empty[Frame, Action] withDefaultValue action
+    private var mapWindowActions = Map.empty[Window, Action] withDefaultValue action
     final def enabled = action.enabled
     final def enabled_=(value: Boolean) { action.enabled = value }
 
-    final protected def actionFor(w: Frame): Action = mapWindowActions(w)
+    final protected def actionFor(w: Window): Action = mapWindowActions(w)
 
-    final def setAction(w: Frame, action: Action) {
+    final def setAction(w: Window, action: Action) {
       if (mapWindowActions.contains(w)) throw new IllegalStateException("Window specific action already set")
       mapWindowActions += w -> action
     }
 
-    final def setAction(w: Frame)(body: => Unit) {
+    final def setAction(w: Window)(body: => Unit) {
       setAction(w, i.action(id, action.title, action.accelerator)(body))
     }
 
-    final def clearAction(w: Frame) {
+    final def clearAction(w: Window) {
       mapWindowActions -= w
     }
   }
@@ -121,28 +121,28 @@ private[desktop] object MenuImpl {
   private final class Item(val id: String, val action: Action) extends ItemLike with Menu.Item {
     protected def prefix = "Item"
 
-    def create(w: Frame): swing.MenuItem = {
+    def create(w: Window): swing.MenuItem = {
       new swing.MenuItem(actionFor(w))
     }
 
-    def destroy(w: Frame) {
+    def destroy(w: Window) {
       clearAction(w)
     }
   }
 
   // ---- group ----
 
-  private final class NodeProxy(val window: Option[Frame]) {
+  private final class NodeProxy(val window: Option[Window]) {
     var seq   = Vector.empty[Menu.Element]
     var map   = Map.empty[String, Menu.NodeLike]
 
-    def create(c: swing.SequentialContainer, w: Frame) {
+    def create(c: swing.SequentialContainer, w: Window) {
       if (window.isDefined) require(window.get == w)  // XXX TODO -- correct?
 
       seq.foreach { n => c.contents += n.create(w)}
     }
 
-    def destroy(w: Frame) {
+    def destroy(w: Window) {
       if (window.isDefined) require(window.get == w)  // XXX TODO -- correct?
 
       seq.foreach(_.destroy(w))
@@ -153,7 +153,7 @@ private[desktop] object MenuImpl {
     extends Realizable[C] {
     _: Menu.NodeLike =>
 
-    private var proxies       = Map.empty[Frame, NodeProxy]
+    private var proxies       = Map.empty[Window, NodeProxy]
     private val defaultProxy  = new NodeProxy(None)
 
     final protected def added(p: NodeProxy, n: Menu.Element) {
@@ -163,9 +163,9 @@ private[desktop] object MenuImpl {
       }
     }
 
-    private def getProxy(w: Frame): Option[NodeProxy] = proxies.get(w)
+    private def getProxy(w: Window): Option[NodeProxy] = proxies.get(w)
 
-    private def proxy(wo: Option[Frame]): NodeProxy = wo match {
+    private def proxy(wo: Option[Window]): NodeProxy = wo match {
       case Some(w) =>
         proxies.getOrElse(w, {
           val p = new NodeProxy(wo)
@@ -175,12 +175,12 @@ private[desktop] object MenuImpl {
       case None => defaultProxy
     }
 
-    final protected def createProxy(w: Frame, component: C) {
+    final protected def createProxy(w: Window, component: C) {
       defaultProxy.create(component, w)
       getProxy(w).foreach(_.create(component, w)) // XXX TODO
     }
 
-    final protected def destroyProxy(w: Frame) {
+    final protected def destroyProxy(w: Window) {
       defaultProxy.destroy(w)
       getProxy(w).foreach { p =>
         p.destroy(w)
@@ -200,7 +200,7 @@ private[desktop] object MenuImpl {
     }
 
     // adds window specific action to the tail
-    final def add(w: Option[Frame], elem: Menu.Element): this.type = {
+    final def add(w: Option[Window], elem: Menu.Element): this.type = {
       add(proxy(w), elem)
       this
     }
@@ -235,14 +235,14 @@ private[desktop] object MenuImpl {
 
     protected def prefix = "Group"
 
-    def create(w: Frame): swing.Menu = {
+    def create(w: Window): swing.Menu = {
       val c = createComponent(actionFor(w))
       addRealized(w, c)
       createProxy(w, c)
       c
     }
 
-    def destroy(w: Frame) {
+    def destroy(w: Window) {
       removeRealized(w)
       clearAction(w)
       destroyProxy(w)
@@ -266,7 +266,7 @@ private[desktop] object MenuImpl {
 
     protected def createEmptyRoot(): C
 
-    final def create(w: Frame): C = {
+    final def create(w: Window): C = {
       val res = createEmptyRoot()
       addRealized(w, res)
       createProxy(w, res)
@@ -274,7 +274,7 @@ private[desktop] object MenuImpl {
       res
     }
 
-    final def destroy(w: Frame) {
+    final def destroy(w: Window) {
       removeRealized(w)
       destroyProxy(w)
     }

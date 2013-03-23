@@ -1,6 +1,6 @@
 package de.sciss.desktop
 
-import swing.{Action, Frame, Component}
+import swing.{Action, Component}
 import javax.swing.KeyStroke
 
 import impl.{MenuImpl => Impl}
@@ -8,8 +8,8 @@ import scalaswingcontrib.PopupMenu
 
 object Menu {
   sealed trait Element {
-    def create(window: Frame): Component
-    def destroy(window: Frame): Unit
+    def create(window: Window): Component
+    def destroy(window: Window): Unit
   }
   sealed trait NodeLike extends Element {
     def id: String
@@ -18,11 +18,11 @@ object Menu {
     def disable(): this.type
   }
   trait Node[+C <: Component] extends NodeLike {
-    def create(window: Frame): C
+    def create(window: Window): C
   }
   object Line extends Element {
-    def create(w: Frame) = new swing.Separator
-    def destroy(w: Frame) {}
+    def create(w: Window) = new swing.Separator
+    def destroy(w: Window) {}
   }
 
   object Item {
@@ -48,9 +48,9 @@ object Menu {
   }
   trait ItemLike[+C <: swing.MenuItem] extends Node[C] {
     def action: Action
-    def setAction(window: Frame, action: Action): Unit
-    def setAction(window: Frame)(body: => Unit): Unit
-    def clearAction(window: Frame): Unit
+    def setAction(window: Window, action: Action): Unit
+    def setAction(window: Window)(body: => Unit): Unit
+    def clearAction(window: Window): Unit
   }
   trait Item extends ItemLike[swing.MenuItem]
 
@@ -60,7 +60,7 @@ object Menu {
     def apply(id: String, text: String): Group = Impl.groupApply(id, text)
   }
   trait GroupLike[+C <: Component with swing.SequentialContainer] extends Node[C]{
-    def add(w: Option[Frame], elem: Element): this.type
+    def add(w: Option[Window], elem: Element): this.type
     def add(elem: Element): this.type
   }
   trait Group extends GroupLike[swing.Menu] with ItemLike[swing.Menu] {
