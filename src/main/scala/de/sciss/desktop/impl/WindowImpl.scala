@@ -55,6 +55,10 @@ object WindowImpl {
       def pack() {
         peer.pack()
       }
+
+      def dispose() {
+        peer.dispose()
+      }
     }
 
     private final class Frame(val component: swing.Frame, hasMenuBar: Boolean, screen: Boolean)
@@ -70,6 +74,10 @@ object WindowImpl {
 
       def pack() {
         component.pack()
+      }
+
+      def dispose() {
+        component.dispose()
       }
 
       // XXX TODO
@@ -105,6 +113,7 @@ object WindowImpl {
     var title: String
     var resizable: Boolean
     def pack(): Unit
+    def dispose(): Unit
   }
 }
 trait WindowImpl extends Window {
@@ -198,6 +207,10 @@ trait WindowImpl extends Window {
 //      throw new IllegalStateException()
 //    }
 //  }
+
+  def dispose() {
+    delegate.dispose()
+  }
 
   final protected def showDialog[A](source: DialogSource[A]): A = {
  		handler.showDialog(this, source)
