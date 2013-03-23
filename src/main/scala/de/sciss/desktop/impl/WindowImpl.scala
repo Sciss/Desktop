@@ -1,3 +1,28 @@
+/*
+ *  WindowImpl.scala
+ *  (Desktop)
+ *
+ *  Copyright (c) 2013 Hanns Holger Rutz. All rights reserved.
+ *
+ *	This software is free software; you can redistribute it and/or
+ *	modify it under the terms of the GNU General Public License
+ *	as published by the Free Software Foundation; either
+ *	version 2, june 1991 of the License, or (at your option) any later version.
+ *
+ *	This software is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ *	General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public
+ *	License (gpl.txt) along with this software; if not, write to the Free Software
+ *	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ */
+
 package de.sciss.desktop
 package impl
 
@@ -174,15 +199,40 @@ trait WindowImpl extends Window {
 //    }
 //  }
 
-  protected def showDialog[A](source: DialogSource[A]): A = {
+  final protected def showDialog[A](source: DialogSource[A]): A = {
  		handler.showDialog(this, source)
  	}
 
-  protected def addAction(key: String, action: Action) {
+  final protected def addAction(key: String, action: Action) {
     val a       = action.peer
     val stroke  = action.accelerator.getOrElse(throw new IllegalArgumentException(s"addAction($key, $action) - no accelerator found"))
     val root    = component.peer.getRootPane
     root.registerKeyboardAction(a, key, stroke, FocusType.Window.id)
+  }
+
+  final protected def addActions(entries: (String, Action)*) {
+    entries.foreach { case (key, action) => addAction(key, action) }
+  }
+
+  final protected def bindMenu(key: String, action: Action) {
+    val root  = handler.menu
+    root.get(Some(this), key) match {
+      case Some(it: Menu.ItemLike[_]) =>
+        val src = it.action
+        action.title            = src.title
+        action.icon             = src.icon
+        action.accelerator      = src.accelerator
+        // putNoNullNull(src, a, Action.MNEMONIC_KEY)
+        // action.mnemonic         = src.mnemonic
+        // action.longDescription  = src.longDescription
+        it.setAction(this, action)
+
+      case _ => sys.error(s"No menu item for key '$key'")
+    }
+  }
+
+  final protected def bindMenus(entries: (String, Action)*) {
+    entries.foreach { case (key, action) => bindMenu(key, action) }
   }
 }
 

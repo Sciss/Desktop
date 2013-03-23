@@ -1,3 +1,28 @@
+/*
+ *  MenuImpl.scala
+ *  (Desktop)
+ *
+ *  Copyright (c) 2013 Hanns Holger Rutz. All rights reserved.
+ *
+ *	This software is free software; you can redistribute it and/or
+ *	modify it under the terms of the GNU General Public License
+ *	as published by the Free Software Foundation; either
+ *	version 2, june 1991 of the License, or (at your option) any later version.
+ *
+ *	This software is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ *	General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public
+ *	License (gpl.txt) along with this software; if not, write to the Free Software
+ *	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ */
+
 package de.sciss.desktop
 package impl
 
@@ -13,21 +38,21 @@ private[desktop] object MenuImpl {
   // ---- constructors ----
   import Menu.Item.Attributes
 
-  def itemApply(id: String, action: Action): Menu.Item = new Item(id, action)
-  def itemApply(id: String)(attr: Attributes)(action: => Unit): Menu.Item =
-    new Item(id, i.action(id, attr.text, attr.keyStroke)(action))
+  def itemApply(key: String, action: Action): Menu.Item = new Item(key, action)
+  def itemApply(key: String)(attr: Attributes)(action: => Unit): Menu.Item =
+    new Item(key, i.action(key, attr.text, attr.keyStroke)(action))
 
-  def itemApply(id: String, attr: Attributes): Menu.Item = {
-    val res     = new Item(id, i.noAction(id, attr.text, attr.keyStroke))
+  def itemApply(key: String, attr: Attributes): Menu.Item = {
+    val res     = new Item(key, i.noAction(key, attr.text, attr.keyStroke))
     res.enabled = false
     res
   }
 
-  def groupApply(id: String, action: Action): Menu.Group = new Group(id, action)
-  def groupApply(id: String)(text: String)(action: => Unit): Menu.Group =
-    new Group(id, i.action(id, text, None)(action))
-  def groupApply(id: String, text: String): Menu.Group =
-    new Group(id, i.noAction(id, text, None))
+  def groupApply(key: String, action: Action): Menu.Group = new Group(key, action)
+  def groupApply(key: String)(text: String)(action: => Unit): Menu.Group =
+    new Group(key, i.action(key, text, None)(action))
+  def groupApply(key: String, text: String): Menu.Group =
+    new Group(key, i.noAction(key, text, None))
 
   def rootApply(): Menu.Root = new Root
 
@@ -35,17 +60,17 @@ private[desktop] object MenuImpl {
 
   // ---- util ---
 
-  private def action(id: String, text: String, key: Option[KeyStroke])(body: => Unit): Action =
-    new ActionImpl(id, text, key, body)
+  private def action(key: String, text: String, stroke: Option[KeyStroke])(body: => Unit): Action =
+    new ActionImpl(key, text, stroke, body)
 
-  private def noAction(id: String, text: String, key: Option[KeyStroke]): Action =
-    new ActionImpl(id, text, key, ())
+  private def noAction(key: String, text: String, stroke: Option[KeyStroke]): Action =
+    new ActionImpl(key, text, stroke, ())
 
-  private final class ActionImpl(id: String, text: String, key: Option[KeyStroke], body: => Unit)
+  private final class ActionImpl(key: String, text: String, stroke: Option[KeyStroke], body: => Unit)
     extends Action(text) {
 
-    accelerator = key
-    peer.putValue(ID_KEY, id)
+    accelerator = stroke
+    peer.putValue(ID_KEY, key)
 
     def apply() { body }
   }
@@ -59,7 +84,7 @@ private[desktop] object MenuImpl {
 
     protected def prefix: String
 
-    override def toString = s"Menu.$prefix($id)"
+    override def toString = s"Menu.$prefix($key)"
   }
 
   // ---- realizable tracking ----
@@ -110,7 +135,7 @@ private[desktop] object MenuImpl {
     }
 
     final def setAction(w: Window)(body: => Unit) {
-      setAction(w, i.action(id, action.title, action.accelerator)(body))
+      setAction(w, i.action(key, action.title, action.accelerator)(body))
     }
 
     final def clearAction(w: Window) {
@@ -118,7 +143,7 @@ private[desktop] object MenuImpl {
     }
   }
 
-  private final class Item(val id: String, val action: Action) extends ItemLike with Menu.Item {
+  private final class Item(val key: String, val action: Action) extends ItemLike with Menu.Item {
     protected def prefix = "Item"
 
     def create(w: Window): swing.MenuItem = {
@@ -191,8 +216,8 @@ private[desktop] object MenuImpl {
     private def add(p: NodeProxy, elem: Menu.Element) {
       elem match {
         case n: Menu.NodeLike =>
-          require(!p.map.contains(n.id), "Element already added")
-          p.map += n.id -> n
+          require(!p.map.contains(n.key), "Element already added")
+          p.map += n.key -> n
         case _ =>
       }
       p.seq :+= elem
@@ -210,6 +235,19 @@ private[desktop] object MenuImpl {
       add(defaultProxy, n)
       this
     }
+
+    private def get(w: Option[Window], p: NodeProxy, path: String): Option[Menu.NodeLike] = {
+      val i = path.indexOf('.')
+      if (i < 0) p.map.get(key) else {
+        p.map.get(path.substring(0, i)) match {
+          case Some(g: Menu.Group) => g.get(w, path.substring(i + 1))
+          case _ => None
+        }
+      }
+    }
+
+    final def get(w: Option[Window], path: String): Option[Menu.NodeLike] = get(w, proxy(w), path)
+    final def get(path: String): Option[Menu.NodeLike] = get(None, defaultProxy, path)
 
 //	// inserts at given index
 //	private void add( NodeProxy p, Menu.Node n, int index )
@@ -230,7 +268,7 @@ private[desktop] object MenuImpl {
 //	}
   }
 
-  private final class Group(val id: String, val action: Action)
+  private final class Group(val key: String, val action: Action)
     extends GroupLike[swing.Menu] with ItemLike with Menu.Group {
 
     protected def prefix = "Group"
@@ -287,13 +325,13 @@ private[desktop] object MenuImpl {
   }
 
   private final class Root extends RootLike[swing.MenuBar] with Menu.Root {
-    def id = "root"
+    def key = "root"
     protected def prefix = "Root"
     protected def createEmptyRoot() = new swing.MenuBar
   }
 
   private final class Popup extends RootLike[PopupMenu] with Menu.Popup {
-    def id = "popup"
+    def key = "popup"
     protected def prefix = "Popup"
     protected def createEmptyRoot() = new PopupMenu
   }

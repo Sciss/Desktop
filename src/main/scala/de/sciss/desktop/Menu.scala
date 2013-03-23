@@ -1,3 +1,28 @@
+/*
+ *  Menu.scala
+ *  (Desktop)
+ *
+ *  Copyright (c) 2013 Hanns Holger Rutz. All rights reserved.
+ *
+ *	This software is free software; you can redistribute it and/or
+ *	modify it under the terms of the GNU General Public License
+ *	as published by the Free Software Foundation; either
+ *	version 2, june 1991 of the License, or (at your option) any later version.
+ *
+ *	This software is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ *	General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public
+ *	License (gpl.txt) along with this software; if not, write to the Free Software
+ *	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ */
+
 package de.sciss.desktop
 
 import swing.{Action, Component}
@@ -12,7 +37,7 @@ object Menu {
     def destroy(window: Window): Unit
   }
   sealed trait NodeLike extends Element {
-    def id: String
+    def key: String
     var enabled: Boolean
     def enable(): this.type
     def disable(): this.type
@@ -21,16 +46,16 @@ object Menu {
     def create(window: Window): C
   }
   object Line extends Element {
-    def create(w: Window) = new swing.Separator
-    def destroy(w: Window) {}
+    def create(window: Window) = new swing.Separator
+    def destroy(window: Window) {}
   }
 
   object Item {
-    def apply(id: String, action: Action): Item = Impl.itemApply(id, action)
-    def apply(id: String)(attr: Attributes)(action: => Unit): Item =
-      Impl.itemApply(id)(attr)(action)
+    def apply(key: String, action: Action): Item = Impl.itemApply(key, action)
+    def apply(key: String)(attr: Attributes)(action: => Unit): Item =
+      Impl.itemApply(key)(attr)(action)
 
-    def apply(id: String, attr: Attributes): Item = Impl.itemApply(id, attr)
+    def apply(key: String, attr: Attributes): Item = Impl.itemApply(key, attr)
 
     object Attributes {
       implicit final class TextOnly(val text: String) extends Attributes {
@@ -55,13 +80,15 @@ object Menu {
   trait Item extends ItemLike[swing.MenuItem]
 
   object Group {
-    def apply(id: String, action: Action): Group = Impl.groupApply(id, action)
-    def apply(id: String)(text: String)(action: => Unit): Group = Impl.groupApply(id)(text)(action)
-    def apply(id: String, text: String): Group = Impl.groupApply(id, text)
+    def apply(key: String, action: Action): Group = Impl.groupApply(key, action)
+    def apply(key: String)(text: String)(action: => Unit): Group = Impl.groupApply(key)(text)(action)
+    def apply(key: String, text: String): Group = Impl.groupApply(key, text)
   }
   trait GroupLike[+C <: Component with swing.SequentialContainer] extends Node[C]{
-    def add(w: Option[Window], elem: Element): this.type
+    def add(window: Option[Window], elem: Element): this.type
     def add(elem: Element): this.type
+    def get(window: Option[Window], path: String): Option[NodeLike]
+    def get(path: String): Option[NodeLike]
   }
   trait Group extends GroupLike[swing.Menu] with ItemLike[swing.Menu] {
     def addLine(): this.type
@@ -78,222 +105,6 @@ object Menu {
   trait Popup extends GroupLike[PopupMenu]
 }
 
-//public class MenuGroup
-//extends MenuItem // implements MenuNode
-//{
-//
-//	public MenuNode get( String id )
-//	{
-//		return get( defaultProxy, id );
-//	}
-//
-//	public MenuNode get( AbstractWindow w, String id )
-//	{
-//		return get( getProxy( w, false ), id );
-//	}
-//
-//
-//	private MenuNode get( NodeProxy p, String id )
-//	{
-//		final int i	= id.indexOf( '.' );
-//
-//		if( i == -1 ) {
-//			return (MenuNode) p.mapElements.get( id );
-//		} else {
-//			final MenuGroup mg = (MenuGroup) p.mapElements.get( id.substring( 0, i ));
-//			if( mg == null ) throw new NullPointerException( id );
-//			return mg.get( p.w, id.substring( i + 1 ));
-//		}
-//	}
-//
-//
-//	public int indexOf( String id )
-//	{
-//		return indexOf( defaultProxy, id );
-//	}
-//
-//	public int indexOf( AbstractWindow w, String id )
-//	{
-//		return indexOf( getProxy( w, false ), id );
-//	}
-//
-//	private int indexOf( NodeProxy p, String id )
-//	{
-//		final int i	= id.indexOf( '.' );
-//
-//		if( i == -1 ) {
-//			return p.collElements.indexOf( p.mapElements.get( id ));
-//		} else {
-//			final MenuGroup mg = (MenuGroup) p.mapElements.get( id.substring( 0, i ));
-//			if( mg == null ) throw new NullPointerException( id );
-//			return mg.indexOf( id.substring( i + 1 ));
-//		}
-//	}
-//
-//	public MenuNode getByAction( Action a )
-//	{
-//		return getByAction( defaultProxy, a );
-//	}
-//
-//	public MenuNode getByAction( AbstractWindow w, Action a )
-//	{
-//		return getByAction( getProxy( w, false ), a );
-//	}
-//
-//	private MenuNode getByAction( NodeProxy p, Action a )
-//	{
-//		MenuNode n;
-//
-//		for( Iterator iter = p.collElements.iterator(); iter.hasNext(); ) {
-//			n = (MenuNode) iter.next();
-//			if( n.getAction() == a ) return n;
-//		}
-//
-//		return null;
-//	}
-//
-//	// adds window specific action to the tail
-//	public void add( AbstractWindow w, MenuNode n )
-//	{
-//		add( getProxy( w, true ), n );
-//	}
-//
-//	// adds to the tail
-//	public void add( MenuNode n )
-//	{
-//		add( defaultProxy, n );
-//	}
-//
-//	// inserts at given index
-//	public void add( MenuNode n, int index )
-//	{
-//		add( defaultProxy, n, index );
-//	}
-//
-//	// inserts at given index
-//	public void add( AbstractWindow w, MenuNode n, int index )
-//	{
-//		add( getProxy( w, true ), n, index );
-//	}
-//
-//	// inserts at given index
-//	private void add( NodeProxy p, MenuNode n )
-//	{
-//		add( p, n, p.collElements.size() );
-//	}
-//
-//	public int size()
-//	{
-//		return defaultProxy.size();
-//	}
-//
-//	public MenuNode get( int idx )
-//	{
-//		return (MenuNode) defaultProxy.collElements.get( idx );
-//	}
-//
-//	// inserts at given index
-//	private void add( NodeProxy p, MenuNode n, int index )
-//	{
-//		if( p.mapElements.put( n.getID(), n ) != null ) throw new IllegalArgumentException( "Element already added : " + n );
-//
-//		Realized r;
-//		final boolean isDefault = p.w == null;
-//
-//		p.collElements.add( index, n );
-//
-//		for( Iterator iter = mapRealized.values().iterator(); iter.hasNext(); ) {
-//			r = (Realized) iter.next();
-//			if( isDefault || (p.w == r.w) ) {
-//				r.c.add( n.create( r.w ), index + (isDefault ? 0 : defaultProxy.size()) );
-//			}
-//		}
-//	}
-//
-//	public void addSeparator( AbstractWindow w )
-//	{
-//		add( w, new MenuSeparator() );
-//	}
-//
-//	public void addSeparator()
-//	{
-//		addSeparator( null );
-//	}
-//
-//	public void remove( int index )
-//	{
-//		remove( defaultProxy, index );
-//	}
-//
-//	public void remove( AbstractWindow w, int index )
-//	{
-//		remove( getProxy( w, false ), index );
-//	}
-//
-//	private void remove( NodeProxy p, int index )
-//	{
-//		final MenuNode	n = (MenuNode) p.collElements.remove( index );
-//		Realized		r;
-//
-//		p.mapElements.remove( n.getID() );
-//		final boolean isDefault = p.w == null;
-//
-//		for( Iterator iter = mapRealized.values().iterator(); iter.hasNext(); ) {
-//			r = (Realized) iter.next();
-//			if( isDefault || (p.w == r.w) ) {
-//				r.c.remove( index + (isDefault ? 0 : defaultProxy.size()) );
-//				n.destroy( r.w );
-//			}
-//		}
-//	}
-//
-//	public void remove( MenuNode n )
-//	{
-//		remove( defaultProxy, n );
-//	}
-//
-//	public void remove( AbstractWindow w, MenuNode n )
-//	{
-//		remove( getProxy( w, false ), n );
-//	}
-//
-//	private void remove( NodeProxy p, MenuNode n )
-//	{
-//		for( int idx = 0; idx < p.collElements.size(); idx++ ) {
-//			if( (MenuNode) p.collElements.get( idx ) == n ) {
-//				remove( p, idx );
-//				return;
-//			}
-//		}
-//	}
-//
-//	public JComponent create( AbstractWindow w )
-//	{
-//		final JComponent c = super.create( w );
-//		defaultProxy.create( c, w );
-//		final NodeProxy p = getProxy( w, false );
-//		if( p != null ) p.create( c, w );
-//		return c;
-//	}
-//
-//	public void destroy( AbstractWindow w )
-//	{
-//		super.destroy( w );
-//		defaultProxy.destroy( w );
-//		final NodeProxy p = getProxy( w, false );
-//		if( p != null ) {
-//			p.destroy( w );
-//			if( p.isEmpty() ) {
-//				proxies.remove( w );
-//			}
-//		}
-//	}
-//
-//	protected JComponent createComponent( Action a )
-//	{
-//		return new JMenu( a );
-//	}
-//
 //	public void putMimic( String id, AbstractWindow w, Action a )
 //	{
 //		if( a == null ) return;
@@ -311,22 +122,3 @@ object Menu {
 //
 //		mi.put( w, a );
 //	}
-//
-//	// due to bug in java 1.5 JMenuItem
-//	private void putNoNullNull( Action src, Action dst, String key )
-//	{
-//		final Object srcVal = src.getValue( key );
-//		final Object dstVal	= dst.getValue( key );
-//		if( (srcVal == null) && (dstVal == null) ) return;
-//		dst.putValue(  key, srcVal );
-//	}
-//
-////	public void put( String id, AbstractWindow w, Action a )
-////	{
-////		final MenuItem mi = (MenuItem) get( id );
-////		if( mi == null ) throw new NullPointerException( id );
-////		mi.put( w, a );
-////	}
-//
-
-//}
