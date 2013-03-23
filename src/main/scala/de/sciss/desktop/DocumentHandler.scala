@@ -42,4 +42,7 @@ trait DocumentHandler {
   def documents: Iterator[Document]
   def addListener   (listener: Listener[Document]): Listener[Document]
   def removeListener(listener: Listener[Document]): Unit
+
+  def addDocument(document: Document): Unit
+  def removeDocument(document: Document): Unit
 }

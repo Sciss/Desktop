@@ -139,7 +139,7 @@ trait UndoManagerImpl extends UndoManager {
 	 *
 	 *  @return <code>Action</code> suitable for attaching to a <code>JMenuItem</code>.
 	 */
-	def debugDumpAction: Action = ActionDebugDump
+	final def debugDumpAction: Action = ActionDebugDump
 
 	/**
 	 *  Add a new edit to the undo history.
@@ -180,16 +180,17 @@ trait UndoManagerImpl extends UndoManager {
 	 *
 	 *  @see	de.sciss.app.Document#setDirty( boolean )
 	 */
-  def clear() { peer.discardAllEdits() }
+  final def clear() { peer.discardAllEdits() }
 
-  def add(edit: UndoableEdit): Boolean = peer.addEdit(edit)
+  final def add(edit: UndoableEdit): Boolean = peer.addEdit(edit)
 
-  def undo() { peer.undo() }
-  def redo() { peer.redo() }
-  def canUndo: Boolean = peer.canUndo
-  def canRedo: Boolean = peer.canRedo
-  def canUndoOrRedo: Boolean = peer.canUndoOrRedo
-  def significant: Boolean = peer.isSignificant
+  final def undo() { peer.undo() }
+  final def redo() { peer.redo() }
+  final def undoOrRedo() { peer.undoOrRedo() }
+  final def canUndo: Boolean = peer.canUndo
+  final def canRedo: Boolean = peer.canRedo
+  final def canUndoOrRedo: Boolean = peer.canUndoOrRedo
+  final def significant: Boolean = peer.isSignificant
 
 	private def updateStates() {
     val cu = peer.canUndo
