@@ -25,13 +25,12 @@
 
 package de.sciss.desktop
 
-import swing.{RootPanel, Action, Reactions, Component}
 import javax.swing.{RootPaneContainer, SwingUtilities, WindowConstants}
-import java.awt._
 import java.awt.event.WindowEvent
 import javax.swing.event.InternalFrameEvent
 import annotation.switch
-import scala.Some
+import java.awt.{GraphicsEnvironment, Toolkit, Point, Dimension, Rectangle}
+import swing.{Reactions, RootPanel, Action, UIElement}
 
 object Window {
   sealed trait Style
@@ -94,7 +93,7 @@ object Window {
   final case class Iconified  (source: Window) extends Event
   final case class Opened     (source: Window) extends Event
 
-  def find(component: Component): Option[Window] = {
+  def find(component: UIElement): Option[Window] = {
     val rp = SwingUtilities.getAncestorOfClass(classOf[RootPaneContainer], component.peer)
     if (rp == null) return None
     val w = rp.asInstanceOf[RootPaneContainer].getRootPane.getClientProperty("de.sciss.desktop.Window")
@@ -102,7 +101,7 @@ object Window {
     Some(w.asInstanceOf[Window])
   }
 
-  def showDialog[A](parent: Component, source: DialogSource[A]): A = {
+  def showDialog[A](parent: UIElement, source: DialogSource[A]): A = {
     find(parent) match {
       case Some(w)  => w.handler.showDialog(w, source)
       case _        => showDialog(source)

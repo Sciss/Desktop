@@ -28,9 +28,8 @@ package impl
 
 import java.awt.{Point, Rectangle, Dimension}
 import java.io.File
-import swing.{RootPanel, Action, Component}
-import javax.swing.{JMenuBar, JFrame, JInternalFrame}
-import java.awt.event.{ContainerEvent, ContainerListener}
+import swing.{Reactions, RootPanel, Action, Component}
+import javax.swing.JInternalFrame
 
 object WindowImpl {
   object Delegate {
@@ -42,6 +41,7 @@ object WindowImpl {
 
     private final class InternalFrame(peer: JInternalFrame, hasMenuBar: Boolean) extends Delegate {
       delegate =>
+
       val component = new RootPanel { def peer = delegate.peer }
 
       def closeOperation = Window.CloseOperation(peer.getDefaultCloseOperation)
@@ -51,6 +51,13 @@ object WindowImpl {
       def title_=(value: String) { peer.setTitle(value) }
       def resizable = peer.isResizable
       def resizable_=(value: Boolean) { peer.setResizable(value) }
+      def alwaysOnTop = false // XXX TODO
+      def alwaysOnTop_=(value: Boolean) {
+// XXX TODO
+//        peer.setAlwaysOnTop(value)
+      }
+
+      def active = peer.isSelected
 
       def pack() {
         peer.pack()
@@ -58,6 +65,10 @@ object WindowImpl {
 
       def dispose() {
         peer.dispose()
+      }
+
+      def front() {
+        peer.toFront()
       }
     }
 
@@ -71,6 +82,12 @@ object WindowImpl {
       def title_=(value: String) { component.title = value }
       def resizable = component.resizable
       def resizable_=(value: Boolean) { component.resizable = value }
+      def alwaysOnTop = component.peer.isAlwaysOnTop
+      def alwaysOnTop_=(value: Boolean) {
+        component.peer.setAlwaysOnTop(value)
+      }
+
+      def active = component.peer.isActive
 
       def pack() {
         component.pack()
@@ -78,6 +95,10 @@ object WindowImpl {
 
       def dispose() {
         component.dispose()
+      }
+
+      def front() {
+        component.peer.toFront()
       }
 
       // XXX TODO
@@ -112,8 +133,11 @@ object WindowImpl {
     var closeOperation: Window.CloseOperation
     var title: String
     var resizable: Boolean
+    var alwaysOnTop: Boolean
+    def active: Boolean
     def pack(): Unit
     def dispose(): Unit
+    def front(): Unit
   }
 }
 trait WindowImpl extends Window {
@@ -139,6 +163,15 @@ trait WindowImpl extends Window {
   final protected def pack() { delegate.pack() }
   final protected def contents = component.contents
   final protected def contents_=(value: Component) { component.contents = value }
+
+  final def active: Boolean = delegate.active
+  final def alwaysOnTop: Boolean = delegate.alwaysOnTop
+  final def alwaysOnTop_=(value: Boolean) { delegate.alwaysOnTop = value }
+  final def floating: Boolean = false   // XXX TODO
+  final def front() { delegate.front() }
+  final val reactions: Reactions = new Reactions.Impl
+  final def visible: Boolean = component.visible
+  final def visible_=(value: Boolean) { component.visible = value }
 
   private var _dirty = false
   final protected def dirty: Boolean = _dirty
