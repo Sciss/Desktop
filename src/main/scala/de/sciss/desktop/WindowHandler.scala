@@ -78,9 +78,8 @@ trait WindowHandler {
   def usesScreenMenuBar: Boolean
   def usesFloatingPalettes: Boolean
 
-  def setDefaultBorrower(w: Window): Unit
+  var mainWindow: Window
+  def menuFactory: Menu.Root
 
   def showDialog[A](window: Window, source: DialogSource[A]): A
-
-  def menu: Menu.Root
 }

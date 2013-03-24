@@ -1,7 +1,7 @@
 package de.sciss.desktop
 package impl
 
-trait DocumentHandlerImpl[A] extends DocumentHandler with ModelImpl[DocumentHandler.Update[A]] {
+class DocumentHandlerImpl[A] extends DocumentHandler with ModelImpl[DocumentHandler.Update[A]] {
   private var _active     = Option.empty[Document]
   private var _documents  = Vector.empty[Document]
   private val sync        = new AnyRef

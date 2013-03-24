@@ -116,7 +116,9 @@ object Window {
 
   def availableSpace: Rectangle = GraphicsEnvironment.getLocalGraphicsEnvironment.getMaximumWindowBounds
 
-  def showAction(window: Window): Action = new ShowAction(window)
+  object Actions {
+    def show(window: Window): Action = new ShowAction(window)
+  }
 
   private final class ShowAction(window: Window) extends Action(window.title) {
     window.reactions += {

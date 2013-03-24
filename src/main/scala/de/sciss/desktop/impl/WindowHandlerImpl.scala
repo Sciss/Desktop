@@ -34,7 +34,7 @@ package impl
 //    dispose()
 //  }
 //}
-final class WindowHandlerImpl(val application: SwingApplication, val menu: Menu.Root) extends WindowHandler {
+final class WindowHandlerImpl(val application: SwingApplication, val menuFactory: Menu.Root) extends WindowHandler {
   private var _windows = Vector.empty[Window]
 
   private val isMac = sys.props("os.name").contains("Mac OS")
@@ -71,7 +71,13 @@ final class WindowHandlerImpl(val application: SwingApplication, val menu: Menu.
 
   def usesFloatingPalettes: Boolean = true  // XXX TODO
 
-  def setDefaultBorrower(w: Window) {
-    // XXX TODO
+  private var _mainWindow: Window = null
+  def mainWindow: Window = {
+    if (_mainWindow == null) throw new IllegalStateException("Main window has not been registered yet")
+    _mainWindow
+  }
+  def mainWindow_=(value: Window) {
+    if (_mainWindow != null) throw new IllegalStateException("Main window has already been registered")
+    _mainWindow = value
   }
 }

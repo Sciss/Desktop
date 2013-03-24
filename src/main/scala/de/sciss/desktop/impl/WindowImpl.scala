@@ -28,7 +28,7 @@ package impl
 
 import java.awt.{Point, Rectangle, Dimension}
 import java.io.File
-import swing.{Reactions, RootPanel, Action, Component}
+import swing.{MenuBar, Reactions, RootPanel, Action, Component}
 import javax.swing.JInternalFrame
 
 object WindowImpl {
@@ -68,8 +68,11 @@ object WindowImpl {
       }
 
       def front() {
+        if (peer.isVisible) peer.setVisible(true)
         peer.toFront()
       }
+
+      def menu_=(value: MenuBar) { peer.setJMenuBar(value.peer) }
     }
 
     private final class Frame(val component: swing.Frame, hasMenuBar: Boolean, screen: Boolean)
@@ -98,8 +101,11 @@ object WindowImpl {
       }
 
       def front() {
+        if (!component.visible) component.visible = true
         component.peer.toFront()
       }
+
+      def menu_=(value: MenuBar) { component.menuBar = value }
 
       // XXX TODO
 //      def componentAdded(e: ContainerEvent) {
@@ -134,6 +140,7 @@ object WindowImpl {
     var title: String
     var resizable: Boolean
     var alwaysOnTop: Boolean
+    def menu_=(value: MenuBar): Unit
     def active: Boolean
     def pack(): Unit
     def dispose(): Unit
@@ -187,19 +194,19 @@ trait WindowImpl extends Window {
   }
 
   private final val delegate: Delegate = {
+    val screen = handler.usesScreenMenuBar
     // XXX TODO
 //    style match {
 //      case Window.Palette =>
 //
 //      case _ =>
-        if (handler.usesInternalFrames) {
+        val res = if (handler.usesInternalFrames) {
           val jif = new JInternalFrame(null, true, true, true, true)
           // handler.getDesktop().add( jif )
           val hasMenuBar = style == Window.Regular
           Delegate.internalFrame(jif, hasMenuBar = hasMenuBar)
 
         } else {
-          val screen = handler.usesScreenMenuBar
           val f = new swing.Frame
           val hasMenuBar = screen || (style == Window.Regular)
           Delegate.frame(f, screen = screen, hasMenuBar = hasMenuBar)
@@ -208,7 +215,43 @@ trait WindowImpl extends Window {
       //     			tempFloating		= style == Window.Auxiliary && wh.usesFloating();
       //     			floating			= tempFloating;
 //    }
+
+// XXX TODO
+//    val borrowMenu = style == Window.Palette && {
+//      handler.usesInternalFrames || (!handler.usesFloatingPalettes && screen)
+//    }
+//
+//    if (borrowMenu) {
+//      borrowMenuFrom(handler.mainWindow)
+//      wh.addBorrowListener(this)
+//    } else if (ownMenuBar) {
+//    }
+
+    res
   }
+
+  delegate.menu_=(handler.menuFactory.create(this))
+
+//  private def borrowMenuFrom(that: Window) {
+// 		if( borrowMenuBar && (barBorrower != that) ) {
+// 			if( (bar != null) && (barBorrower != null) ) {
+// 				barBorrower.setJMenuBar( bar );
+// 				bar = null;
+// 			}
+// 			barBorrower = that;
+// 			bar			= barBorrower == null ? null : barBorrower.getJMenuBar();
+// 			if( active ) {
+// 				if( barBorrower != null ) barBorrower.setJMenuBar( null );
+// 				if( jf != null ) {
+// 					jf.setJMenuBar( bar );
+// 				} else if( jif != null ) {
+// 					handler.getMasterFrame().setJMenuBar( bar );
+// 				} else {
+// 					throw new IllegalStateException();
+// 				}
+// 			}
+// 		}
+// 	}
 
   private var _file = Option.empty[File]
   final def file = _file
@@ -243,6 +286,7 @@ trait WindowImpl extends Window {
 
   def dispose() {
     delegate.dispose()
+    handler.menuFactory.destroy(this)
   }
 
   final protected def showDialog[A](source: DialogSource[A]): A = {
@@ -261,7 +305,7 @@ trait WindowImpl extends Window {
   }
 
   final protected def bindMenu(key: String, action: Action) {
-    val root  = handler.menu
+    val root  = handler.menuFactory
     root.get(Some(this), key) match {
       case Some(it: Menu.ItemLike[_]) =>
         val src = it.action
@@ -285,7 +329,7 @@ trait WindowImpl extends Window {
 trait MainWindowImpl extends WindowImpl {
   final protected def style = Window.Regular
 
-  handler.setDefaultBorrower(this)
+  handler.mainWindow = this
   closeOperation = Window.CloseIgnore
   reactions += {
     case Window.Closing(_) => application.quit()

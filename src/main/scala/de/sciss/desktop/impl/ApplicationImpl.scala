@@ -26,6 +26,8 @@
 package de.sciss.desktop
 package impl
 
+import swing.Swing
+
 trait ApplicationImpl extends Application {
   private lazy val _systemPrefs = Preferences.system(getClass)
   private lazy val _userPrefs   = Preferences.user  (getClass)
@@ -45,4 +47,20 @@ trait ApplicationImpl extends Application {
   }
 
   def getComponent[A](key: String): Option[A] = sync.synchronized(componentMap.get(key).asInstanceOf[Option[A]])
+}
+
+abstract class SwingApplicationImpl[A](val name: String) extends ApplicationImpl with SwingApplication with App {
+  sys.props("com.apple.mrj.application.apple.menu.about.name")  = name
+  sys.props("apple.laf.useScreenMenuBar")                       = "true"
+  Swing.onEDT(init())
+
+  final type Document = A
+
+  protected def init(): Unit
+  protected def menuFactory: Menu.Root
+
+  final protected implicit def application: SwingApplication { type Document = A } = this
+
+  lazy implicit val documentHandler: DocumentHandler { type Document = A } = new DocumentHandlerImpl[A]
+  lazy implicit val windowHandler: WindowHandler = new WindowHandlerImpl(this, menuFactory)
 }
