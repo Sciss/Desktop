@@ -58,11 +58,12 @@ abstract class SwingApplicationImpl(val name: String) extends ApplicationImpl wi
     sys.props("apple.laf.useScreenMenuBar") = "true"
   }
   Swing.onEDT {
-    /* val mf = */ new MainWindowImpl {
-      def handler = app.windowHandler
-      title       = name
-      front()
-    }
+//    /* val mf = */ new MainWindowImpl {
+//      def handler = app.windowHandler
+//      title       = name
+//      front()
+//    }
+    windowHandler
     init()
   }
 

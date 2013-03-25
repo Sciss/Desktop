@@ -49,6 +49,7 @@ object WindowImpl {
       val reactions = new Reactions.Impl
 
       peer.addInternalFrameListener(this)
+      if (hasMenuBar) peer.setJMenuBar(window.handler.menuFactory.create(window).peer)
 
       def closeOperation = Window.CloseOperation(peer.getDefaultCloseOperation)
       def closeOperation_=(value: Window.CloseOperation) { peer.setDefaultCloseOperation(value.id) }
@@ -75,14 +76,15 @@ object WindowImpl {
 
       def dispose() {
         peer.dispose()
+        if (hasMenuBar) window.handler.menuFactory.destroy(window)
       }
 
       def front() {
-        if (peer.isVisible) peer.setVisible(true)
+        if (!peer.isVisible) peer.setVisible(true)
         peer.toFront()
       }
 
-      def menu_=(value: MenuBar) { peer.setJMenuBar(value.peer) }
+//      def menu_=(value: MenuBar) { peer.setJMenuBar(value.peer) }
 
       def internalFrameOpened(e: InternalFrameEvent) {
         reactions(Window.Opened(window))
@@ -120,6 +122,7 @@ object WindowImpl {
       val reactions = new Reactions.Impl
 
       peer.addWindowListener(this)
+      if (hasMenuBar) component.menuBar = window.handler.menuFactory.create(window)
 
       def closeOperation = Window.CloseOperation(peer.getDefaultCloseOperation)
       def closeOperation_=(value: Window.CloseOperation) { peer.setDefaultCloseOperation(value.id) }
@@ -145,6 +148,7 @@ object WindowImpl {
 
       def dispose() {
         component.dispose()
+        if (hasMenuBar) window.handler.menuFactory.destroy(window)
       }
 
       def front() {
@@ -152,7 +156,7 @@ object WindowImpl {
         peer.toFront()
       }
 
-      def menu_=(value: MenuBar) { component.menuBar = value }
+//      def menu_=(value: MenuBar) { component.menuBar = value }
 
       // XXX TODO
 //      def componentAdded(e: ContainerEvent) {
@@ -215,7 +219,7 @@ object WindowImpl {
     var title: String
     var resizable: Boolean
     var alwaysOnTop: Boolean
-    def menu_=(value: MenuBar): Unit
+//    def menu_=(value: MenuBar): Unit
     def active: Boolean
     def pack(): Unit
     def dispose(): Unit
@@ -272,7 +276,7 @@ trait WindowStub extends Window {
 
   protected def delegate: Delegate
 
-  delegate.menu_=(handler.menuFactory.create(this))
+//  delegate.menu_=(handler.menuFactory.create(this))
 
 //  private def borrowMenuFrom(that: Window) {
 // 		if( borrowMenuBar && (barBorrower != that) ) {
@@ -331,8 +335,8 @@ trait WindowStub extends Window {
 //  }
 
   def dispose() {
+    handler.removeWindow(this)
     delegate.dispose()
-    handler.menuFactory.destroy(this)
   }
 
   final protected def showDialog[A](source: DialogSource[A]): A = {
@@ -407,29 +411,8 @@ trait WindowImpl extends WindowStub {
 //      wh.addBorrowListener(this)
 //    } else if (ownMenuBar) {
 //    }
-
     res
   }
-}
 
-trait MainWindowImpl extends WindowStub {
-  import WindowImpl._
-
-  final protected def style = Window.Regular
-
-  final protected lazy val delegate =
-    Delegate.frame(this, new swing.Frame, hasMenuBar = true, screen = handler.usesScreenMenuBar)
-
-  if (Desktop.isMac) {
-    makeUndecorated()
-    bounds      = new Rectangle(Short.MaxValue, Short.MaxValue, 0, 0)
-  } else {
-    bounds      = Window.availableSpace
-  }
-
-  handler.mainWindow = this
-  closeOperation = Window.CloseIgnore
-  reactions += {
-    case Window.Closing(_) => application.quit()
-  }
+  handler.addWindow(this)
 }

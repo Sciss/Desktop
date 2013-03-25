@@ -1,6 +1,6 @@
 package de.sciss.desktop
 
-import impl.{WindowImpl, SwingApplicationImpl, MainWindowImpl}
+import impl.{WindowImpl, SwingApplicationImpl}
 import swing.{Action, Swing}
 import Swing._
 import java.awt
@@ -48,10 +48,10 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
   }
 
   private class DocumentWindow(document: Document) extends WindowImpl {
-    val handler = TextEdit.windowHandler
+    def handler = TextEdit.windowHandler
     protected def style = Window.Regular
     title = document.name
-    size = (400, 200)
+    size  = (400, 200)
 
     bindMenus(
       "file.close" -> Action("Close") {

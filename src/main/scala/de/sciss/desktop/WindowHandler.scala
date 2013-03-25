@@ -78,7 +78,7 @@ trait WindowHandler {
   def usesScreenMenuBar: Boolean
   def usesFloatingPalettes: Boolean
 
-  var mainWindow: Window
+  def mainWindow: Window
   def menuFactory: Menu.Root
 
   def showDialog[A](window: Window, source: DialogSource[A]): A

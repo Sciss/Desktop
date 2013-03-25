@@ -26,6 +26,10 @@
 package de.sciss.desktop
 package impl
 
+import java.awt.Rectangle
+import javax.swing.{JInternalFrame, JDesktopPane}
+import java.awt.event.{ComponentEvent, ComponentAdapter}
+
 //object WindowHandlerImpl {
 //  private final class DialogWindow(dialog: Dialog) extends WindowImpl {
 //// 			if( modal ) fph.addModalDialog(); // this shit is necessary because java.awt.FileDialog doesn't fire windowActivated ...
@@ -35,6 +39,8 @@ package impl
 //  }
 //}
 final class WindowHandlerImpl(val application: SwingApplication, val menuFactory: Menu.Root) extends WindowHandler {
+  hndl =>
+
   private var _windows = Vector.empty[Window]
 
   def showDialog[A](window: Window, source: DialogSource[A]): A = {
@@ -54,6 +60,7 @@ final class WindowHandlerImpl(val application: SwingApplication, val menuFactory
 
   def addWindow(w: Window) {
     _windows :+= w
+    MainWindowImpl.add(w)
   }
 
   def removeWindow(w: Window) {
@@ -67,13 +74,61 @@ final class WindowHandlerImpl(val application: SwingApplication, val menuFactory
   def usesScreenMenuBar   : Boolean =  Desktop.isMac
   def usesFloatingPalettes: Boolean = true
 
-  private var _mainWindow: Window = null
-  def mainWindow: Window = {
-    if (_mainWindow == null) throw new IllegalStateException("Main window has not been registered yet")
-    _mainWindow
-  }
-  def mainWindow_=(value: Window) {
-    if (_mainWindow != null) throw new IllegalStateException("Main window has already been registered")
-    _mainWindow = value
+//  private var _mainWindow: Window = null
+  def mainWindow: Window = MainWindowImpl
+//  def mainWindow_=(value: Window) {
+//    if (_mainWindow != null) throw new IllegalStateException("Main window has already been registered")
+//    _mainWindow = value
+//  }
+
+  mainWindow.front()
+
+  private object MainWindowImpl extends WindowStub {
+    import WindowImpl._
+
+    protected def style = Window.Regular
+    def handler = hndl
+
+    private val frame = new swing.Frame
+    protected val delegate =
+      Delegate.frame(this, frame, hasMenuBar = true, screen = handler.usesScreenMenuBar)
+
+    if (Desktop.isMac) {
+      makeUndecorated()
+      bounds      = new Rectangle(Short.MaxValue, Short.MaxValue, 0, 0)
+    } else {
+      bounds      = Window.availableSpace
+    }
+
+    private val desktop: Option[JDesktopPane] = {
+      if (handler.usesInternalFrames) {
+        val res = new JDesktopPane
+        frame.peer.setContentPane(res)
+        Some(res)
+      } else None
+    }
+
+    def add(w: Window) {
+      desktop.foreach { d =>
+        w.component.peer match {
+          case jif: JInternalFrame =>
+//            jif.addComponentListener(new ComponentAdapter {
+//              override def componentShown(e: ComponentEvent) {
+//                println("SHOWN")
+                d.add(jif)
+//              }
+//            })
+//            println("ADD")
+//            jif.setVisible(true)
+          case _ =>
+        }
+      }
+    }
+
+    // handler.mainWindow = this
+    closeOperation = Window.CloseIgnore
+    reactions += {
+      case Window.Closing(_) => application.quit()
+    }
   }
 }
