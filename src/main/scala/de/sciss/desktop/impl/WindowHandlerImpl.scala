@@ -37,8 +37,6 @@ package impl
 final class WindowHandlerImpl(val application: SwingApplication, val menuFactory: Menu.Root) extends WindowHandler {
   private var _windows = Vector.empty[Window]
 
-  private val isMac = sys.props("os.name").contains("Mac OS")
-
   def showDialog[A](window: Window, source: DialogSource[A]): A = {
  		// temporarily disable alwaysOnTop
  		val wasOnTop = if (!usesInternalFrames && usesFloatingPalettes) windows.filter { w =>
@@ -65,11 +63,9 @@ final class WindowHandlerImpl(val application: SwingApplication, val menuFactory
 
   def windows: Iterator[Window] = _windows.iterator
 
-  def usesInternalFrames: Boolean = false // XXX TODO
-
-  def usesScreenMenuBar: Boolean = isMac
-
-  def usesFloatingPalettes: Boolean = true  // XXX TODO
+  def usesInternalFrames  : Boolean = !Desktop.isMac
+  def usesScreenMenuBar   : Boolean =  Desktop.isMac
+  def usesFloatingPalettes: Boolean = true
 
   private var _mainWindow: Window = null
   def mainWindow: Window = {

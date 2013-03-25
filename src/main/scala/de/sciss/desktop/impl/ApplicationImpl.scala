@@ -52,13 +52,22 @@ trait ApplicationImpl extends Application {
 abstract class SwingApplicationImpl(val name: String) extends ApplicationImpl with SwingApplication with App {
   app =>
 
-  if (Desktop.isMac) {
-    sys.props("com.apple.mrj.application.apple.menu.about.name")  = name
-    sys.props("apple.laf.useScreenMenuBar")                       = "true"
-  }
-  Swing.onEDT(init())
+  sys.props("com.apple.mrj.application.apple.menu.about.name") = name
 
-  protected def init(): Unit
+  if (Desktop.isMac) {
+    sys.props("apple.laf.useScreenMenuBar") = "true"
+  }
+  Swing.onEDT {
+    /* val mf = */ new MainWindowImpl {
+      def handler = app.windowHandler
+      title       = name
+      front()
+    }
+    init()
+  }
+
+  /** Subclasses may override this to initialize the GUI on the event thread */
+  protected def init() {}
   protected def menuFactory: Menu.Root
 
   final protected implicit def application: SwingApplication { type Document = app.Document } = this

@@ -10,11 +10,8 @@ import java.io.File
 import javax.swing.text.PlainDocument
 
 object TextEdit extends SwingApplicationImpl("TextEdit") {
-  protected def init() {
-    new MainWindow
-  }
-
   def quit() {
+    println("Bye bye...")
     sys.exit()
   }
 
@@ -38,11 +35,6 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
       )
   }
 
-  private class MainWindow extends MainWindowImpl {
-    def handler = TextEdit.windowHandler
-    front()
-  }
-
   class Document {
     def name: String = file match {
       case Some(f) =>
@@ -56,7 +48,7 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
   }
 
   private class DocumentWindow(document: Document) extends WindowImpl {
-    def handler = TextEdit.windowHandler
+    val handler = TextEdit.windowHandler
     protected def style = Window.Regular
     title = document.name
     size = (400, 200)

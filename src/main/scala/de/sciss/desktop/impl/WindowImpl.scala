@@ -30,19 +30,25 @@ import java.awt.{Point, Rectangle, Dimension}
 import java.io.File
 import swing.{MenuBar, Reactions, RootPanel, Action, Component}
 import javax.swing.JInternalFrame
+import java.awt.event.{WindowEvent, WindowListener}
+import javax.swing.event.{InternalFrameEvent, InternalFrameListener}
 
 object WindowImpl {
-  private object Delegate {
-    def internalFrame(peer: JInternalFrame, hasMenuBar: Boolean): Delegate =
-      new InternalFrame(peer, hasMenuBar = hasMenuBar)
+  private[impl] object Delegate {
+    def internalFrame(window: Window, peer: JInternalFrame, hasMenuBar: Boolean): Delegate =
+      new InternalFrame(window, peer, hasMenuBar = hasMenuBar)
 
-    def frame(peer: swing.Frame, hasMenuBar: Boolean, screen: Boolean): Delegate =
-      new Frame(peer, hasMenuBar = hasMenuBar, screen = screen)
+    def frame(window: Window, peer: swing.Frame, hasMenuBar: Boolean, screen: Boolean): Delegate =
+      new Frame(window, peer, hasMenuBar = hasMenuBar, screen = screen)
 
-    private final class InternalFrame(peer: JInternalFrame, hasMenuBar: Boolean) extends Delegate {
+    private final class InternalFrame(window: Window, peer: JInternalFrame, hasMenuBar: Boolean)
+      extends Delegate with InternalFrameListener {
       delegate =>
 
       val component = new RootPanel { def peer = delegate.peer }
+      val reactions = new Reactions.Impl
+
+      peer.addInternalFrameListener(this)
 
       def closeOperation = Window.CloseOperation(peer.getDefaultCloseOperation)
       def closeOperation_=(value: Window.CloseOperation) { peer.setDefaultCloseOperation(value.id) }
@@ -77,28 +83,61 @@ object WindowImpl {
       }
 
       def menu_=(value: MenuBar) { peer.setJMenuBar(value.peer) }
+
+      def internalFrameOpened(e: InternalFrameEvent) {
+        reactions(Window.Opened(window))
+      }
+
+      def internalFrameClosing(e: InternalFrameEvent) {
+        reactions(Window.Closing(window))
+      }
+
+      def internalFrameClosed(e: InternalFrameEvent) {
+        reactions(Window.Closed(window))
+      }
+
+      def internalFrameIconified(e: InternalFrameEvent) {
+        reactions(Window.Iconified(window))
+      }
+
+      def internalFrameDeiconified(e: InternalFrameEvent) {
+        reactions(Window.Deiconified(window))
+      }
+
+      def internalFrameActivated(e: InternalFrameEvent) {
+        reactions(Window.Activated(window))
+      }
+
+      def internalFrameDeactivated(e: InternalFrameEvent) {
+        reactions(Window.Deactivated(window))
+      }
     }
 
-    private final class Frame(val component: swing.Frame, hasMenuBar: Boolean, screen: Boolean)
-      extends Delegate /* with ContainerListener */ {
+    private final class Frame(window: Window, val component: swing.Frame, hasMenuBar: Boolean, screen: Boolean)
+      extends Delegate with WindowListener {
 
-      def closeOperation = Window.CloseOperation(component.peer.getDefaultCloseOperation)
-      def closeOperation_=(value: Window.CloseOperation) { component.peer.setDefaultCloseOperation(value.id) }
+      private val peer = component.peer
+      val reactions = new Reactions.Impl
+
+      peer.addWindowListener(this)
+
+      def closeOperation = Window.CloseOperation(peer.getDefaultCloseOperation)
+      def closeOperation_=(value: Window.CloseOperation) { peer.setDefaultCloseOperation(value.id) }
 
       def title = component.title
       def title_=(value: String) { component.title = value }
       def resizable = component.resizable
       def resizable_=(value: Boolean) { component.resizable = value }
-      def alwaysOnTop = component.peer.isAlwaysOnTop
+      def alwaysOnTop = peer.isAlwaysOnTop
       def alwaysOnTop_=(value: Boolean) {
-        component.peer.setAlwaysOnTop(value)
+        peer.setAlwaysOnTop(value)
       }
 
       def makeUndecorated() {
-        component.peer.setUndecorated(true)
+        peer.setUndecorated(true)
       }
 
-      def active = component.peer.isActive
+      def active = peer.isActive
 
       def pack() {
         component.pack()
@@ -110,7 +149,7 @@ object WindowImpl {
 
       def front() {
         if (!component.visible) component.visible = true
-        component.peer.toFront()
+        peer.toFront()
       }
 
       def menu_=(value: MenuBar) { component.menuBar = value }
@@ -140,9 +179,37 @@ object WindowImpl {
 //        rp.revalidate()
 //        rp.repaint()
 //      }
+
+      def windowOpened(e: WindowEvent) {
+        reactions(Window.Opened(window))
+      }
+
+      def windowClosing(e: WindowEvent) {
+        reactions(Window.Closing(window))
+      }
+
+      def windowClosed(e: WindowEvent) {
+        reactions(Window.Closed(window))
+      }
+
+      def windowIconified(e: WindowEvent) {
+        reactions(Window.Iconified(window))
+      }
+
+      def windowDeiconified(e: WindowEvent) {
+        reactions(Window.Deiconified(window))
+      }
+
+      def windowActivated(e: WindowEvent) {
+        reactions(Window.Activated(window))
+      }
+
+      def windowDeactivated(e: WindowEvent) {
+        reactions(Window.Deactivated(window))
+      }
     }
   }
-  private sealed trait Delegate {
+  private[impl] sealed trait Delegate {
     def component: RootPanel
     var closeOperation: Window.CloseOperation
     var title: String
@@ -154,9 +221,10 @@ object WindowImpl {
     def dispose(): Unit
     def front(): Unit
     def makeUndecorated(): Unit
+    def reactions: Reactions
   }
 }
-trait WindowImpl extends Window {
+trait WindowStub extends Window {
   import WindowImpl._
 
   protected def style: Window.Style
@@ -185,7 +253,7 @@ trait WindowImpl extends Window {
   final def alwaysOnTop_=(value: Boolean) { delegate.alwaysOnTop = value }
   final def floating: Boolean = false   // XXX TODO
   final def front() { delegate.front() }
-  final val reactions: Reactions = new Reactions.Impl
+  final def reactions: Reactions = delegate.reactions
   final def visible: Boolean = component.visible
   final def visible_=(value: Boolean) { component.visible = value }
 
@@ -202,42 +270,7 @@ trait WindowImpl extends Window {
     component.peer.getRootPane.putClientProperty(key, value)
   }
 
-  private final val delegate: Delegate = {
-    val screen = handler.usesScreenMenuBar
-    // XXX TODO
-//    style match {
-//      case Window.Palette =>
-//
-//      case _ =>
-        val res = if (handler.usesInternalFrames) {
-          val jif = new JInternalFrame(null, true, true, true, true)
-          // handler.getDesktop().add( jif )
-          val hasMenuBar = style == Window.Regular
-          Delegate.internalFrame(jif, hasMenuBar = hasMenuBar)
-
-        } else {
-          val f = new swing.Frame
-          val hasMenuBar = screen || (style == Window.Regular)
-          Delegate.frame(f, screen = screen, hasMenuBar = hasMenuBar)
-        }
-      //			floating			= false;
-      //     			tempFloating		= style == Window.Auxiliary && wh.usesFloating();
-      //     			floating			= tempFloating;
-//    }
-
-// XXX TODO
-//    val borrowMenu = style == Window.Palette && {
-//      handler.usesInternalFrames || (!handler.usesFloatingPalettes && screen)
-//    }
-//
-//    if (borrowMenu) {
-//      borrowMenuFrom(handler.mainWindow)
-//      wh.addBorrowListener(this)
-//    } else if (ownMenuBar) {
-//    }
-
-    res
-  }
+  protected def delegate: Delegate
 
   delegate.menu_=(handler.menuFactory.create(this))
 
@@ -338,13 +371,60 @@ trait WindowImpl extends Window {
     entries.foreach { case (key, action) => bindMenu(key, action) }
   }
 }
+trait WindowImpl extends WindowStub {
+  import WindowImpl._
 
-trait MainWindowImpl extends WindowImpl {
+  protected final lazy val delegate: Delegate = {
+    val screen = handler.usesScreenMenuBar
+    // XXX TODO
+//    style match {
+//      case Window.Palette =>
+//
+//      case _ =>
+        val res = if (handler.usesInternalFrames) {
+          val jif = new JInternalFrame(null, true, true, true, true)
+          // handler.getDesktop().add( jif )
+          val hasMenuBar = style == Window.Regular
+          Delegate.internalFrame(this, jif, hasMenuBar = hasMenuBar)
+
+        } else {
+          val f = new swing.Frame
+          val hasMenuBar = screen || (style == Window.Regular)
+          Delegate.frame(this, f, screen = screen, hasMenuBar = hasMenuBar)
+        }
+      //			floating			= false;
+      //     			tempFloating		= style == Window.Auxiliary && wh.usesFloating();
+      //     			floating			= tempFloating;
+//    }
+
+// XXX TODO
+//    val borrowMenu = style == Window.Palette && {
+//      handler.usesInternalFrames || (!handler.usesFloatingPalettes && screen)
+//    }
+//
+//    if (borrowMenu) {
+//      borrowMenuFrom(handler.mainWindow)
+//      wh.addBorrowListener(this)
+//    } else if (ownMenuBar) {
+//    }
+
+    res
+  }
+}
+
+trait MainWindowImpl extends WindowStub {
+  import WindowImpl._
+
   final protected def style = Window.Regular
+
+  final protected lazy val delegate =
+    Delegate.frame(this, new swing.Frame, hasMenuBar = true, screen = handler.usesScreenMenuBar)
 
   if (Desktop.isMac) {
     makeUndecorated()
     bounds      = new Rectangle(Short.MaxValue, Short.MaxValue, 0, 0)
+  } else {
+    bounds      = Window.availableSpace
   }
 
   handler.mainWindow = this
