@@ -130,8 +130,8 @@ private[desktop] object MenuImpl {
 
   // ---- item ----
 
-  private trait ItemLike /* [C <: swing.MenuItem] extends Node[C] with Menu.ItemLike[C] with */ extends CanEnable {
-    _: Menu.ItemLike[_ <: swing.MenuItem] =>
+  private trait ItemLike[C <: swing.MenuItem] extends CanEnable with Realizable[C] {
+    _: Menu.ItemLike[C] =>
 
     private var mapWindowActions = Map.empty[Window, Action] withDefaultValue action
     final def enabled = action.enabled
@@ -153,14 +153,17 @@ private[desktop] object MenuImpl {
     }
   }
 
-  private final class Item(val key: String, val action: Action) extends ItemLike with Menu.Item {
-    override def toString = s"Menu.Item($key)"
+  private final class Item(val key: String, val action: Action) extends ItemLike[swing.MenuItem] with Menu.Item {
+    protected def prefix = "Item"
 
     def create(w: Window): swing.MenuItem = {
-      new swing.MenuItem(actionFor(w))
+      val c = new swing.MenuItem(actionFor(w))
+      addRealized(w, c)
+      c
     }
 
     def destroy(w: Window) {
+      removeRealized(w)
       clearAction(w)
     }
   }
@@ -193,14 +196,12 @@ private[desktop] object MenuImpl {
     private var proxies       = Map.empty[Window, NodeProxy]
     private val defaultProxy  = new NodeProxy(None)
 
-    final protected def added(p: NodeProxy, n: Menu.Element) {
+    private def added(p: NodeProxy, n: Menu.Element) {
       val isDefault = p.window.isEmpty
       realizedIterator.foreach { case (w, r) =>
         if (isDefault || p.window == Some(w)) r.contents += n.create(w)
       }
     }
-
-    private def getProxy(w: Window): Option[NodeProxy] = proxies.get(w)
 
     private def proxy(wo: Option[Window]): NodeProxy = wo match {
       case Some(w) =>
@@ -214,12 +215,12 @@ private[desktop] object MenuImpl {
 
     final protected def createProxy(w: Window, component: C) {
       defaultProxy.create(component, w)
-      getProxy(w).foreach(_.create(component, w)) // XXX TODO
+      proxies.get(w).foreach(_.create(component, w)) // XXX TODO
     }
 
     final protected def destroyProxy(w: Window) {
       defaultProxy.destroy(w)
-      getProxy(w).foreach { p =>
+      proxies.get(w).foreach { p =>
         p.destroy(w)
      	  if( p.seq.isEmpty ) proxies -= w
       }
@@ -263,6 +264,13 @@ private[desktop] object MenuImpl {
     final def get(w: Option[Window], path: String): Option[Menu.NodeLike] = get(w, proxy(w), path)
     final def get(path: String): Option[Menu.NodeLike] = get(None, defaultProxy, path)
 
+    final def bind(child: String, window: Window, action: Action) {
+      val p = proxies.get(window).getOrElse(throw new NoSuchElementException(s"Window $window was not yet realized"))
+      val c = p.map.getOrElse(child, throw new NoSuchElementException(s"Child $child not found"))
+
+      ???
+    }
+
 //	// inserts at given index
 //	private void add( NodeProxy p, Menu.Node n, int index )
 //	{
@@ -283,7 +291,7 @@ private[desktop] object MenuImpl {
   }
 
   private final class Group(val key: String, val action: Action)
-    extends GroupLike[swing.Menu] with ItemLike with Menu.Group {
+    extends GroupLike[swing.Menu] with ItemLike[swing.Menu] with Menu.Group {
 
     protected def prefix = "Group"
 

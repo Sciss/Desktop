@@ -89,6 +89,8 @@ object Menu {
     def add(elem: Element): this.type
     def get(window: Option[Window], path: String): Option[NodeLike]
     def get(path: String): Option[NodeLike]
+
+    def bind(child: String, window: Window, action: Action): Unit
   }
   trait Group extends GroupLike[swing.Menu] with ItemLike[swing.Menu] {
     def addLine(): this.type
