@@ -39,7 +39,7 @@ object Implicits {
 //      case NonFatal(_) => None
 //    }
 //  }
-  implicit final class RichComponent(val component: Component) extends AnyVal {
+  implicit final class DesktopComponent(val component: Component) extends AnyVal {
     def addAction(key: String, action: Action, focus: FocusType = FocusType.Default) {
       val a       = action.peer
 //      val key     = a.getValue(j.Action.NAME).toString
@@ -53,4 +53,8 @@ object Implicits {
       component.peer.unregisterKeyboardAction(stroke)
     }
   }
+
+//  implicit final class DesktopFile(val file: File) extends AnyVal {
+//    def / ()
+//  }
 }

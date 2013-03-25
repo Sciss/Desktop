@@ -33,26 +33,26 @@ import scalaswingcontrib.PopupMenu
 private[desktop] object MenuImpl {
   i =>
 
-  private final val ID_KEY = "de.sciss.gui.Menu.id"
+//  private final val ID_KEY = "de.sciss.gui.Menu.id"
 
   // ---- constructors ----
   import Menu.Item.Attributes
 
   def itemApply(key: String, action: Action): Menu.Item = new Item(key, action)
   def itemApply(key: String)(attr: Attributes)(action: => Unit): Menu.Item =
-    new Item(key, i.action(key, attr.text, attr.keyStroke)(action))
+    new Item(key, i.action(attr.text, attr.keyStroke)(action))
 
   def itemApply(key: String, attr: Attributes): Menu.Item = {
-    val res     = new Item(key, i.noAction(key, attr.text, attr.keyStroke))
-    res.enabled = false
-    res
+    val a     = i.noAction(attr.text, attr.keyStroke)
+    a.enabled = false
+    new Item(key, a)
   }
 
   def groupApply(key: String, action: Action): Menu.Group = new Group(key, action)
   def groupApply(key: String)(text: String)(action: => Unit): Menu.Group =
-    new Group(key, i.action(key, text, None)(action))
+    new Group(key, i.action(text, None)(action))
   def groupApply(key: String, text: String): Menu.Group =
-    new Group(key, i.noAction(key, text, None))
+    new Group(key, i.noAction(text, None))
 
   def rootApply(): Menu.Root = new Root
 
@@ -60,20 +60,30 @@ private[desktop] object MenuImpl {
 
   // ---- util ---
 
-  private def action(key: String, text: String, stroke: Option[KeyStroke])(body: => Unit): Action =
-    new ActionImpl(key, text, stroke, body)
-
-  private def noAction(key: String, text: String, stroke: Option[KeyStroke]): Action =
-    new ActionImpl(key, text, stroke, ())
-
-  private final class ActionImpl(key: String, text: String, stroke: Option[KeyStroke], body: => Unit)
-    extends Action(text) {
-
-    accelerator = stroke
-    peer.putValue(ID_KEY, key)
-
-    def apply() { body }
+  def action(text: String, stroke: Option[KeyStroke])(body: => Unit): Action = {
+    val res = Action(text)(body)
+//    res.peer.putValue(ID_KEY, key)
+    res.accelerator = stroke
+    res
   }
+
+  def noAction(text: String, stroke: Option[KeyStroke]): Action = new Action(text) {
+//  peer.putValue(ID_KEY, key)
+    accelerator = stroke
+//    enabled     = false
+
+    override def toString = s"proxy($title)"
+    def apply() {}
+  }
+
+//  private final class ActionImpl(key: String, text: String, stroke: Option[KeyStroke], body: => Unit)
+//    extends Action(text) {
+//
+//    accelerator = stroke
+//    peer.putValue(ID_KEY, key)
+//
+//    def apply() { body }
+//  }
 
   // ---- node ----
 
@@ -135,7 +145,7 @@ private[desktop] object MenuImpl {
     }
 
     final def setAction(w: Window)(body: => Unit) {
-      setAction(w, i.action(key, action.title, action.accelerator)(body))
+      setAction(w, i.action(action.title, action.accelerator)(body))
     }
 
     final def clearAction(w: Window) {
@@ -144,7 +154,7 @@ private[desktop] object MenuImpl {
   }
 
   private final class Item(val key: String, val action: Action) extends ItemLike with Menu.Item {
-    protected def prefix = "Item"
+    override def toString = s"Menu.Item($key)"
 
     def create(w: Window): swing.MenuItem = {
       new swing.MenuItem(actionFor(w))
@@ -160,6 +170,8 @@ private[desktop] object MenuImpl {
   private final class NodeProxy(val window: Option[Window]) {
     var seq   = Vector.empty[Menu.Element]
     var map   = Map.empty[String, Menu.NodeLike]
+
+    override def toString = s"NodeProxy($window)@${hashCode().toHexString}"
 
     def create(c: swing.SequentialContainer, w: Window) {
       if (window.isDefined) require(window.get == w)  // XXX TODO -- correct?
@@ -217,6 +229,7 @@ private[desktop] object MenuImpl {
       elem match {
         case n: Menu.NodeLike =>
           require(!p.map.contains(n.key), "Element already added")
+          // println(s"Adding ${n.key} -> $n to $p")
           p.map += n.key -> n
         case _ =>
       }
@@ -238,11 +251,12 @@ private[desktop] object MenuImpl {
 
     private def get(w: Option[Window], p: NodeProxy, path: String): Option[Menu.NodeLike] = {
       val i = path.indexOf('.')
-      if (i < 0) p.map.get(key) else {
-        p.map.get(path.substring(0, i)) match {
-          case Some(g: Menu.Group) => g.get(w, path.substring(i + 1))
-          case _ => None
-        }
+      val k = if (i < 0) path else path.substring(0, i)
+      val e = p.map.get(k)
+      // println(s"In $p look for key $k yields $e")
+      if (i < 0) e else e match {
+        case Some(g: Menu.Group) => g.get(w, path.substring(i + 1))
+        case _ => None
       }
     }
 

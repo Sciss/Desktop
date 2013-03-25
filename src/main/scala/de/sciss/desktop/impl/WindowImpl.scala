@@ -32,7 +32,7 @@ import swing.{MenuBar, Reactions, RootPanel, Action, Component}
 import javax.swing.JInternalFrame
 
 object WindowImpl {
-  object Delegate {
+  private object Delegate {
     def internalFrame(peer: JInternalFrame, hasMenuBar: Boolean): Delegate =
       new InternalFrame(peer, hasMenuBar = hasMenuBar)
 
@@ -55,6 +55,10 @@ object WindowImpl {
       def alwaysOnTop_=(value: Boolean) {
 // XXX TODO
 //        peer.setAlwaysOnTop(value)
+      }
+
+      def makeUndecorated() {
+        // XXX TODO
       }
 
       def active = peer.isSelected
@@ -88,6 +92,10 @@ object WindowImpl {
       def alwaysOnTop = component.peer.isAlwaysOnTop
       def alwaysOnTop_=(value: Boolean) {
         component.peer.setAlwaysOnTop(value)
+      }
+
+      def makeUndecorated() {
+        component.peer.setUndecorated(true)
       }
 
       def active = component.peer.isActive
@@ -134,7 +142,7 @@ object WindowImpl {
 //      }
     }
   }
-  sealed trait Delegate {
+  private sealed trait Delegate {
     def component: RootPanel
     var closeOperation: Window.CloseOperation
     var title: String
@@ -145,6 +153,7 @@ object WindowImpl {
     def pack(): Unit
     def dispose(): Unit
     def front(): Unit
+    def makeUndecorated(): Unit
   }
 }
 trait WindowImpl extends Window {
@@ -272,6 +281,10 @@ trait WindowImpl extends Window {
     putClientProperty("apple.awt.brushMetalLook", true)
   }
 
+  final protected def makeUndecorated() {
+    delegate.makeUndecorated()
+  }
+
   final def component: RootPanel = delegate.component
 
 //  def insets: Insets = {
@@ -304,20 +317,33 @@ trait WindowImpl extends Window {
     entries.foreach { case (key, action) => addAction(key, action) }
   }
 
-  final protected def bindMenu(key: String, action: Action) {
-    val root  = handler.menuFactory
-    root.get(Some(this), key) match {
-      case Some(it: Menu.ItemLike[_]) =>
-        val src = it.action
-        action.title            = src.title
-        action.icon             = src.icon
-        action.accelerator      = src.accelerator
-        // putNoNullNull(src, a, Action.MNEMONIC_KEY)
-        // action.mnemonic         = src.mnemonic
-        // action.longDescription  = src.longDescription
-        it.setAction(this, action)
+  final protected def bindMenu(path: String, action: Action) {
+    def mimic(parent: Menu.GroupLike[_], sub: String) {
+      parent.get(sub) match {
+        case Some(it: Menu.ItemLike[_]) =>
+          val src = it.action
+          action.title            = src.title
+          action.icon             = src.icon
+          action.accelerator      = src.accelerator
+          // putNoNullNull(src, a, Action.MNEMONIC_KEY)
+          // action.mnemonic         = src.mnemonic
+          // action.longDescription  = src.longDescription
+          it.setAction(this, action)
 
-      case _ => sys.error(s"No menu item for key '$key'")
+        case _ => sys.error(s"No menu item for path '$path'")
+      }
+    }
+
+    val root  = handler.menuFactory
+    val i     = path.lastIndexOf('.')
+    if (i < 0) mimic(root, path) else {
+      root.get(path.substring(0, i)) match {
+        case Some(gl: Menu.GroupLike[_]) =>
+          mimic(gl, path.substring(i + 1))
+//          gl
+
+        case _ => sys.error(s"No menu item for path '$path'")
+      }
     }
   }
 
@@ -328,6 +354,11 @@ trait WindowImpl extends Window {
 
 trait MainWindowImpl extends WindowImpl {
   final protected def style = Window.Regular
+
+  if (Desktop.isMac) {
+    makeUndecorated()
+    bounds      = new Rectangle(Short.MaxValue, Short.MaxValue, 0, 0)
+  }
 
   handler.mainWindow = this
   closeOperation = Window.CloseIgnore

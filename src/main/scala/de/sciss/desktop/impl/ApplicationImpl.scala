@@ -49,18 +49,22 @@ trait ApplicationImpl extends Application {
   def getComponent[A](key: String): Option[A] = sync.synchronized(componentMap.get(key).asInstanceOf[Option[A]])
 }
 
-abstract class SwingApplicationImpl[A](val name: String) extends ApplicationImpl with SwingApplication with App {
-  sys.props("com.apple.mrj.application.apple.menu.about.name")  = name
-  sys.props("apple.laf.useScreenMenuBar")                       = "true"
-  Swing.onEDT(init())
+abstract class SwingApplicationImpl(val name: String) extends ApplicationImpl with SwingApplication with App {
+  app =>
 
-  final type Document = A
+  if (Desktop.isMac) {
+    sys.props("com.apple.mrj.application.apple.menu.about.name")  = name
+    sys.props("apple.laf.useScreenMenuBar")                       = "true"
+  }
+  Swing.onEDT(init())
 
   protected def init(): Unit
   protected def menuFactory: Menu.Root
 
-  final protected implicit def application: SwingApplication { type Document = A } = this
+  final protected implicit def application: SwingApplication { type Document = app.Document } = this
 
-  lazy implicit val documentHandler: DocumentHandler { type Document = A } = new DocumentHandlerImpl[A]
+  lazy implicit val documentHandler: DocumentHandler { type Document = app.Document } =
+    new DocumentHandlerImpl[Document]
+
   lazy implicit val windowHandler: WindowHandler = new WindowHandlerImpl(this, menuFactory)
 }

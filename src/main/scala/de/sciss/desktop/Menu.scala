@@ -103,22 +103,10 @@ object Menu {
     def apply(): Popup = Impl.popupApply()
   }
   trait Popup extends GroupLike[PopupMenu]
-}
 
-//	public void putMimic( String id, AbstractWindow w, Action a )
-//	{
-//		if( a == null ) return;
-//		final MenuItem mi = (MenuItem) get( id );
-//		if( mi == null ) throw new NullPointerException( id );
-//
-//		final Action src = mi.getAction();
-//		a.putValue( Action.NAME, src.getValue( Action.NAME ));
-//		a.putValue( Action.SMALL_ICON, src.getValue( Action.SMALL_ICON ));
-//		a.putValue( Action.ACCELERATOR_KEY, src.getValue( Action.ACCELERATOR_KEY ));
-//		putNoNullNull( src, a, Action.MNEMONIC_KEY );
-////		a.putValue( Action.MNEMONIC_KEY, src.getValue( Action.MNEMONIC_KEY ));
-//		a.putValue( Action.SHORT_DESCRIPTION, src.getValue( Action.SHORT_DESCRIPTION ));
-//		a.putValue( Action.LONG_DESCRIPTION, src.getValue( Action.LONG_DESCRIPTION ));
-//
-//		mi.put( w, a );
-//	}
+  def proxy(attr: Item.Attributes): Action = {
+    val a = Impl.noAction(attr.text, attr.keyStroke)
+    a.enabled = false
+    a
+  }
+}
