@@ -90,8 +90,9 @@ private[desktop] object MenuImpl {
 //  private final case class Realized[C](window: Frame, component: C)
 
   private trait Node {
-    _: Menu.NodeLike =>
+//    _: Menu.NodeLike =>
 
+    protected def key: String
     protected def prefix: String
 
     override def toString = s"Menu.$prefix($key)"
@@ -99,7 +100,7 @@ private[desktop] object MenuImpl {
 
   // ---- realizable tracking ----
   private trait Realizable[C <: swing.Component] extends Node {
-    _: Menu.NodeLike =>
+//    _: Menu.NodeLike =>
 
     private var mapRealized = Map.empty[Window, C]
 
@@ -131,7 +132,9 @@ private[desktop] object MenuImpl {
   // ---- item ----
 
   private trait ItemLike[C <: swing.MenuItem] extends CanEnable with Realizable[C] {
-    _: Menu.ItemLike[C] =>
+//    _: Menu.Node[C] =>
+
+    protected def action: Action
 
     private var mapWindowActions = Map.empty[Window, Action] withDefaultValue action
     final def enabled = action.enabled
@@ -139,17 +142,19 @@ private[desktop] object MenuImpl {
 
     final protected def actionFor(w: Window): Action = mapWindowActions(w)
 
-    final def setAction(w: Window, action: Action) {
-      if (mapWindowActions.contains(w)) throw new IllegalStateException("Window specific action already set")
+    final protected def putAction(w: Window, action: Action) {
       mapWindowActions += w -> action
     }
 
-    final def setAction(w: Window)(body: => Unit) {
-      setAction(w, i.action(action.title, action.accelerator)(body))
+    final protected def removeAction(w: Window) {
+      mapWindowActions -= w
     }
 
-    final def clearAction(w: Window) {
-      mapWindowActions -= w
+    final def bind(w: Window, action: Action) {
+      getRealized(w).foreach { mi =>
+        mi.action = action
+      }
+      putAction(w, action)
     }
   }
 
@@ -164,7 +169,7 @@ private[desktop] object MenuImpl {
 
     def destroy(w: Window) {
       removeRealized(w)
-      clearAction(w)
+      removeAction(w)
     }
   }
 
@@ -191,7 +196,7 @@ private[desktop] object MenuImpl {
 
   private trait GroupLike[C <: swing.Component with swing.SequentialContainer]
     extends Realizable[C] {
-    _: Menu.NodeLike =>
+//    _: Menu.NodeLike =>
 
     private var proxies       = Map.empty[Window, NodeProxy]
     private val defaultProxy  = new NodeProxy(None)
@@ -264,12 +269,12 @@ private[desktop] object MenuImpl {
     final def get(w: Option[Window], path: String): Option[Menu.NodeLike] = get(w, proxy(w), path)
     final def get(path: String): Option[Menu.NodeLike] = get(None, defaultProxy, path)
 
-    final def bind(child: String, window: Window, action: Action) {
-      val p = proxies.get(window).getOrElse(throw new NoSuchElementException(s"Window $window was not yet realized"))
-      val c = p.map.getOrElse(child, throw new NoSuchElementException(s"Child $child not found"))
-
-      ???
-    }
+//    final def bind(child: String, window: Window, action: Action) {
+//      val p = proxies.get(window).getOrElse(throw new NoSuchElementException(s"Window $window was not yet realized"))
+//      val c = p.map.getOrElse(child, throw new NoSuchElementException(s"Child $child not found"))
+//      c.bind(window, action)
+//      ...
+//    }
 
 //	// inserts at given index
 //	private void add( NodeProxy p, Menu.Node n, int index )
@@ -304,7 +309,7 @@ private[desktop] object MenuImpl {
 
     def destroy(w: Window) {
       removeRealized(w)
-      clearAction(w)
+      removeAction(w)
       destroyProxy(w)
     }
 

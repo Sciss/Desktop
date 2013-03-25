@@ -318,32 +318,19 @@ trait WindowImpl extends Window {
   }
 
   final protected def bindMenu(path: String, action: Action) {
-    def mimic(parent: Menu.GroupLike[_], sub: String) {
-      parent.get(sub) match {
-        case Some(it: Menu.ItemLike[_]) =>
-          val src = it.action
-          action.title            = src.title
-          action.icon             = src.icon
-          action.accelerator      = src.accelerator
-          // putNoNullNull(src, a, Action.MNEMONIC_KEY)
-          // action.mnemonic         = src.mnemonic
-          // action.longDescription  = src.longDescription
-          it.setAction(this, action)
-
-        case _ => sys.error(s"No menu item for path '$path'")
-      }
-    }
-
     val root  = handler.menuFactory
-    val i     = path.lastIndexOf('.')
-    if (i < 0) mimic(root, path) else {
-      root.get(path.substring(0, i)) match {
-        case Some(gl: Menu.GroupLike[_]) =>
-          mimic(gl, path.substring(i + 1))
-//          gl
+    root.get(path) match {
+      case Some(it: Menu.ItemLike[_]) =>
+        val src = it.action
+        action.title            = src.title
+        action.icon             = src.icon
+        action.accelerator      = src.accelerator
+        // putNoNullNull(src, a, Action.MNEMONIC_KEY)
+        // action.mnemonic         = src.mnemonic
+        // action.longDescription  = src.longDescription
+        it.bind(this, action)
 
-        case _ => sys.error(s"No menu item for path '$path'")
-      }
+      case _ => sys.error(s"No menu item for path '$path'")
     }
   }
 

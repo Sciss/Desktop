@@ -71,13 +71,11 @@ object Menu {
       def keyStroke: Option[KeyStroke]
     }
   }
-  trait ItemLike[+C <: swing.MenuItem] extends Node[C] {
+  sealed trait ItemLike[+C <: swing.MenuItem] extends Node[C] {
     def action: Action
-    def setAction(window: Window, action: Action): Unit
-    def setAction(window: Window)(body: => Unit): Unit
-    def clearAction(window: Window): Unit
+    def bind(window: Window, action: Action): Unit
   }
-  trait Item extends ItemLike[swing.MenuItem]
+  trait Item extends Node[swing.MenuItem] with ItemLike[swing.MenuItem]
 
   object Group {
     def apply(key: String, action: Action): Group = Impl.groupApply(key, action)
@@ -89,8 +87,6 @@ object Menu {
     def add(elem: Element): this.type
     def get(window: Option[Window], path: String): Option[NodeLike]
     def get(path: String): Option[NodeLike]
-
-    def bind(child: String, window: Window, action: Action): Unit
   }
   trait Group extends GroupLike[swing.Menu] with ItemLike[swing.Menu] {
     def addLine(): this.type
