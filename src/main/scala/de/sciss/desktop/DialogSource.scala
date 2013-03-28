@@ -23,9 +23,9 @@
  *	contact@sciss.de
  */
 
-package de.sciss.desktop
+package de.sciss
+package desktop
 
-import javax.swing.JOptionPane
 import java.io.File
 import java.util.StringTokenizer
 
@@ -36,22 +36,22 @@ object DialogSource {
     }
   }
 
-  implicit final class OptionPane(val source: (JOptionPane, String)) extends DialogSource[Any] {
-    def show(): Any = {
+  implicit final class OptionPane[A](val source: (desktop.OptionPane[A], String)) extends DialogSource[A] {
+    def show(): A = {
       val (pane, title) = source
-      val jdlg  = pane.createDialog(title)
+      val jdlg  = pane.peer.createDialog(title)
       jdlg.setVisible(true)
-      pane.getValue
+      pane.result
     }
   }
 
   implicit final class Exception(val source: (scala.Exception, String)) extends DialogSource[Unit] {
     def show() {
       val (exception, title) = source
-      val strBuf = new StringBuffer("Exception: ")
+      val strBuf = new StringBuilder("Exception: ")
       val message = if (exception == null) "null" else (exception.getClass.getName + " - " + exception.getLocalizedMessage)
       var lineLen = 0
-      val options = Array[AnyRef]("Ok", "Show Stack Trace")
+      val options = Seq("Ok", "Show Stack Trace")
       val tok = new StringTokenizer(message)
       strBuf.append(":\n")
       while (tok.hasMoreTokens) {
@@ -64,8 +64,9 @@ object DialogSource {
         strBuf.append(' ')
         lineLen += word.length() + 1
       }
-      val op = new JOptionPane(strBuf.toString, JOptionPane.ERROR_MESSAGE, JOptionPane.YES_NO_OPTION, null, options, options(0))
-      if (Window.showDialog((op, title)) == 1) {
+      val op = desktop.OptionPane(message = strBuf.toString(), messageType = desktop.OptionPane.Message.Error,
+        optionType = desktop.OptionPane.Options.YesNo, entries = options, initial = Some(options(0)))
+      if (Window.showDialog((op, title)).id == 1) {
         exception.printStackTrace()
       }
     }

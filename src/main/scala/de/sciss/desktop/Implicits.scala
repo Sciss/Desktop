@@ -25,9 +25,10 @@
 
 package de.sciss.desktop
 
-import swing.{Component, Action}
+import scala.swing.{Swing, Component, Action}
 import javax.{swing => j}
 import j.KeyStroke
+import javax.swing.event.{AncestorEvent, AncestorListener}
 
 object Implicits {
 //  implicit object ParamPrefs extends Preferences.Type[Param] {
@@ -39,6 +40,24 @@ object Implicits {
 //      case NonFatal(_) => None
 //    }
 //  }
+
+//  private final class DialogFocusListener extends AncestorListener() {
+//    def ancestorAdded(e: AncestorEvent ) {
+//      val c = e.getComponent
+////      println(s"ANCESTOR ADDED $c")
+////      Swing.onEDT(
+//      val t = new javax.swing.Timer(100, Swing.ActionListener(_ => c.requestFocusInWindow()))
+//      t.setRepeats(false)
+//      t.start()
+////      c.requestFocus()
+////      )
+//      c.removeAncestorListener(this)
+//    }
+//
+//    def ancestorRemoved(e: AncestorEvent) {}
+//    def ancestorMoved  (e: AncestorEvent) {}
+//  }
+
   implicit final class DesktopComponent(val component: Component) extends AnyVal {
     def addAction(key: String, action: Action, focus: FocusType = FocusType.Default) {
       val a       = action.peer
@@ -52,6 +71,12 @@ object Implicits {
       val stroke  = a.getValue(j.Action.ACCELERATOR_KEY).asInstanceOf[KeyStroke]
       component.peer.unregisterKeyboardAction(stroke)
     }
+
+//    def initialDialogFocus(): A = {
+////      println(s"INITIAL FOCUS ${component.peer}")
+//      component.peer.addAncestorListener(new DialogFocusListener)
+//      component
+//    }
   }
 
 //  implicit final class DesktopFile(val file: File) extends AnyVal {
