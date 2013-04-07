@@ -1,6 +1,6 @@
 name := "Desktop"
 
-version := "0.2.0-SNAPSHOT"
+version := "0.2.0"
 
 organization := "de.sciss"
 
@@ -22,6 +22,23 @@ libraryDependencies in ThisBuild ++= Seq(
 libraryDependencies in ThisBuild <+= scalaVersion { sv =>
   "org.scala-lang" % "scala-swing" % sv
 }
+
+retrieveManaged := true
+
+scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
+
+// ---- build info ----
+
+buildInfoSettings
+
+sourceGenerators in Compile <+= buildInfo
+
+buildInfoKeys := Seq(name, organization, version, scalaVersion, description,
+  BuildInfoKey.map(homepage) { case (k, opt)           => k -> opt.get },
+  BuildInfoKey.map(licenses) { case (_, Seq((lic, _))) => "license" -> lic }
+)
+
+buildInfoPackage := "de.sciss.desktop"
 
 // ---- publishing ----
 
@@ -52,3 +69,14 @@ pomExtra <<= name { n =>
    </developer>
 </developers>
 }
+
+// ---- ls.implicit.ly ----
+
+seq(lsSettings :_*)
+
+(LsKeys.tags in LsKeys.lsync) := Seq("swing", "desktop", "application")
+
+(LsKeys.ghUser in LsKeys.lsync) := Some("Sciss")
+
+(LsKeys.ghRepo in LsKeys.lsync) <<= name(Some(_))
+
