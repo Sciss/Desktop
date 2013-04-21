@@ -39,6 +39,7 @@ object OptionPane {
   def message(message: Any, messageType: Message.Value = Message.Info, icon: Icon = EmptyIcon,
               focus: Option[Component] = None): OptionPane[Unit] =
     new Impl[Unit] {
+      protected lazy val _messageType = messageType
       lazy val peer = new JOption(message, messageType, Options.Default, icon, Nil, None, focus)
       def result {}
     }
@@ -47,6 +48,7 @@ object OptionPane {
                    messageType: Message.Value = Message.Question, icon: Icon = EmptyIcon,
                    focus: Option[Component] = None): OptionPane[Result.Value] =
     new Impl[Result.Value] {
+      protected lazy val _messageType = messageType
       lazy val peer = new JOption(message, messageType, optionType, icon, Nil, None, focus)
       def result: Result.Value = {
         val j = peer.getValue match {
@@ -61,6 +63,7 @@ object OptionPane {
             icon: Icon = EmptyIcon, entries: Seq[Any] = Nil, initial: Option[Any] = None,
             focus: Option[Component] = None): OptionPane[Result.Value] =
     new Impl[Result.Value] {
+      protected lazy val _messageType = messageType
       lazy val peer = new JOption(message, messageType, optionType, icon, entries, initial, focus)
       def result: Result.Value = {
         val i = peer.getValue
@@ -81,6 +84,14 @@ object OptionPane {
 
   private abstract class Impl[A] extends OptionPane[A] {
     override def toString = s"OptionPane@${hashCode().toHexString}"
+    protected def _messageType: Message.Value
+    var title = _messageType match {
+      case Message.Plain    => "Message"
+      case Message.Info     => "Notice"
+      case Message.Question => "Request"
+      case Message.Warning  => "Warning"
+      case Message.Error    => "Error"
+    }
   }
 
   private def wrapMessage(message: Any): Any = message match {
@@ -102,8 +113,17 @@ object OptionPane {
     }
   }
 }
-sealed trait OptionPane[A] {
+sealed trait OptionPane[A] extends DialogSource[A] {
   def peer: j.JOptionPane
   def result: A
+  var title: String
+
 //  def createDialog(parent: UIElement, title: String): Dialog
+
+  def show(window: Option[Window]): A = {
+    val parent  = window.map(Window.peer(_)).orNull
+    val jdlg    = peer.createDialog(parent, title)
+    jdlg.setVisible(true)
+    result
+  }
 }

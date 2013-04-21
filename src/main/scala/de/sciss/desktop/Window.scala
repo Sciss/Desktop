@@ -25,11 +25,12 @@
 
 package de.sciss.desktop
 
-import javax.swing.{RootPaneContainer, SwingUtilities, WindowConstants}
+import javax.swing.{JFrame, RootPaneContainer, SwingUtilities, WindowConstants}
 import java.awt.event.WindowEvent
 import javax.swing.event.InternalFrameEvent
 import annotation.switch
-import java.awt.{GraphicsEnvironment, Toolkit, Point, Dimension, Rectangle}
+import java.awt
+import awt.{GraphicsEnvironment, Toolkit, Point, Dimension, Rectangle}
 import swing.{Reactions, RootPanel, Action, UIElement}
 
 object Window {
@@ -40,6 +41,14 @@ object Window {
   case object Auxiliary extends Style
   /** Supplementary window which is a (possibly floating) palette. */
   case object Palette   extends Style
+
+  private[desktop] def peer(w: Window): awt.Frame = w.component match {
+    case j: JFrame => j
+    case _ => w.handler.mainWindow.component match {
+      case j: JFrame => j
+      case _ => null
+    }
+  }
 
   object CloseOperation {
     def apply(id: Int): CloseOperation = (id: @switch) match {
@@ -103,13 +112,13 @@ object Window {
 
   def showDialog[A](parent: UIElement, source: DialogSource[A]): A = {
     find(parent) match {
-      case Some(w)  => w.handler.showDialog(w, source)
-      case _        => showDialog(source)
+      case some @ Some(w) => w.handler.showDialog(some, source)
+      case _              => showDialog(source)
     }
   }
 
   def showDialog[A](source: DialogSource[A]): A = {
-    source.show()
+    source.show(None)
   }
 
   def menuShortcut: Int = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask

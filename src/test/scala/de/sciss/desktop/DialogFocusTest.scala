@@ -1,9 +1,9 @@
 package de.sciss.desktop
 
-import swing.{Frame, Button, Dialog, BoxPanel, Orientation, Alignment, TextField, Label, Swing}
+import swing.{Frame, Button, Dialog, Alignment, TextField, Label, Swing}
 import scalaswingcontrib.group.GroupPanel
 import javax.swing.{WindowConstants, JOptionPane, GroupLayout, JPanel, SwingConstants, JTextField, JLabel}
-import javax.swing.event.{AncestorEvent, AncestorListener}
+import language.reflectiveCalls
 
 object DialogFocusTest extends App {
   Swing.onEDT {

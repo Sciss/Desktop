@@ -26,27 +26,18 @@
 package de.sciss
 package desktop
 
-import java.io.File
 import java.util.StringTokenizer
+
 
 object DialogSource {
   implicit final class Dialog(val source: swing.Dialog) extends DialogSource[Unit] {
-    def show() {
+    def show(window: Option[Window]) {
       source.open()
     }
   }
 
-  implicit final class OptionPane[A](val source: (desktop.OptionPane[A], String)) extends DialogSource[A] {
-    def show(): A = {
-      val (pane, title) = source
-      val jdlg  = pane.peer.createDialog(title)
-      jdlg.setVisible(true)
-      pane.result
-    }
-  }
-
   implicit final class Exception(val source: (scala.Exception, String)) extends DialogSource[Unit] {
-    def show() {
+    def show(window: Option[Window]) {
       val (exception, title) = source
       val strBuf = new StringBuilder("Exception: ")
       val message = if (exception == null) "null" else (exception.getClass.getName + " - " + exception.getLocalizedMessage)
@@ -66,21 +57,13 @@ object DialogSource {
       }
       val op = desktop.OptionPane(message = strBuf.toString(), messageType = desktop.OptionPane.Message.Error,
         optionType = desktop.OptionPane.Options.YesNo, entries = options, initial = Some(options(0)))
-      if (Window.showDialog((op, title)).id == 1) {
+      op.title = title
+      if (Window.showDialog(window.map(_.component).orNull, op).id == 1) {
         exception.printStackTrace()
       }
     }
   }
-
-  implicit final class FileDialog(val source: java.awt.FileDialog) extends DialogSource[Option[File]] {
-    def show(): Option[File] = {
-      source.setVisible(true)
-      val dir   = source.getDirectory
-      val file  = source.getFile
-      if (dir != null && file != null) Some(new File(dir, file)) else None
-    }
-  }
 }
-sealed trait DialogSource[+A] {
-  def show(): A
+trait DialogSource[+A] {
+  def show(window: Option[Window]): A
 }

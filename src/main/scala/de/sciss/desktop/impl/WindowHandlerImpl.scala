@@ -43,16 +43,16 @@ final class WindowHandlerImpl(val application: SwingApplication, val menuFactory
 
   private var _windows = Vector.empty[Window]
 
-  def showDialog[A](window: Window, source: DialogSource[A]): A = {
+  def showDialog[A](window: Option[Window], source: DialogSource[A]): A = {
  		// temporarily disable alwaysOnTop
  		val wasOnTop = if (!usesInternalFrames && usesFloatingPalettes) windows.filter { w =>
-       val res = window.alwaysOnTop
-       if (res) window.alwaysOnTop = false
+       val res = w.alwaysOnTop
+       if (res) w.alwaysOnTop = false
        res
     } .toList else Nil
 
  		try {
- 			source.show()
+ 			source.show(window)
  		} finally { // make sure to restore original state
        wasOnTop.foreach(_.alwaysOnTop = true)
  		}

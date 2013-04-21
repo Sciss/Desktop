@@ -340,7 +340,7 @@ trait WindowStub extends Window {
   }
 
   final protected def showDialog[A](source: DialogSource[A]): A = {
- 		handler.showDialog(this, source)
+ 		handler.showDialog(Some(this), source)
  	}
 
   final protected def addAction(key: String, action: Action) {

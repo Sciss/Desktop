@@ -81,5 +81,5 @@ trait WindowHandler {
   def mainWindow: Window
   def menuFactory: Menu.Root
 
-  def showDialog[A](window: Window, source: DialogSource[A]): A
+  def showDialog[A](window: Option[Window], source: DialogSource[A]): A
 }

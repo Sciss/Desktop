@@ -4,7 +4,6 @@ import impl.{WindowImpl, SwingApplicationImpl}
 import swing.{Action, Swing}
 import Swing._
 import java.awt
-import awt.FileDialog
 import awt.event.KeyEvent
 import java.io.File
 import javax.swing.text.PlainDocument
@@ -23,9 +22,9 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
       .add(Group("file", "File")
         .add(Item("new")("New" -> (menu1 + VK_N))(newDocument()))
         .add(Item("open")("Open..." -> (menu1 + VK_O)) {
-          val dlg = new FileDialog(null: awt.Frame, "Open")
-          dlg.setVisible(true)
-          val f = if (dlg.getFile == null) None else Some(new File(dlg.getDirectory, dlg.getFile))
+          val dlg = FileDialog.open()
+          dlg.show(None)
+          val f = dlg.file
           println(s"Result: $f")
         })
         .addLine()

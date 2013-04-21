@@ -10,7 +10,7 @@ To link to this library:
 
     libraryDependencies += "de.sciss" %% "desktop" % v
 
-The current version `v` is `"0.2.+"`
+The current version `v` is `"0.3.+"`
 
 ## building
 

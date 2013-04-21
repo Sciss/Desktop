@@ -1,6 +1,6 @@
 name := "Desktop"
 
-version := "0.2.0"
+version := "0.3.0-SNAPSHOT"
 
 organization := "de.sciss"
 
@@ -15,7 +15,7 @@ licenses := Seq("GPL v2+" -> url("http://www.gnu.org/licenses/gpl-2.0.txt"))
 initialCommands in console := """import de.sciss.desktop._"""
 
 libraryDependencies in ThisBuild ++= Seq(
-  "com.github.benhutchison" % "scalaswingcontrib" % "1.4"   // using popup menu
+  "com.github.benhutchison" % "scalaswingcontrib" % "1.5"   // using popup menu
 //  "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 )
 
