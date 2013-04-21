@@ -9,24 +9,44 @@ import java.io.File
 import javax.swing.text.PlainDocument
 
 object TextEdit extends SwingApplicationImpl("TextEdit") {
-  def quit() {
+  override def quit() {
     println("Bye bye...")
     sys.exit()
+  }
+
+  private var docs = Map.empty[Document, DocumentWindow]
+
+  private lazy val recent = RecentFiles(userPrefs("recent-docs")) { file =>
+    openDocument(file)
+  }
+
+  def findDocument(file: File): Option[Document] = {
+    val some = Some(file)
+    documentHandler.documents.find(_.file == some)
+  }
+
+  def openDocument(file: File) {
+    findDocument(file).flatMap(docs get _) match {
+      case Some(window) => window.front()
+      case _            => newDocument(Some(file))
+    }
+    recent.add(file)  // put it to the front
   }
 
   protected lazy val menuFactory = {
     import Menu._
     import KeyStrokes._
     import KeyEvent._
+
     Root()
       .add(Group("file", "File")
         .add(Item("new")("New" -> (menu1 + VK_N))(newDocument()))
         .add(Item("open")("Open..." -> (menu1 + VK_O)) {
           val dlg = FileDialog.open()
           dlg.show(None)
-          val f = dlg.file
-          println(s"Result: $f")
+          dlg.file.foreach(openDocument _)
         })
+        .add(recent.menu)
         .addLine()
         .add(Item("close",  proxy("Close"      -> (menu1 + VK_W))))
         .add(Item("save",   proxy("Save"       -> (menu1 + VK_S))))
@@ -51,11 +71,11 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
     protected def style = Window.Regular
     title = document.name
     size  = (400, 200)
+    file  = document.file
 
     bindMenus(
       "file.close" -> Action("Close") {
-        dispose()
-        documentHandler.removeDocument(document)
+        closeDocument(document)
       },
       "file.save" -> Action("Save") {
         println("Save")
@@ -68,9 +88,17 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
     front()
   }
 
-  def newDocument() {
-    val doc = new Document
+  def closeDocument(doc: Document) {
+    documentHandler.removeDocument(doc)
+    docs.get(doc).foreach(_.dispose())
+    docs -= doc
+  }
+
+  def newDocument(file: Option[File] = None) {
+    val doc   = new Document
+    doc.file  = file
     documentHandler.addDocument(doc)
-    val w   = new DocumentWindow(doc)
+    val w     = new DocumentWindow(doc)
+    docs     += doc -> w
   }
 }

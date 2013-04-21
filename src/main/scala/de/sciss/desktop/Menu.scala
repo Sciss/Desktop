@@ -39,7 +39,6 @@ object Menu {
   sealed trait NodeLike extends Element {
     def key: String
     var enabled: Boolean
-    // var visible: Boolean
     def enable(): this.type
     def disable(): this.type
   }
@@ -74,6 +73,7 @@ object Menu {
   }
   sealed trait ItemLike[+C <: swing.MenuItem] extends Node[C] {
     def action: Action
+    var visible: Boolean
     def bind(window: Window, action: Action): Unit
   }
   trait Item extends Node[swing.MenuItem] with ItemLike[swing.MenuItem]

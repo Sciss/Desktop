@@ -77,4 +77,8 @@ abstract class SwingApplicationImpl(val name: String) extends ApplicationImpl wi
     new DocumentHandlerImpl[Document]
 
   lazy implicit val windowHandler: WindowHandler = new WindowHandlerImpl(this, menuFactory)
+
+  def quit() {
+    sys.exit()
+  }
 }

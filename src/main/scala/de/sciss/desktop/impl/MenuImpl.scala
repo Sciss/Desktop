@@ -33,8 +33,6 @@ import scalaswingcontrib.PopupMenu
 private[desktop] object MenuImpl {
   i =>
 
-//  private final val ID_KEY = "de.sciss.gui.Menu.id"
-
   // ---- constructors ----
   import Menu.Item.Attributes
 
@@ -62,36 +60,20 @@ private[desktop] object MenuImpl {
 
   def action(text: String, stroke: Option[KeyStroke])(body: => Unit): Action = {
     val res = Action(text)(body)
-//    res.peer.putValue(ID_KEY, key)
     res.accelerator = stroke
     res
   }
 
   def noAction(text: String, stroke: Option[KeyStroke]): Action = new Action(text) {
-//  peer.putValue(ID_KEY, key)
     accelerator = stroke
-//    enabled     = false
 
     override def toString = s"proxy($title)"
     def apply() {}
   }
 
-//  private final class ActionImpl(key: String, text: String, stroke: Option[KeyStroke], body: => Unit)
-//    extends Action(text) {
-//
-//    accelerator = stroke
-//    peer.putValue(ID_KEY, key)
-//
-//    def apply() { body }
-//  }
-
   // ---- node ----
 
-//  private final case class Realized[C](window: Frame, component: C)
-
   private trait Node {
-//    _: Menu.NodeLike =>
-
     protected def key: String
     protected def prefix: String
 
@@ -100,8 +82,6 @@ private[desktop] object MenuImpl {
 
   // ---- realizable tracking ----
   private trait Realizable[C <: swing.Component] extends Node {
-//    _: Menu.NodeLike =>
-
     private var mapRealized = Map.empty[Window, C]
 
     final protected def getRealized(w: Window): Option[C] = mapRealized.get(w)
@@ -132,13 +112,23 @@ private[desktop] object MenuImpl {
   // ---- item ----
 
   private trait ItemLike[C <: swing.MenuItem] extends CanEnable with Realizable[C] {
-//    _: Menu.Node[C] =>
-
     protected def action: Action
 
-    private var mapWindowActions = Map.empty[Window, Action] withDefaultValue action
+    private var mapWindowActions  = Map.empty[Window, Action] withDefaultValue action
+    private var _visible          = true
+
     final def enabled = action.enabled
     final def enabled_=(value: Boolean) { action.enabled = value }
+
+    final def visible = _visible
+    final def visible_=(value: Boolean) {
+      if (_visible != value) {
+        _visible = value
+        realizedIterator.foreach {
+          case (_, c) => c.visible = value
+        }
+      }
+    }
 
     final protected def actionFor(w: Window): Action = mapWindowActions(w)
 
@@ -163,6 +153,7 @@ private[desktop] object MenuImpl {
 
     def create(w: Window): swing.MenuItem = {
       val c = new swing.MenuItem(actionFor(w))
+      if (!visible) c.visible = false
       addRealized(w, c)
       c
     }
@@ -196,7 +187,6 @@ private[desktop] object MenuImpl {
 
   private trait GroupLike[C <: swing.Component with swing.SequentialContainer]
     extends Realizable[C] {
-//    _: Menu.NodeLike =>
 
     private var proxies       = Map.empty[Window, NodeProxy]
     private val defaultProxy  = new NodeProxy(None)
@@ -268,31 +258,6 @@ private[desktop] object MenuImpl {
 
     final def get(w: Option[Window], path: String): Option[Menu.NodeLike] = get(w, proxy(w), path)
     final def get(path: String): Option[Menu.NodeLike] = get(None, defaultProxy, path)
-
-//    final def bind(child: String, window: Window, action: Action) {
-//      val p = proxies.get(window).getOrElse(throw new NoSuchElementException(s"Window $window was not yet realized"))
-//      val c = p.map.getOrElse(child, throw new NoSuchElementException(s"Child $child not found"))
-//      c.bind(window, action)
-//      ...
-//    }
-
-//	// inserts at given index
-//	private void add( NodeProxy p, Menu.Node n, int index )
-//	{
-//		if( p.mapElements.put( n.getID(), n ) != null ) throw new IllegalArgumentException( "Element already added : " + n );
-//
-//		Realized r;
-//		final boolean isDefault = p.w == null;
-//
-//		p.collElements.add( index, n );
-//
-//		for( Iterator iter = mapRealized.values().iterator(); iter.hasNext(); ) {
-//			r = (Realized) iter.next();
-//			if( isDefault || (p.w == r.w) ) {
-//				r.c.add( n.create( r.w ), index + (isDefault ? 0 : defaultProxy.size()) );
-//			}
-//		}
-//	}
   }
 
   private final class Group(val key: String, val action: Action)
@@ -302,6 +267,7 @@ private[desktop] object MenuImpl {
 
     def create(w: Window): swing.Menu = {
       val c = createComponent(actionFor(w))
+      if (!visible) c.visible = false
       addRealized(w, c)
       createProxy(w, c)
       c
@@ -362,20 +328,4 @@ private[desktop] object MenuImpl {
     protected def prefix = "Popup"
     protected def createEmptyRoot() = new PopupMenu
   }
-
-//  {
-//  	private static int uniqueID = 0;
-//
-//  	public MenuSeparator()
-//  	{
-//  		super( "_" + String.valueOf( uniqueID++ ), (Action) null );
-//  	}
-//
-//  	public void setEnabled( boolean b ) { /* ignore */ }
-//
-//  	protected JComponent createComponent( Action a )
-//  	{
-//  		return new JSeparator();
-//  	}
-//  }
 }
