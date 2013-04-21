@@ -39,6 +39,7 @@ object Menu {
   sealed trait NodeLike extends Element {
     def key: String
     var enabled: Boolean
+    // var visible: Boolean
     def enable(): this.type
     def disable(): this.type
   }

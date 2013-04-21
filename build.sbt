@@ -15,6 +15,7 @@ licenses := Seq("GPL v2+" -> url("http://www.gnu.org/licenses/gpl-2.0.txt"))
 initialCommands in console := """import de.sciss.desktop._"""
 
 libraryDependencies in ThisBuild ++= Seq(
+  "de.sciss" %% "model" % "0.3.+",
   "com.github.benhutchison" % "scalaswingcontrib" % "1.5"   // using popup menu
 //  "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 )

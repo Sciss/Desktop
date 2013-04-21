@@ -25,57 +25,34 @@
 
 package de.sciss.desktop
 
-import java.util.{prefs => j}
+import java.util.{prefs => j, StringTokenizer}
 import impl.{PreferencesImpl => Impl}
 import scala.util.control.NonFatal
 import java.io.File
 import java.awt.Dimension
+import de.sciss.model.Model
 
 object Preferences {
 
   def user  (clazz: Class[_]): Preferences = Impl.user  (clazz)
   def system(clazz: Class[_]): Preferences = Impl.system(clazz)
 
-  type Listener[A] = Option[A] => Unit
+  type Update[A]    = Option[A]
+  type Listener[A]  = Model.Listener[Update[A]]
 
-  final case class Entry[A](prefs: Preferences, key: String)(implicit tpe: Type[A]) {
-    private var listeners = Vector.empty[Listener[A]]
+  object Entry {
+    def apply[A](prefs: Preferences, key: String)(implicit tpe: Preferences.Type[A]): Entry[A] =
+      Impl.entry(prefs, key)
 
-    private object prefsListener extends j.PreferenceChangeListener {
-      def preferenceChange(e: j.PreferenceChangeEvent) {
-        if (e.getKey == key) {
-          val newValue = Option(e.getNewValue).flatMap(tpe.valueOf _)
-          this.synchronized(listeners.foreach { l => try {
-            l(newValue)
-          } catch {
-            case NonFatal(e1) => e1.printStackTrace()
-          }})
-        }
-      }
-    }
+    def unapply[A](e: Entry[A]): Option[(Preferences, String)] = Some(e.preferences -> e.key)
+  }
+  trait Entry[A] extends Model[Update[A]] {
+    def preferences: Preferences
+    def key: String
 
-    def addListener(listener: Listener[A]) {
-      prefsListener.synchronized {
-        val add = listeners.isEmpty
-        listeners :+= listener
-        if (add) prefs.peer.addPreferenceChangeListener(prefsListener)
-      }
-    }
-
-    def removeListener(listener: Listener[A]) {
-      prefsListener.synchronized {
-        val i = listeners.indexOf(listener)
-        if (i >= 0) {
-          listeners = listeners.patch(0, Vector.empty, 1)
-          val remove = listeners.isEmpty
-          if (remove) prefs.peer.removePreferenceChangeListener(prefsListener)
-        }
-      }
-    }
-
-    def get: Option[A] = prefs.get(key)
-    def getOrElse(default: => A): A = prefs.getOrElse(key, default)
-    def put(value: A) { prefs.put(key, value) }
+    def get: Option[A]
+    def getOrElse(default: => A): A
+    def put(value: A): Unit
   }
 
   object Type {
@@ -87,6 +64,16 @@ object Preferences {
     implicit object file extends Type[File] {
       def toString(value: File) = value.getPath
       def valueOf(string: String): Option[File] = Some(new File(string))
+    }
+
+    implicit object files extends Type[List[File]] {
+      def toString(value: List[File]) = value.map(_.getPath).mkString(File.pathSeparator)
+      def valueOf(string: String): Option[List[File]] = {
+        val tok = new StringTokenizer(string, File.pathSeparator)
+        val b   = List.newBuilder[File]
+        while (tok.hasMoreTokens) b += new File(tok.nextToken())
+        Some(b.result())
+      }
     }
 
     implicit object int extends Type[Int] {

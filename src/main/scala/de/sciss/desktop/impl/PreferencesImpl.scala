@@ -27,6 +27,7 @@ package de.sciss.desktop
 package impl
 
 import java.util.{prefs => j}
+import de.sciss.model.impl.ModelImpl
 
 object PreferencesImpl {
   def user(clazz: Class[_]): Preferences =
@@ -34,6 +35,37 @@ object PreferencesImpl {
 
   def system(clazz: Class[_]): Preferences =
     new Impl(j.Preferences.systemNodeForPackage(clazz), isSystem = true, clazz.getName)
+
+  def entry[A](prefs: Preferences, key: String)(implicit tpe: Preferences.Type[A]): Preferences.Entry[A] =
+    new EntryImpl(prefs, key)
+
+  private final class EntryImpl[A](val preferences: Preferences, val key: String)
+                           (implicit tpe: Preferences.Type[A])
+    extends Preferences.Entry[A] with ModelImpl[Preferences.Update[A]] {
+
+    private type Listener = Preferences.Listener[A]
+
+    private object prefsListener extends j.PreferenceChangeListener {
+      def preferenceChange(e: j.PreferenceChangeEvent) {
+        if (e.getKey == key) {
+          val newValue = Option(e.getNewValue).flatMap(tpe.valueOf _)
+          dispatch(newValue)
+        }
+      }
+    }
+
+    override protected def startListening() {
+      preferences.peer.addPreferenceChangeListener(prefsListener)
+    }
+
+    override protected def stopListening() {
+      preferences.peer.removePreferenceChangeListener(prefsListener)
+    }
+
+    def get: Option[A] = preferences.get(key)
+    def getOrElse(default: => A): A = preferences.getOrElse(key, default)
+    def put(value: A) { preferences.put(key, value) }
+  }
 
   private final class Impl(val peer: j.Preferences, isSystem: Boolean, name: String) extends Preferences {
     import Preferences.Type

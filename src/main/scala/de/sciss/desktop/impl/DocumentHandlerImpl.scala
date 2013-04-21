@@ -1,6 +1,8 @@
 package de.sciss.desktop
 package impl
 
+import de.sciss.model.impl.ModelImpl
+
 class DocumentHandlerImpl[A] extends DocumentHandler with ModelImpl[DocumentHandler.Update[A]] {
   private var _active     = Option.empty[Document]
   private var _documents  = Vector.empty[Document]
