@@ -36,6 +36,8 @@ object OptionPane {
   val Options = Dialog.Options
   val Result  = Dialog.Result
 
+  private final case class User(id: Int) extends Result.Value
+
   def message(message: Any, messageType: Message.Value = Message.Info, icon: Icon = EmptyIcon,
               focus: Option[Component] = None): OptionPane[Unit] =
     new Impl[Unit] {
@@ -78,7 +80,7 @@ object OptionPane {
             }
           }
         }
-        Result(j)
+        User(j)
       }
     }
 
