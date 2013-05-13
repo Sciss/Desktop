@@ -117,8 +117,8 @@ object FileDialog {
       if (peerInit) {
         val dir   = peer.getDirectory
         val file  = peer.getFile
-        if (dir != null)
-          Some(if (file != null) new File(dir, file) else new File(dir))
+        if (file != null)
+          Some(new File(dir, file))
         else
           None
 
