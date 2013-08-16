@@ -61,6 +61,38 @@ object OptionPane {
       }
     }
 
+  def textInput(message: Any, messageType: Message.Value = Message.Question, icon: Icon = EmptyIcon,
+               initial: String): OptionPane[Option[String]] =
+    new Impl[Option[String]] {
+      protected lazy val _messageType = messageType
+      lazy val peer = new JOption(message, messageType, Options.OkCancel, icon, Nil, None, None)
+
+      peer.setWantsInput(true)
+      peer.setInitialSelectionValue(initial)
+
+      def result = peer.getInputValue match {
+        case JOptionPane.UNINITIALIZED_VALUE => None
+        case value => Some(value.toString)
+      }
+    }
+
+  def comboInput[A](message: Any, messageType: Message.Value = Message.Question, icon: Icon = EmptyIcon,
+               options: Seq[A], initial: A): OptionPane[Option[A]] =
+    new Impl[Option[A]] {
+      protected lazy val _messageType = messageType
+      lazy val peer = new JOption(message, messageType, Options.OkCancel, icon, Nil, None, None)
+
+      peer.setWantsInput(true)
+      // array must not be null, otherwise option pane uses text field
+      peer.setSelectionValues(if (options.isEmpty) new Array[AnyRef](0) else optionsToJava(options))
+      peer.setInitialSelectionValue(initial)
+
+      def result = peer.getInputValue match {
+        case JOptionPane.UNINITIALIZED_VALUE => None
+        case value => Option(value.asInstanceOf[A]) // with empty options, value might be null
+      }
+    }
+
   def apply(message: Any, optionType: Options.Value = Options.YesNo, messageType: Message.Value = Message.Question,
             icon: Icon = EmptyIcon, entries: Seq[Any] = Nil, initial: Option[Any] = None,
             focus: Option[Component] = None): OptionPane[Result.Value] =
@@ -101,11 +133,13 @@ object OptionPane {
     case other => other
   }
 
+  private def optionsToJava(options: Seq[Any]): Array[AnyRef] =
+    if (options.isEmpty) null else options.map(wrapMessage(_).asInstanceOf[AnyRef])(breakOut)
+
   private final class JOption(message: Any, messageType: Message.Value, optionType: Options.Value, icon: Icon,
                               options: Seq[Any], initialValue: Option[Any], focus: Option[Component])
     extends JOptionPane(wrapMessage(message), messageType.id, optionType.id, Swing.wrapIcon(icon),
-      if (options.isEmpty) null else (options.map(wrapMessage(_).asInstanceOf[AnyRef])(breakOut): Array[AnyRef]),
-      initialValue.map(wrapMessage).orNull) {
+      optionsToJava(options), initialValue.map(wrapMessage).orNull) {
 
     override def selectInitialValue() {
       focus match {
@@ -116,14 +150,13 @@ object OptionPane {
   }
 }
 sealed trait OptionPane[A] extends DialogSource[A] {
+  /** The underlying `javax.swing` peer. */
   def peer: j.JOptionPane
   def result: A
   var title: String
 
-//  def createDialog(parent: UIElement, title: String): Dialog
-
   def show(window: Option[Window]): A = {
-    val parent  = window.map(Window.peer(_)).orNull
+    val parent  = window.map(Window.peer).orNull
     val jdlg    = peer.createDialog(parent, title)
     jdlg.setVisible(true)
     result
