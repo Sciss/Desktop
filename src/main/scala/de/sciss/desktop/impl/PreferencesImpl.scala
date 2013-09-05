@@ -46,25 +46,22 @@ object PreferencesImpl {
     private type Listener = Preferences.Listener[A]
 
     private object prefsListener extends j.PreferenceChangeListener {
-      def preferenceChange(e: j.PreferenceChangeEvent) {
+      def preferenceChange(e: j.PreferenceChangeEvent): Unit =
         if (e.getKey == key) {
-          val newValue = Option(e.getNewValue).flatMap(tpe.valueOf _)
+          val newValue = Option(e.getNewValue).flatMap(tpe.valueOf)
           dispatch(newValue)
         }
-      }
     }
 
-    override protected def startListening() {
+    override protected def startListening(): Unit =
       preferences.peer.addPreferenceChangeListener(prefsListener)
-    }
 
-    override protected def stopListening() {
+    override protected def stopListening(): Unit =
       preferences.peer.removePreferenceChangeListener(prefsListener)
-    }
 
     def get: Option[A] = preferences.get(key)
     def getOrElse(default: => A): A = preferences.getOrElse(key, default)
-    def put(value: A) { preferences.put(key, value) }
+    def put(value: A): Unit = preferences.put(key, value)
   }
 
   private final class Impl(val peer: j.Preferences, isSystem: Boolean, name: String) extends Preferences {
@@ -86,8 +83,7 @@ object PreferencesImpl {
       if (s == null) default else tpe.valueOf(s).getOrElse(default)
     }
 
-    def put[A](key: String, value: A)(implicit tpe: Type[A]) {
+    def put[A](key: String, value: A)(implicit tpe: Type[A]): Unit =
       peer.put(key, tpe.toString(value))
-    }
   }
 }

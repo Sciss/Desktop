@@ -58,14 +58,14 @@ object Implicits {
   //  }
 
   implicit final class DesktopComponent(val component: Component) extends AnyVal {
-    def addAction(key: String, action: Action, focus: FocusType = FocusType.Default) {
+    def addAction(key: String, action: Action, focus: FocusType = FocusType.Default): Unit = {
       val a       = action.peer
       //      val key     = a.getValue(j.Action.NAME).toString
       val stroke  = action.accelerator.getOrElse(throw new IllegalArgumentException(s"addAction($key, $action) - no accelerator found"))
       component.peer.registerKeyboardAction(a, key, stroke, focus.id)
     }
 
-    def removeAction(action: Action) {
+    def removeAction(action: Action): Unit = {
       val a       = action.peer
       val stroke  = a.getValue(j.Action.ACCELERATOR_KEY).asInstanceOf[KeyStroke]
       component.peer.unregisterKeyboardAction(stroke)

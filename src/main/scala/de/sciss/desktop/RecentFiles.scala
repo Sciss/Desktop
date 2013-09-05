@@ -18,9 +18,8 @@ object RecentFiles {
 
   private val dummyFile = new File("")
 
-  private def fork(code: => Unit) {
+  private def fork(code: => Unit): Unit =
     if (EventQueue.isDispatchThread) code else Swing.onEDT(code)
-  }
 
   private final class Impl(entry: Preferences.Entry[List[File]], maxItems: Int, action: File => Unit,
                            keyStroke: Option[KeyStroke])
@@ -29,9 +28,8 @@ object RecentFiles {
     private final class FileAction extends Action("file") {
       var file = dummyFile
 
-      def apply() {
+      def apply(): Unit =
         if (file != dummyFile) action(file)
-      }
     }
 
     private val actions = Vector.fill(maxItems)(new FileAction)
@@ -46,7 +44,7 @@ object RecentFiles {
     }
 
     // runs on EDT!
-    private def updateEntries(entries: List[File]) {
+    private def updateEntries(entries: List[File]): Unit = {
       val v   = entries.toVector
       // val fsv = FileSystemView.getFileSystemView
 
@@ -99,7 +97,7 @@ object RecentFiles {
 
     fork(updateEntries(files))
 
-    def add(file: File) {
+    def add(file: File): Unit = {
       val f0  = files
       if (f0.headOption == Some(file)) return // already at top
       val f1  = f0.filterNot(_ == file)
@@ -108,7 +106,7 @@ object RecentFiles {
       entry.put(f3)
     }
 
-    def remove(file: File) {
+    def remove(file: File): Unit = {
       val f0  = files
       if (!f0.contains(file)) return
       val f1  = f0.filterNot(_ == file)
@@ -117,9 +115,7 @@ object RecentFiles {
 
     def files: List[File] = entry.getOrElse(Nil)
 
-    def dispose() {
-      entry.removeListener(l)
-    }
+    def dispose(): Unit = entry.removeListener(l)
   }
 }
 trait RecentFiles {

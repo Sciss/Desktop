@@ -58,12 +58,12 @@ final class WindowHandlerImpl(val application: SwingApplication, val menuFactory
  		}
  	}
 
-  def addWindow(w: Window) {
+  def addWindow(w: Window): Unit = {
     _windows :+= w
     MainWindowImpl.add(w)
   }
 
-  def removeWindow(w: Window) {
+  def removeWindow(w: Window): Unit = {
     val i = _windows.indexOf(w)
     if (i >= 0) _windows = _windows.patch(i, Vector.empty, 1)
   }
@@ -108,22 +108,21 @@ final class WindowHandlerImpl(val application: SwingApplication, val menuFactory
       } else None
     }
 
-    def add(w: Window) {
+    def add(w: Window): Unit =
       desktop.foreach { d =>
         w.component.peer match {
           case jif: JInternalFrame =>
-//            jif.addComponentListener(new ComponentAdapter {
-//              override def componentShown(e: ComponentEvent) {
-//                println("SHOWN")
-                d.add(jif)
-//              }
-//            })
-//            println("ADD")
-//            jif.setVisible(true)
+            //            jif.addComponentListener(new ComponentAdapter {
+            //              override def componentShown(e: ComponentEvent) {
+            //                println("SHOWN")
+            d.add(jif)
+            //              }
+            //            })
+            //            println("ADD")
+            //            jif.setVisible(true)
           case _ =>
         }
       }
-    }
 
     // handler.mainWindow = this
     closeOperation = Window.CloseIgnore

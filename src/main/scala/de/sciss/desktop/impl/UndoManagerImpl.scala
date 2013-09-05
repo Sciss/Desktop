@@ -57,7 +57,7 @@ trait UndoManagerImpl extends UndoManager {
   private var pendingEdits      = new CompoundEdit()
 
   object peer extends j.undo.UndoManager {
-    override def redo() {
+    override def redo(): Unit =
   		try {
   			undoPending()
   			super.redo()
@@ -65,9 +65,8 @@ trait UndoManagerImpl extends UndoManager {
   		finally {
   			updateStates()
   		}
-  	}
 
-  	override def undo() {
+  	override def undo(): Unit =
   		try {
   			undoPending()
   			super.undo()
@@ -75,7 +74,6 @@ trait UndoManagerImpl extends UndoManager {
   		finally {
   			updateStates()
   		}
-  	}
 
     override def editToBeUndone: UndoableEdit = super.editToBeUndone
     override def editToBeRedone: UndoableEdit = super.editToBeRedone
@@ -103,8 +101,8 @@ trait UndoManagerImpl extends UndoManager {
       }
     }
 
-    override def discardAllEdits() {
-       pendingEdits.synchronized {
+    override def discardAllEdits(): Unit = {
+      pendingEdits.synchronized {
    			pendingEdits.die()
    			pendingEdits = new CompoundEdit()
    			pendingEditCount = 0
@@ -163,7 +161,7 @@ trait UndoManagerImpl extends UndoManager {
 	 *  @see	javax.swing.Action#setEnabled( boolean )
 	 */
 
-	private def undoPending() {
+	private def undoPending(): Unit =
     pendingEdits.synchronized {
 			if( pendingEditCount > 0 ) {
 				pendingEdits.end()
@@ -172,7 +170,6 @@ trait UndoManagerImpl extends UndoManager {
 				pendingEditCount = 0
 			}
 		}
-	}
 
 	/**
 	 *  Purge the undo history and
@@ -180,19 +177,19 @@ trait UndoManagerImpl extends UndoManager {
 	 *
 	 *  @see	de.sciss.app.Document#setDirty( boolean )
 	 */
-  final def clear() { peer.discardAllEdits() }
+  final def clear(): Unit = peer.discardAllEdits()
 
   final def add(edit: UndoableEdit): Boolean = peer.addEdit(edit)
 
-  final def undo() { peer.undo() }
-  final def redo() { peer.redo() }
-  final def undoOrRedo() { peer.undoOrRedo() }
+  final def undo(): Unit = peer.undo()
+  final def redo(): Unit = peer.redo()
+  final def undoOrRedo(): Unit = peer.undoOrRedo()
   final def canUndo: Boolean = peer.canUndo
   final def canRedo: Boolean = peer.canRedo
   final def canUndoOrRedo: Boolean = peer.canUndoOrRedo
   final def significant: Boolean = peer.isSignificant
 
-	private def updateStates() {
+	private def updateStates(): Unit = {
     val cu = peer.canUndo
     if (undoAction.enabled != cu) {
       undoAction.enabled  = cu
@@ -220,13 +217,12 @@ trait UndoManagerImpl extends UndoManager {
 	object undoAction extends Action("Undo") {
     accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Window.menuShortcut))
 
-    def apply() {
+    def apply(): Unit =
 			try {
 				undo()
 			} catch{
         case e1: CannotUndoException => Console.err.println(e1.getLocalizedMessage)
       }
-		}
 	}
 
 	object redoAction extends Action("Redo") {
@@ -238,17 +234,16 @@ trait UndoManagerImpl extends UndoManager {
       KeyStroke.getKeyStroke(KeyEvent.VK_Y, Window.menuShortcut)
     )
 
-		def apply() {
+		def apply(): Unit =
 			try {
 				redo()
 			} catch {
         case e1: CannotRedoException => Console.err.println(e1.getLocalizedMessage)
 			}
-		}
 	}
 
 	private object ActionDebugDump extends Action("Debug Undo History") {
-		def apply() {
+		def apply(): Unit = {
 			val num			  = manager.peer._edits.size
 			val redoEdit	= manager.peer.editToBeRedone()
 			val undoEdit	= manager.peer.editToBeUndone()

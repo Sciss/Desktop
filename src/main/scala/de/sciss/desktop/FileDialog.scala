@@ -85,31 +85,30 @@ object FileDialog {
 
     private var _mode: Mode = Open
     def mode = _mode
-    def mode_=(value: Mode) {
+    def mode_=(value: Mode): Unit =
       if (_mode != value) {
         _mode = value
         if (peerInit) peer.setMode(awtMode)
       }
-    }
 
     private var _title = "Open"
     def title = _title
-    def title_=(value: String) {
+    def title_=(value: String): Unit =
       if (_title != value) {
         _title = value
         if (peerInit) peer.setTitle(value)
       }
-    }
 
     private var _filter = Option.empty[File => Boolean]
     def filter = _filter
-    def filter_=(value: Option[File => Boolean]) {
-      _filter = value
-      if (peerInit) peer.setFilenameFilter(awtFilter)
-    }
+    def filter_=(value: Option[File => Boolean]): Unit =
+      if (_filter != value) {
+        _filter = value
+        if (peerInit) peer.setFilenameFilter(awtFilter)
+      }
 
     // gutta have sum fun!
-    def setFilter(fun: (File) => Boolean) { filter = Some(fun) }
+    def setFilter(fun: (File) => Boolean): Unit = filter = Some(fun)
 
     private var _file = Option.empty[File]
 
@@ -125,22 +124,21 @@ object FileDialog {
       } else _file
     }
 
-    private def setAwtFile(birne: awt.FileDialog) {
+    private def setAwtFile(birne: awt.FileDialog): Unit = {
       val dir   = _file.map(_.getParent).orNull
       val name  = _file.map(_.getName  ).orNull
       birne.setDirectory(dir)
       birne.setFile(name)
     }
 
-    def file_=(value: Option[File]) {
-      _file = value
-      if (peerInit) {
-        setAwtFile(peer)
+    def file_=(value: Option[File]): Unit =
+      if (_file != value) {
+        _file = value
+        if (peerInit) setAwtFile(peer)
       }
-    }
 
     def show(window: Option[Window]): Option[File] = {
-      if (!peerInit) _owner = window.map(Window.peer(_)).orNull
+      if (!peerInit) _owner = window.map(Window.peer).orNull
       val dlg = peer
       if (mode == Folder) {
         val key       = "apple.awt.fileDialogForDirectories"

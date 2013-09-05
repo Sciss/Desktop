@@ -31,19 +31,37 @@ import java.util.StringTokenizer
 
 object DialogSource {
   implicit final class Dialog(val source: swing.Dialog) extends DialogSource[Unit] {
-    def show(window: Option[Window]) {
-      source.open()
-    }
+    def show(window: Option[Window]): Unit = source.open()
   }
 
   implicit final class Exception(val source: (scala.Exception, String)) extends DialogSource[Unit] {
-    def show(window: Option[Window]) {
+    private def uncamelizeClassName(x: Any): String = {
+      val cn0 = x.getClass.getName
+      val i   = cn0.lastIndexOf('.')
+      val cn  = cn0.substring(i + 1)
+      val len = cn.length
+      val b   = new StringBuilder(len + len/2)
+      var j   = 0
+      var wasUpper = true
+      while (j < len) {
+        val c       = cn.charAt(j)
+        val isUpper = c.isUpper
+        if (!wasUpper && isUpper) b.append(' ')
+        b.append(c)
+        wasUpper    = isUpper
+        j += 1
+      }
+      b.result()
+    }
+
+    def show(window: Option[Window]): Unit = {
       val (exception, title) = source
-      val strBuf = new StringBuilder("Exception: ")
-      val message = if (exception == null) "null" else (exception.getClass.getName + " - " + exception.getLocalizedMessage)
+      val name    = if (exception == null) "Exception" else uncamelizeClassName(exception)
+      val strBuf  = new StringBuilder(name)
+      val message = if (exception == null) "null" else exception.getLocalizedMessage
       var lineLen = 0
       val options = Seq("Ok", "Show Stack Trace")
-      val tok = new StringTokenizer(message)
+      val tok     = new StringTokenizer(message)
       strBuf.append(":\n")
       while (tok.hasMoreTokens) {
         val word = tok.nextToken()
@@ -58,7 +76,8 @@ object DialogSource {
       val op = desktop.OptionPane(message = strBuf.toString(), messageType = desktop.OptionPane.Message.Error,
         optionType = desktop.OptionPane.Options.YesNo, entries = options, initial = Some(options(0)))
       op.title = title
-      if (Window.showDialog(window.map(_.component).orNull, op).id == 1) {
+
+      if (op.show(window).id == 1) {
         exception.printStackTrace()
       }
     }

@@ -141,12 +141,11 @@ object OptionPane {
     extends JOptionPane(wrapMessage(message), messageType.id, optionType.id, Swing.wrapIcon(icon),
       optionsToJava(options), initialValue.map(wrapMessage).orNull) {
 
-    override def selectInitialValue() {
+    override def selectInitialValue(): Unit =
       focus match {
         case Some(c) => c.requestFocusInWindow()
         case _ => super.selectInitialValue()
       }
-    }
   }
 }
 sealed trait OptionPane[A] extends DialogSource[A] {

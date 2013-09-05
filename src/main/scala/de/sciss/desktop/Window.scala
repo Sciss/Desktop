@@ -138,14 +138,13 @@ object Window {
 //			  }
     }
 
-	  def apply() {
+	  def apply(): Unit = {
       window.visible = true
       window.front()
     }
 
-//    def dispose() {
+//    def dispose(): Unit =
 //      w.reactions -= ...
-//    }
 	}
 }
 /** Interface that unites functionality

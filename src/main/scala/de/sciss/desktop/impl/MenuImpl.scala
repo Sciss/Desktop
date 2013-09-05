@@ -68,7 +68,7 @@ private[desktop] object MenuImpl {
     accelerator = stroke
 
     override def toString = s"proxy($title)"
-    def apply() {}
+    def apply() = ()
   }
 
   // ---- node ----
@@ -87,13 +87,11 @@ private[desktop] object MenuImpl {
     final protected def getRealized(w: Window): Option[C] = mapRealized.get(w)
     final protected def realizedIterator: Iterator[(Window, C)] = mapRealized.iterator
 
-    final protected def addRealized(w: Window, c: C) {
+    final protected def addRealized(w: Window, c: C): Unit =
       mapRealized += w -> c // Realized(w, c)
-    }
 
-    final protected def removeRealized(w: Window) {
+    final protected def removeRealized(w: Window): Unit =
       mapRealized -= w
-    }
   }
 
   private trait CanEnable {
@@ -118,29 +116,26 @@ private[desktop] object MenuImpl {
     private var _visible          = true
 
     final def enabled = action.enabled
-    final def enabled_=(value: Boolean) { action.enabled = value }
+    final def enabled_=(value: Boolean): Unit = action.enabled = value
 
     final def visible = _visible
-    final def visible_=(value: Boolean) {
+    final def visible_=(value: Boolean): Unit =
       if (_visible != value) {
         _visible = value
         realizedIterator.foreach {
           case (_, c) => c.visible = value
         }
       }
-    }
 
     final protected def actionFor(w: Window): Action = mapWindowActions(w)
 
-    final protected def putAction(w: Window, action: Action) {
+    final protected def putAction(w: Window, action: Action): Unit =
       mapWindowActions += w -> action
-    }
 
-    final protected def removeAction(w: Window) {
+    final protected def removeAction(w: Window): Unit =
       mapWindowActions -= w
-    }
 
-    final def bind(w: Window, action: Action) {
+    final def bind(w: Window, action: Action): Unit = {
       getRealized(w).foreach { mi =>
         mi.action = action
       }
@@ -158,7 +153,7 @@ private[desktop] object MenuImpl {
       c
     }
 
-    def destroy(w: Window) {
+    def destroy(w: Window): Unit = {
       removeRealized(w)
       removeAction(w)
     }
@@ -172,13 +167,13 @@ private[desktop] object MenuImpl {
 
     override def toString = s"NodeProxy($window)@${hashCode().toHexString}"
 
-    def create(c: swing.SequentialContainer, w: Window) {
+    def create(c: swing.SequentialContainer, w: Window): Unit = {
       if (window.isDefined) require(window.get == w)  // XXX TODO -- correct?
 
       seq.foreach { n => c.contents += n.create(w)}
     }
 
-    def destroy(w: Window) {
+    def destroy(w: Window): Unit = {
       if (window.isDefined) require(window.get == w)  // XXX TODO -- correct?
 
       seq.foreach(_.destroy(w))
@@ -191,7 +186,7 @@ private[desktop] object MenuImpl {
     private var proxies       = Map.empty[Window, NodeProxy]
     private val defaultProxy  = new NodeProxy(None)
 
-    private def added(p: NodeProxy, n: Menu.Element) {
+    private def added(p: NodeProxy, n: Menu.Element): Unit = {
       val isDefault = p.window.isEmpty
       realizedIterator.foreach { case (w, r) =>
         if (isDefault || p.window == Some(w)) r.contents += n.create(w)
@@ -208,12 +203,12 @@ private[desktop] object MenuImpl {
       case None => defaultProxy
     }
 
-    final protected def createProxy(w: Window, component: C) {
+    final protected def createProxy(w: Window, component: C): Unit = {
       defaultProxy.create(component, w)
       proxies.get(w).foreach(_.create(component, w)) // XXX TODO
     }
 
-    final protected def destroyProxy(w: Window) {
+    final protected def destroyProxy(w: Window): Unit = {
       defaultProxy.destroy(w)
       proxies.get(w).foreach { p =>
         p.destroy(w)
@@ -221,7 +216,7 @@ private[desktop] object MenuImpl {
       }
     }
 
-    private def add(p: NodeProxy, elem: Menu.Element) {
+    private def add(p: NodeProxy, elem: Menu.Element): Unit = {
       elem match {
         case n: Menu.NodeLike =>
           require(!p.map.contains(n.key), "Element already added")
@@ -273,7 +268,7 @@ private[desktop] object MenuImpl {
       c
     }
 
-    def destroy(w: Window) {
+    def destroy(w: Window): Unit = {
       removeRealized(w)
       removeAction(w)
       destroyProxy(w)
@@ -305,13 +300,13 @@ private[desktop] object MenuImpl {
       res
     }
 
-    final def destroy(w: Window) {
+    final def destroy(w: Window): Unit = {
       removeRealized(w)
       destroyProxy(w)
     }
 
     final def enabled = _enabled
-    final def enabled_=(value: Boolean) {
+    final def enabled_=(value: Boolean): Unit = { // XXX TODO: should we filter _enabled != value ?
       _enabled = value
       realizedIterator.foreach(_._2.enabled = value)
     }

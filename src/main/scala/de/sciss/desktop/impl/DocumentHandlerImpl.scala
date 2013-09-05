@@ -15,14 +15,13 @@ class DocumentHandlerImpl[A] extends DocumentHandler with ModelImpl[DocumentHand
   final def documents: Iterator[Document] = _documents.iterator
 
   def activeDocument: Option[Document] = _active
-  def activeDocument_=(value: Option[Document]) {
+  def activeDocument_=(value: Option[Document]): Unit =
     if (_active != value) {
       _active = value
       value.foreach { doc => dispatch(DocumentHandler.Activated(doc)) }
     }
-  }
 
-  def addDocument(document: Document) {
+  def addDocument(document: Document): Unit =
     sync.synchronized {
       _documents :+= document
       dispatch(DocumentHandler.Added(document))
@@ -30,9 +29,8 @@ class DocumentHandlerImpl[A] extends DocumentHandler with ModelImpl[DocumentHand
         activeDocument = Some(document)
       }
     }
-  }
 
-  def removeDocument(document: Document) {
+  def removeDocument(document: Document): Unit =
     sync.synchronized {
       val i = _documents.indexOf(document)
       if (i < 0) throw new IllegalArgumentException(s"Document not found: $document")
@@ -42,5 +40,4 @@ class DocumentHandlerImpl[A] extends DocumentHandler with ModelImpl[DocumentHand
       }
       dispatch(DocumentHandler.Removed(document))
     }
-  }
 }

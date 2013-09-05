@@ -47,7 +47,7 @@ object Menu {
   }
   object Line extends Element {
     def create(window: Window) = new swing.Separator
-    def destroy(window: Window) {}
+    def destroy(window: Window) = ()
   }
 
   object Item {

@@ -43,6 +43,9 @@ trait DocumentHandler {
   def addListener   (listener: Listener[Document]): Listener[Document]
   def removeListener(listener: Listener[Document]): Unit
 
-  def addDocument(document: Document): Unit
+  /** Adds a new document to the list of handled documents. If there is currently
+    * no active document, this call will also implicitly make the document the active one.
+    */
+  def addDocument   (document: Document): Unit
   def removeDocument(document: Document): Unit
 }

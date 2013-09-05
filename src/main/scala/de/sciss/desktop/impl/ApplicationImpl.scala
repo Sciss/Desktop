@@ -38,13 +38,11 @@ trait ApplicationImpl extends Application {
   private val sync          = new AnyRef
   private var componentMap  = Map.empty[String, Any]
 
-  def addComponent(key: String, component: Any) {
+  def addComponent(key: String, component: Any): Unit =
     sync.synchronized(componentMap += key -> component)
-  }
 
-  def removeComponent(key: String) {
+  def removeComponent(key: String): Unit =
     sync.synchronized(componentMap -= key)
-  }
 
   def getComponent[A](key: String): Option[A] = sync.synchronized(componentMap.get(key).asInstanceOf[Option[A]])
 }
@@ -68,7 +66,7 @@ abstract class SwingApplicationImpl(val name: String) extends ApplicationImpl wi
   }
 
   /** Subclasses may override this to initialize the GUI on the event thread */
-  protected def init() {}
+  protected def init() = ()
   protected def menuFactory: Menu.Root
 
   final protected implicit def application: SwingApplication { type Document = app.Document } = this
@@ -78,7 +76,5 @@ abstract class SwingApplicationImpl(val name: String) extends ApplicationImpl wi
 
   lazy implicit val windowHandler: WindowHandler = new WindowHandlerImpl(this, menuFactory)
 
-  def quit() {
-    sys.exit()
-  }
+  def quit(): Unit = sys.exit()
 }

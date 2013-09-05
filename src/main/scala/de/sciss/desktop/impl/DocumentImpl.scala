@@ -17,7 +17,7 @@
 //
 //    override def toString = "Document(" + data.getTitle + ")"
 //
-//    def close() {
+//    def close(): Unit = {
 //      data.close()
 //      dispatch(Document.Closed(this))
 //    }
