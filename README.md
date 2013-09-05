@@ -10,9 +10,9 @@ To link to this library:
 
     libraryDependencies += "de.sciss" %% "desktop" % v
 
-The current version `v` is `"0.3.3+"`
+The current version `v` is `"0.3.4+"`
 
 ## building
 
-ScalaDesktop currently builds against Scala 2.10, using sbt 0.12. It uses uses [ScalaSwingContrib](https://github.com/benhutchison/ScalaSwingContrib) for the popup menu wrapper.
+ScalaDesktop currently builds against Scala 2.10, using sbt 0.13. It uses uses [ScalaSwingContrib](https://github.com/benhutchison/ScalaSwingContrib) for the popup menu wrapper.
 
