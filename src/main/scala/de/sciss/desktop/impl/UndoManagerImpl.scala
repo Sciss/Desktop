@@ -53,7 +53,7 @@ trait UndoManagerImpl extends UndoManager {
 	 *	pendingEdits will only be added to the real
 	 *	undo history when the next significant edit comes in.
 	 */
-	private var pendingEditCount  = 0  // fucking CompoundEdit hasn't got getter methods
+	private var pendingEditCount  = 0  // have to count separately, because CompoundEdit hasn't got getter methods
   private var pendingEdits      = new CompoundEdit()
 
   object peer extends j.undo.UndoManager {
@@ -78,7 +78,7 @@ trait UndoManagerImpl extends UndoManager {
     override def editToBeUndone: UndoableEdit = super.editToBeUndone
     override def editToBeRedone: UndoableEdit = super.editToBeRedone
 
-    def _edits = edits  // grmpff
+    def _edits = edits  // widening visibility
 
     override def addEdit(anEdit: UndoableEdit): Boolean = {
       if (anEdit.isSignificant) {
@@ -115,51 +115,48 @@ trait UndoManagerImpl extends UndoManager {
   peer.setLimit(1000)
   updateStates()
 
-//	/**
-//	 *  Get an Action object that will undo the
-//	 *	last step in the undo history.
-//	 *
-//	 *  @return <code>Action</code> suitable for attaching to a <code>JMenuItem</code>.
-//	 */
-//	def getUndoAction: j.Action = ActionUndo.peer
+  //	/**
+  //	 *  Get an Action object that will undo the
+  //	 *	last step in the undo history.
+  //	 *
+  //	 *  @return <code>Action</code> suitable for attaching to a <code>JMenuItem</code>.
+  //	 */
+  //	def getUndoAction: j.Action = ActionUndo.peer
 
-//	/**
-//	 *  Get an Action object that will redo the
-//	 *	next step in the undo history.
-//	 *
-//	 *  @return <code>Action</code> suitable for attaching to a <code>JMenuItem</code>.
-//	 */
-//	def getRedoAction: j.Action = _redoAction.peer
+  //	/**
+  //	 *  Get an Action object that will redo the
+  //	 *	next step in the undo history.
+  //	 *
+  //	 *  @return <code>Action</code> suitable for attaching to a <code>JMenuItem</code>.
+  //	 */
+  //	def getRedoAction: j.Action = _redoAction.peer
 
-	/**
-	 *  Get an Action object that will dump the
-	 *  current undo history to the console.
-	 *
-	 *  @return <code>Action</code> suitable for attaching to a <code>JMenuItem</code>.
-	 */
+  /** Gets an `Action` object that will dump the
+    * current undo history to the console.
+    *
+    * @return action suitable for attaching to a menu item
+	  */
 	final def debugDumpAction: Action = ActionDebugDump
 
-	/**
-	 *  Add a new edit to the undo history.
-	 *  This behaves just like the normal
-	 *  UndoManager, i.e. it tries to replace
-	 *  the previous edit if possible. When
-	 *  the edits <code>isSignificant()</code>
-	 *  method returns true, the main application
-	 *  is informed about this edit by calling
-	 *  the <code>setModified</code> method.
-	 *  Also the undo and redo action's enabled
-	 *  / disabled states are updated.
-	 *	<p>
-	 *	Insignificant edits are saved in a pending
-	 *	compound edit that gets added with the
-	 *	next significant edit to allow redos as
-	 *	long as possible.
-	 *
-	 *  @see	de.sciss.app.Document#setDirty( boolean )
-	 *  @see	javax.swing.undo.UndoableEdit#isSignificant()
-	 *  @see	javax.swing.Action#setEnabled( boolean )
-	 */
+	/** Adds a new edit to the undo history.
+	  * This behaves just like the normal
+	  * UndoManager, i.e. it tries to replace
+	  * the previous edit if possible. When
+	  * the edits `isSignificant()`
+	  * method returns true, the main application
+	  * is informed about this edit by calling
+	  * the `setModified` method.
+	  * Also the undo and redo action's enabled
+	  * / disabled states are updated.
+	  *
+	  *	Insignificant edits are saved in a pending
+	  *	compound edit that gets added with the
+	  *	next significant edit to allow redo as
+	  *	long as possible.
+	  *
+	  * @see	javax.swing.undo.UndoableEdit#isSignificant()
+	  * @see	javax.swing.Action#setEnabled( boolean )
+	  */
 
 	private def undoPending(): Unit =
     pendingEdits.synchronized {
@@ -171,23 +168,20 @@ trait UndoManagerImpl extends UndoManager {
 			}
 		}
 
-	/**
-	 *  Purge the undo history and
-	 *  update the undo / redo actions enabled / disabled state.
-	 *
-	 *  @see	de.sciss.app.Document#setDirty( boolean )
-	 */
+	/** Purges the undo history and updates the undo / redo actions enabled / disabled state. */
   final def clear(): Unit = peer.discardAllEdits()
 
   final def add(edit: UndoableEdit): Boolean = peer.addEdit(edit)
 
-  final def undo(): Unit = peer.undo()
-  final def redo(): Unit = peer.redo()
+  final def undo      (): Unit = peer.undo()
+  final def redo      (): Unit = peer.redo()
   final def undoOrRedo(): Unit = peer.undoOrRedo()
-  final def canUndo: Boolean = peer.canUndo
-  final def canRedo: Boolean = peer.canRedo
-  final def canUndoOrRedo: Boolean = peer.canUndoOrRedo
-  final def significant: Boolean = peer.isSignificant
+
+  final def canUndo       : Boolean = peer.canUndo
+  final def canRedo       : Boolean = peer.canRedo
+  final def canUndoOrRedo : Boolean = peer.canUndoOrRedo
+
+  final def significant   : Boolean = peer.isSignificant
 
 	private def updateStates(): Unit = {
     val cu = peer.canUndo
@@ -207,14 +201,14 @@ trait UndoManagerImpl extends UndoManager {
 
   //	protected def editToBeRedone(): UndoableEdit = super.editToBeRedone()
 
-//	protected def editToBeUndone(): UndoableEdit = super.editToBeUndone()
+  //	protected def editToBeUndone(): UndoableEdit = super.editToBeUndone()
 
-//	protected java.util.List getEdits()
-//	{
-//		return edits;
-//	}
+  //	protected java.util.List getEdits()
+  //	{
+  //		return edits;
+  //	}
 
-	object undoAction extends Action("Undo") {
+  object undoAction extends Action("Undo") {
     accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Window.menuShortcut))
 
     def apply(): Unit =

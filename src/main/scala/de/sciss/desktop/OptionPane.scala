@@ -156,8 +156,8 @@ sealed trait OptionPane[A] extends DialogSource[A] {
 
   def show(window: Option[Window]): A = {
     val parent  = window.map(Window.peer).orNull
-    val jdlg    = peer.createDialog(parent, title)
-    jdlg.setVisible(true)
+    val jDlg    = peer.createDialog(parent, title)
+    jDlg.setVisible(true)
     result
   }
 }

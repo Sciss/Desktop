@@ -27,7 +27,6 @@ package de.sciss.desktop
 
 import java.io.{FilenameFilter, File}
 import java.awt
-import javax.swing.{JFrame, JInternalFrame, JRootPane}
 
 object FileDialog {
   sealed trait Mode

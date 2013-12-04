@@ -28,18 +28,9 @@ package impl
 
 import java.awt.Rectangle
 import javax.swing.{JInternalFrame, JDesktopPane}
-import java.awt.event.{ComponentEvent, ComponentAdapter}
 
-//object WindowHandlerImpl {
-//  private final class DialogWindow(dialog: Dialog) extends WindowImpl {
-//// 			if( modal ) fph.addModalDialog(); // this shit is necessary because java.awt.FileDialog doesn't fire windowActivated ...
-//    visible = true
-//// 			if( modal ) fph.removeModalDialog();
-//    dispose()
-//  }
-//}
 final class WindowHandlerImpl(val application: SwingApplication, val menuFactory: Menu.Root) extends WindowHandler {
-  hndl =>
+  handler =>
 
   private var _windows = Vector.empty[Window]
 
@@ -74,12 +65,7 @@ final class WindowHandlerImpl(val application: SwingApplication, val menuFactory
   def usesScreenMenuBar   : Boolean =  Desktop.isMac
   def usesFloatingPalettes: Boolean = true
 
-//  private var _mainWindow: Window = null
   def mainWindow: Window = MainWindowImpl
-//  def mainWindow_=(value: Window) {
-//    if (_mainWindow != null) throw new IllegalStateException("Main window has already been registered")
-//    _mainWindow = value
-//  }
 
   mainWindow.front()
 
@@ -87,7 +73,7 @@ final class WindowHandlerImpl(val application: SwingApplication, val menuFactory
     import WindowImpl._
 
     protected def style = Window.Regular
-    def handler = hndl
+    def handler = handler
 
     private val frame = new swing.Frame
     protected val delegate =

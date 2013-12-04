@@ -28,7 +28,7 @@ package impl
 
 import java.awt.{Point, Rectangle, Dimension}
 import java.io.File
-import swing.{MenuBar, Reactions, RootPanel, Action, Component}
+import swing.{Reactions, RootPanel, Action, Component}
 import javax.swing.JInternalFrame
 import java.awt.event.{WindowEvent, WindowListener}
 import javax.swing.event.{InternalFrameEvent, InternalFrameListener}
