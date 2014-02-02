@@ -1,9 +1,9 @@
 package de.sciss.desktop.mac
 
-import com.apple.eawt.{OpenFilesHandler, QuitResponse, QuitHandler, PreferencesHandler, AboutHandler}
+import com.apple.eawt.{AppHiddenListener, AppForegroundListener, OpenFilesHandler, QuitResponse, QuitHandler, PreferencesHandler, AboutHandler}
 import javax.swing.{BoxLayout, JButton, Timer, AbstractButton, WindowConstants, JFrame}
 import java.awt.{Color, LinearGradientPaint, Image, EventQueue}
-import com.apple.eawt.AppEvent.{OpenFilesEvent, QuitEvent, PreferencesEvent, AboutEvent}
+import com.apple.eawt.AppEvent.{AppHiddenEvent, AppForegroundEvent, OpenFilesEvent, QuitEvent, PreferencesEvent, AboutEvent}
 import java.awt.event.{ActionEvent, ActionListener}
 import com.apple.eio.FileManager
 import java.io.File
@@ -119,11 +119,30 @@ object MacTest extends App with Runnable {
     val bImg = new BufferedImage(512, 512, BufferedImage.TYPE_INT_ARGB)
     val g = bImg.createGraphics()
     g.setPaint(new LinearGradientPaint(0f, 0f, 512f, 512f, Array(0f, 1f), Array(Color.red, Color.blue)))
-    g.fillRect(0, 0, 512, 512)
+    g.fillOval(0, 0, 512, 512)
     g.dispose()
 
-    // setDockImage(bImg)
+    setDockImage(bImg)
     // setDockImage(null)
+
+    app.addAppEventListener(new AppForegroundListener {
+      def appRaisedToForeground(e: AppForegroundEvent): Unit = println("appRaisedToForeground")
+      def appMovedToBackground (e: AppForegroundEvent): Unit = println("appMovedToBackground" )
+    })
+
+    app.addAppEventListener(new AppHiddenListener {
+      def appHidden  (e: AppHiddenEvent): Unit = println("appHidden"  )
+      def appUnhidden(e: AppHiddenEvent): Unit = println("appUnhidden")
+    })
+
+    // when is this triggered?
+    //    app.addAppEventListener(new AppReOpenedListener {
+    //      def appReOpened(e: AppReOpenedEvent): Unit = println("appReOpened")
+    //    })
+
+    // ScreenSleepListener
+    // SystemSleepListener
+    // UserSessionListener
 
     new JFrame("Aux") {
       setSize(400, 400)

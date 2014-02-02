@@ -181,14 +181,12 @@ private[desktop] object MenuImpl {
       }
     }
 
-    private def proxy(wo: Option[Window]): NodeProxy = wo match {
-      case Some(w) =>
-        proxies.getOrElse(w, {
-          val p = new NodeProxy(wo)
-          proxies += w -> p
-          p
-        })
-      case None => defaultProxy
+    private def proxy(wo: Option[Window]): NodeProxy = wo.fold(defaultProxy) { w =>
+      proxies.getOrElse(w, {
+        val p = new NodeProxy(wo)
+        proxies += w -> p
+        p
+      })
     }
 
     final protected def createProxy(w: Window, component: C): Unit = {
@@ -200,7 +198,7 @@ private[desktop] object MenuImpl {
       defaultProxy.destroy(w)
       proxies.get(w).foreach { p =>
         p.destroy(w)
-     	  if( p.seq.isEmpty ) proxies -= w
+        if (p.seq.isEmpty) proxies -= w
       }
     }
 
@@ -303,12 +301,12 @@ private[desktop] object MenuImpl {
   private final class Root extends RootLike[swing.MenuBar] with Menu.Root {
     def key = "root"
     protected def prefix = "Root"
-    protected def createEmptyRoot() = new swing.MenuBar
+    protected def createEmptyRoot(): swing.MenuBar = new swing.MenuBar
   }
 
   private final class Popup extends RootLike[PopupMenu] with Menu.Popup {
     def key = "popup"
     protected def prefix = "Popup"
-    protected def createEmptyRoot() = new PopupMenu
+    protected def createEmptyRoot(): PopupMenu = new PopupMenu
   }
 }

@@ -37,10 +37,20 @@ lazy val commonSettings = Project.defaultSettings ++ Seq(
   }
 )
 
+//lazy val platform = Project(
+//  id            = s"$baseNameL-platform",
+//  base          = file("platform"),
+//  settings      = commonSettings ++ Seq(
+//    name        := s"$baseName-platform",
+//    description := "Abstract API for platform specific desktop functionality"
+//  )
+//)
+
 lazy val core = Project(
-  id        = s"$baseNameL-core",
-  base      = file("core"),
-  settings  = commonSettings ++ buildInfoSettings ++ Seq(
+  id            = s"$baseNameL-core",
+  base          = file("core"),
+  // dependencies  = Seq(platform),
+  settings      = commonSettings ++ buildInfoSettings ++ Seq(
     name        := s"$baseName-core",
     description := "A library for document based desktop applications",
     libraryDependencies ++= Seq(
@@ -60,9 +70,10 @@ lazy val core = Project(
 )
 
 lazy val mac = Project(
-  id        = s"$baseNameL-mac",
-  base      = file("mac"),
-  settings  = commonSettings ++ Seq(
+  id            = s"$baseNameL-mac",
+  base          = file("mac"),
+  dependencies  = Seq(core /* platform */),
+  settings      = commonSettings ++ Seq(
     name        := s"$baseName-mac",
     description := "Macintosh specific adaptors or Desktop"
   )

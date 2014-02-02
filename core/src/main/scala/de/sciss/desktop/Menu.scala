@@ -27,14 +27,14 @@ object Menu {
   sealed trait NodeLike extends Element {
     def key: String
     var enabled: Boolean
-    def enable(): this.type
+    def enable (): this.type
     def disable(): this.type
   }
   trait Node[+C <: Component] extends NodeLike {
     def create(window: Window): C
   }
   object Line extends Element {
-    def create(window: Window) = new swing.Separator
+    def create (window: Window) = new swing.Separator
     def destroy(window: Window) = ()
   }
 
