@@ -3,7 +3,7 @@ package de.sciss.desktop
 import java.io.File
 
 object PrefsTest {
-  def test(p: Preferences) {
+  def test(p: Preferences): Unit = {
     p.put("string", "value")(Preferences.Type.string)
     p.put("int", 123)
     p.put("boolean", true)

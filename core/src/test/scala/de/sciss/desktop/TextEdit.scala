@@ -9,7 +9,7 @@ import java.io.File
 import javax.swing.text.PlainDocument
 
 object TextEdit extends SwingApplicationImpl("TextEdit") {
-  override def quit() {
+  override def quit(): Unit = {
     println("Bye bye...")
     sys.exit()
   }
@@ -25,7 +25,7 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
     documentHandler.documents.find(_.file == some)
   }
 
-  def openDocument(file: File) {
+  def openDocument(file: File): Unit = {
     findDocument(file).flatMap(docs.get) match {
       case Some(window) => window.front()
       case _            => newDocument(Some(file))
@@ -87,13 +87,13 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
     front()
   }
 
-  def closeDocument(doc: Document) {
+  def closeDocument(doc: Document): Unit = {
     documentHandler.removeDocument(doc)
     docs.get(doc).foreach(_.dispose())
     docs -= doc
   }
 
-  def newDocument(file: Option[File] = None) {
+  def newDocument(file: Option[File] = None): Unit = {
     val doc   = new Document
     doc.file  = file
     documentHandler.addDocument(doc)

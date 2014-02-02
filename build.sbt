@@ -59,6 +59,15 @@ lazy val core = Project(
   )
 )
 
+lazy val mac = Project(
+  id        = s"$baseNameL-mac",
+  base      = file("mac"),
+  settings  = commonSettings ++ Seq(
+    name        := s"$baseName-mac",
+    description := "Macintosh specific adaptors or Desktop"
+  )
+)
+
 // ---- ls.implicit.ly ----
 
 seq(lsSettings :_*)
