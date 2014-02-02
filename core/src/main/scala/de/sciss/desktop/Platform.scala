@@ -26,4 +26,6 @@ trait Platform extends Model[Desktop.Update] {
 
   def requestUserAttention (repeat    : Boolean): Unit
   def requestForeground    (allWindows: Boolean): Unit
+
+  def setQuitHandler(test: => Boolean): Unit
 }

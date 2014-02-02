@@ -19,6 +19,7 @@ import de.sciss.model.Model
 import scala.swing.Image
 import java.awt
 import java.net.URI
+import scala.collection.immutable.{IndexedSeq => Vec}
 
 object Desktop {
   /** `true` when running the application on a Mac (OS X) system. */
@@ -147,4 +148,34 @@ object Desktop {
     */
   def addListener   (pf: Listener): pf.type = platform addListener    pf
   def removeListener(pf: Listener): Unit    = platform removeListener pf
+
+  private val sync = new AnyRef
+  private var quitAcceptors = Vec.empty[() => Boolean]
+
+  private lazy val _initQuit: Unit = initQuit()
+
+  private def initQuit(): Unit = platform.setQuitHandler(mayQuit())
+
+  /** Adds a veto function invoked when calling `mayQuit`. The function should return `true` if it is ok to quit,
+    * and `false` if not (for example, because a document is dirty and a confirmation dialog was cancelled).
+    *
+    * @param accept   the function to invoke when attempting to quit.
+    * @return         the function argument for convenience
+    */
+  def addQuitAcceptor(accept: => Boolean): () => Boolean = sync.synchronized {
+    _initQuit
+    val fun = () => accept
+    quitAcceptors :+= fun
+    fun
+  }
+
+  def removeQuitAcceptor(accept: () => Boolean): Unit = sync.synchronized {
+    val idx = quitAcceptors.indexOf(accept)
+    if (idx >= 0) quitAcceptors = quitAcceptors.patch(idx, Nil, 1)
+  }
+
+  /** Traverses the registered quit interceptors. If all of them accept the quit action, returns `true`. If any
+    * of them refuses the request, returns `false`.
+    */
+  def mayQuit(): Boolean = sync.synchronized(quitAcceptors.forall(_.apply()))
 }

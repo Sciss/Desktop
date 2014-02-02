@@ -1,6 +1,6 @@
 package de.sciss.desktop.mac
 
-import de.sciss.desktop.{Window, WindowHandler, Desktop}
+import de.sciss.desktop.{OptionPane, Window, WindowHandler, Desktop}
 import java.io.File
 import de.sciss.desktop.impl.{WindowImpl, SwingApplicationImpl}
 import de.sciss.desktop.Menu.Root
@@ -15,6 +15,8 @@ object MacTest2 extends SwingApplicationImpl("Mac Test") {
 
   override protected def init(): Unit = {
     new WindowImpl {
+      win =>
+
       def handler: WindowHandler = MacTest2.windowHandler
 
       val text = new TextArea(8, 20) {
@@ -49,7 +51,17 @@ object MacTest2 extends SwingApplicationImpl("Mac Test") {
           text.caret.position = text.peer.getLineStartOffset(text.lineCount -1)
       }
 
-      closeOperation = Window.CloseExit
+      Desktop.addQuitAcceptor {
+        val pane = OptionPane.confirmation(message = "Really quit?!")
+        val res  = pane.show(Some(win), title = "Quit Application")
+        res == OptionPane.Result.Yes
+      }
+
+      closeOperation = Window.CloseIgnore
+
+      reactions += {
+        case Window.Closing(_) => if (Desktop.mayQuit()) quit()
+      }
 
       pack()
       front()

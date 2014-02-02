@@ -18,8 +18,8 @@ import com.apple.eio.FileManager
 import de.sciss.desktop.{Desktop, Platform}
 import de.sciss.model.impl.ModelImpl
 import com.apple.eawt
-import com.apple.eawt.{OpenFilesHandler, AppHiddenListener, AppForegroundListener}
-import com.apple.eawt.AppEvent.{OpenFilesEvent, AppHiddenEvent, AppForegroundEvent}
+import com.apple.eawt.{QuitResponse, QuitHandler, OpenFilesHandler, AppHiddenListener, AppForegroundListener}
+import com.apple.eawt.AppEvent.{QuitEvent, OpenFilesEvent, AppHiddenEvent, AppForegroundEvent}
 import scala.collection.JavaConverters
 import scala.swing.Image
 
@@ -62,6 +62,11 @@ object MacPlatform extends Platform with ModelImpl[Desktop.Update] {
     //   println("Shutdown")
     // }
   }
+
+  def setQuitHandler(test: => Boolean): Unit = app.setQuitHandler(new QuitHandler {
+    def handleQuitRequestWith(e: QuitEvent, response: QuitResponse): Unit =
+      if (test) response.performQuit() else response.cancelQuit()
+  })
 
   override protected def startListening(): Unit = _init
 }

@@ -25,10 +25,10 @@ trait Application {
   def quit(): Unit
   def name: String
 
-
-  def addComponent(key: String, component: Any): Unit
+  def addComponent   (key: String, component: Any): Unit
   def removeComponent(key: String): Unit
   def getComponent[A](key: String): Option[A]
+
   def documentHandler: DocumentHandler
 
   def userPrefs  : Preferences

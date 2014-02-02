@@ -8,12 +8,16 @@ Desktop is an application framework for Scala on the desktop, including support 
 
 To link to this library:
 
-    libraryDependencies += "de.sciss" %% "desktop" % v
+    "de.sciss" %% "desktop" % v
+
+Furthermore, if you want to support the Mac (OS X) platform, also add the following:
+
+    "de.sciss" %% "desktop-mac" % v
 
 The current version `v` is `"0.4.+"`.
 
 ## building
 
-ScalaDesktop currently builds against Scala 2.10, using sbt 0.13. It uses uses [ScalaSwingContrib](https://github.com/benhutchison/ScalaSwingContrib) for the popup menu wrapper.
+Desktop currently builds against Scala 2.10, using sbt 0.13.
 
-Some demos are available through `sbt desktop-core/test:run`.
+Some demos are available through `sbt desktop/test:run`. For Mac specific demos, `sbt desktop-mac/test:run`.

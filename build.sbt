@@ -47,7 +47,7 @@ lazy val commonSettings = Project.defaultSettings ++ Seq(
 //)
 
 lazy val core = Project(
-  id            = s"$baseNameL-core",
+  id            = s"$baseNameL",
   base          = file("core"),
   // dependencies  = Seq(platform),
   settings      = commonSettings ++ buildInfoSettings ++ Seq(
