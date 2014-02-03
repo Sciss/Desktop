@@ -54,7 +54,7 @@ object MacPlatform extends Platform with ModelImpl[Desktop.Update] {
         // println(s"openFiles. EDT? ${java.awt.EventQueue.isDispatchThread}")
         import JavaConverters._
         val sq = e.getFiles.asScala.toList
-        dispatch(Desktop.OpenFiles(e.getSearchTerm, sq))
+        dispatch(Desktop.OpenFiles(Option(e.getSearchTerm), sq))
       }
     })
 

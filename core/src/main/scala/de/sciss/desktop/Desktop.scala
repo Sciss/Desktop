@@ -145,7 +145,7 @@ object Desktop {
     * @param search an optional search term the user entered to find the files
     * @param files  the files which should be opened by the application
     */
-  case class OpenFiles(search: String, files: List[File]) extends Update
+  case class OpenFiles(search: Option[String], files: List[File]) extends Update
 
   /** Registers a listener for desktop and application events. The listener receives update of type `Update`.
     *
