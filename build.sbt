@@ -37,21 +37,21 @@ lazy val commonSettings = Project.defaultSettings ++ Seq(
   }
 )
 
-//lazy val platform = Project(
-//  id            = s"$baseNameL-platform",
-//  base          = file("platform"),
-//  settings      = commonSettings ++ Seq(
-//    name        := s"$baseName-platform",
-//    description := "Abstract API for platform specific desktop functionality"
-//  )
-//)
+lazy val root = Project(
+  id        = "root",
+  base      = file("."),
+  aggregate = Seq(core, mac),
+  settings  = Project.defaultSettings ++ Seq(
+    packagedArtifacts := Map.empty           // prevent publishing anything!
+  )
+)
 
 lazy val core = Project(
   id            = s"$baseNameL",
   base          = file("core"),
   // dependencies  = Seq(platform),
   settings      = commonSettings ++ buildInfoSettings ++ Seq(
-    name        := s"$baseName-core",
+    name        := s"$baseName",
     description := "A library for document based desktop applications",
     libraryDependencies ++= Seq(
       "org.scala-lang"          %  "scala-swing"       % scalaVersion.value,
