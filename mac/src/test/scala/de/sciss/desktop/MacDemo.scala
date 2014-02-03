@@ -1,15 +1,35 @@
-package de.sciss.desktop.mac
+package de.sciss.desktop
 
-import de.sciss.desktop.{OptionPane, Window, WindowHandler, Desktop}
 import java.io.File
 import de.sciss.desktop.impl.{WindowImpl, SwingApplicationImpl}
-import de.sciss.desktop.Menu.Root
 import scala.swing.{ToggleButton, ScrollPane, TextArea, Button, FlowPanel}
 import scala.swing.event.ButtonClicked
 import java.net.URI
 
-object MacTest2 extends SwingApplicationImpl("Mac Test") {
-  protected lazy val menuFactory: Root = Root()
+object MacDemo extends SwingApplicationImpl("Mac Test") {
+  protected lazy val menuFactory: Menu.Root = {
+    import Menu._
+    val itAbout = Item.About(this) {
+      val opt = OptionPane.message(s"$name is a demo for the Desktop library.")
+      opt.show(title = "About")
+    }
+    val itPrefs = Item.Preferences(this) {
+      val opt = OptionPane.textInput("User Name:", initial = "Foo Bar")
+      opt.show(title = "Settings")
+    }
+    val itQuit = Item.Quit(this)
+    val r = Root()
+    if (itPrefs.visible || itQuit.visible) {
+      val gFile = Group("file", "File")
+      r.add(gFile)
+      if (itPrefs.visible) gFile.add(itPrefs)
+      if (itQuit .visible) gFile.add(itQuit )
+    }
+    if (itAbout.visible) {
+      r.add(Group("help", "Help").add(itAbout))
+    }
+    r
+  }
 
   type Document = Unit
 
@@ -17,7 +37,7 @@ object MacTest2 extends SwingApplicationImpl("Mac Test") {
     new WindowImpl {
       win =>
 
-      def handler: WindowHandler = MacTest2.windowHandler
+      def handler: WindowHandler = MacDemo.windowHandler
 
       val text = new TextArea(8, 20) {
         editable = false

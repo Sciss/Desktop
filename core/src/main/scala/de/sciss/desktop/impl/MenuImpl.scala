@@ -44,6 +44,34 @@ private[desktop] object MenuImpl {
 
   def popupApply(): Menu.Popup = new Popup
 
+  def aboutApply(app: SwingApplication)(action: => Unit): Menu.Item = {
+    val supported = Desktop.platform.setAboutHandler(action)
+    val text      = s"About ${app.name}" // XXX TODO: localization? shortcuts?
+    val item      = Menu.Item("about")(text)(action)
+    item.visible  = !supported
+    item
+  }
+
+  def prefsApply(app: SwingApplication)(action: => Unit): Menu.Item = {
+    val supported = Desktop.platform.setPreferencesHandler(action)
+    // XXX TODO: localization? shortcuts?
+    // cf. http://kb.mozillazine.org/Menu_differences_in_Windows,_Linux,_and_Mac
+    val text      = if (Desktop.isLinux) "Preferences" else if (Desktop.isMac) "Preferences..." else "Options..."
+    val item      = Menu.Item("preferences")(text)(action)
+    item.visible  = !supported
+    item
+  }
+
+  def quitApply(app: SwingApplication): Menu.Item = {
+    val supported = Desktop.isQuitSupported
+    val text      = if (Desktop.isWindows) "Exit" else "Quit" // XXX TODO: localization? shortcuts?
+    val item      = Menu.Item("quit")(text) {
+      if (Desktop.mayQuit()) app.quit()
+    }
+    item.visible  = !supported
+    item
+  }
+
   // ---- util ---
 
   def action(text: String, stroke: Option[KeyStroke])(body: => Unit): Action = {

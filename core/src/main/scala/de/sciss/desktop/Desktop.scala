@@ -22,12 +22,18 @@ import java.net.URI
 import scala.collection.immutable.{IndexedSeq => Vec}
 
 object Desktop {
+  private val osName: String = sys.props("os.name")
+
+  /** `true` when running the application on a Linux system. */
+  val isLinux  : Boolean = osName.contains("Linux")
   /** `true` when running the application on a Mac (OS X) system. */
-  final val isMac = sys.props("os.name").contains("Mac")
+  val isMac    : Boolean = osName.contains("Mac")
+  /** `true` when running the application on a Windows system. */
+  val isWindows: Boolean = osName.contains("Windows")
 
   private def getModule[A](name: String): A = Class.forName(name + "$").getField("MODULE$").get(null).asInstanceOf[A]
 
-  private lazy val platform: Platform = {
+  private[desktop] lazy val platform: Platform = {
     val res = Try {
       if (isMac) getModule[Platform]("de.sciss.desktop.impl.MacPlatform")
       // else if (isLinux) ...
@@ -152,9 +158,9 @@ object Desktop {
   private val sync = new AnyRef
   private var quitAcceptors = Vec.empty[() => Boolean]
 
-  private lazy val _initQuit: Unit = initQuit()
+  private[desktop] lazy val isQuitSupported: Boolean = initQuit()
 
-  private def initQuit(): Unit = platform.setQuitHandler(mayQuit())
+  private def initQuit(): Boolean = platform.setQuitHandler(mayQuit())
 
   /** Adds a veto function invoked when calling `mayQuit`. The function should return `true` if it is ok to quit,
     * and `false` if not (for example, because a document is dirty and a confirmation dialog was cancelled).
@@ -163,7 +169,7 @@ object Desktop {
     * @return         the function argument for convenience
     */
   def addQuitAcceptor(accept: => Boolean): () => Boolean = sync.synchronized {
-    _initQuit
+    isQuitSupported
     val fun = () => accept
     quitAcceptors :+= fun
     fun

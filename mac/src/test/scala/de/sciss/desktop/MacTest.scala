@@ -1,4 +1,4 @@
-package de.sciss.desktop.mac
+package de.sciss.desktop
 
 import com.apple.eawt.{AppHiddenListener, AppForegroundListener, OpenFilesHandler, QuitResponse, QuitHandler, PreferencesHandler, AboutHandler}
 import javax.swing.{BoxLayout, JButton, Timer, AbstractButton, WindowConstants, JFrame}

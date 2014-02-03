@@ -35,5 +35,7 @@ object DummyPlatform extends Platform {
   def requestUserAttention (repeat    : Boolean): Unit = ()
   def requestForeground    (allWindows: Boolean): Unit = ()
 
-  def setQuitHandler(test: => Boolean): Unit = ()
+  def setQuitHandler       (test  : => Boolean): Boolean = false
+  def setAboutHandler      (action: => Unit   ): Boolean = false
+  def setPreferencesHandler(action: => Unit   ): Boolean = false
 }

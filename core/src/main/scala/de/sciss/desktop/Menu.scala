@@ -45,6 +45,50 @@ object Menu {
 
     def apply(key: String, attr: Attributes): Item = Impl.itemApply(key, attr)
 
+    /** Creates a special 'About' menu item. If the platform has a special
+      * place for this item, the returned object indicates this by being `!visible`.
+      * In that case the call site may omit adding the item to the regular menu structure.
+      * If the item is visible, i.e. the platform does not have special support for it,
+      * it should be added to the end of the last menu group labelled `"Help"`.
+      *
+      * The item's key will be `"about"`.
+      *
+      * @param app      the Swing application which is used to determine the item name.
+      * @param action   the action to execute when the menu item is selected
+      * @return         the menu item, possibly a dummy in which case its `visible` attribute is `false`
+      */
+    def About(app: SwingApplication)(action: => Unit): Item = Impl.aboutApply(app)(action)
+
+    /** Creates a special 'Preferences' menu item. If the platform has a special
+      * place for this item, the returned object indicates this by being `!visible`.
+      * In that case the call site may omit adding the item to the regular menu structure.
+      * If the item is visible, i.e. the platform does not have special support for it,
+      * it should be added to `"Edit"` menu on Linux or the `"Tools"` menu on Windows.
+      *
+      * The item's key will be `"preferences"`.
+      *
+      * @param app      the Swing application which is used to determine the item name.
+      * @param action   the action to execute when the menu item is selected
+      * @return         the menu item, possibly a dummy in which case its `visible` attribute is `false`
+      */
+    def Preferences(app: SwingApplication)(action: => Unit): Item = Impl.prefsApply(app)(action)
+
+    /** Creates a special 'Quit' menu item. If the platform has a special
+      * place for this item, the returned object indicates this by being `!visible`.
+      * In that case the call site may omit adding the item to the regular menu structure.
+      * If the item is visible, i.e. the platform does not have special support for it,
+      * it should be added to `"File"` menu.
+      *
+      * The item is automatically associated with an action which calls `Desktop.mayQuit()`, conditionally
+      * followed by `app.quit()`.
+      *
+      * The item's key will be `"quit"`.
+      *
+      * @param app      the Swing application which is used to determine the item name.
+      * @return         the menu item, possibly a dummy in which case its `visible` attribute is `false`
+      */
+    def Quit(app: SwingApplication): Item = Impl.quitApply(app)
+
     object Attributes {
       implicit final class TextOnly(val text: String) extends Attributes {
         def keyStroke   = None

@@ -18,8 +18,8 @@ import com.apple.eio.FileManager
 import de.sciss.desktop.{Desktop, Platform}
 import de.sciss.model.impl.ModelImpl
 import com.apple.eawt
-import com.apple.eawt.{QuitResponse, QuitHandler, OpenFilesHandler, AppHiddenListener, AppForegroundListener}
-import com.apple.eawt.AppEvent.{QuitEvent, OpenFilesEvent, AppHiddenEvent, AppForegroundEvent}
+import com.apple.eawt.{PreferencesHandler, AboutHandler, QuitResponse, QuitHandler, OpenFilesHandler, AppHiddenListener, AppForegroundListener}
+import com.apple.eawt.AppEvent.{PreferencesEvent, AboutEvent, QuitEvent, OpenFilesEvent, AppHiddenEvent, AppForegroundEvent}
 import scala.collection.JavaConverters
 import scala.swing.Image
 
@@ -63,10 +63,30 @@ object MacPlatform extends Platform with ModelImpl[Desktop.Update] {
     // }
   }
 
-  def setQuitHandler(test: => Boolean): Unit = app.setQuitHandler(new QuitHandler {
-    def handleQuitRequestWith(e: QuitEvent, response: QuitResponse): Unit =
-      if (test) response.performQuit() else response.cancelQuit()
-  })
+  def setQuitHandler(test: => Boolean): Boolean = {
+    // if (true) return false  // simulate non-support
+    app.setQuitHandler(new QuitHandler {
+      def handleQuitRequestWith(e: QuitEvent, response: QuitResponse): Unit =
+        if (test) response.performQuit() else response.cancelQuit()
+    })
+    true
+  }
+
+  def setAboutHandler(action: => Unit): Boolean = {
+    // if (true) return false  // simulate non-support
+    app.setAboutHandler(new AboutHandler {
+      def handleAbout(e: AboutEvent): Unit = action
+    })
+    true
+  }
+
+  def setPreferencesHandler(action: => Unit): Boolean = {
+    // if (true) return false  // simulate non-support
+    app.setPreferencesHandler(new PreferencesHandler {
+      def handlePreferences(e: PreferencesEvent): Unit = action
+    })
+    true
+  }
 
   override protected def startListening(): Unit = _init
 }
