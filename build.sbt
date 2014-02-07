@@ -2,8 +2,16 @@ lazy val baseName = "Desktop"
 
 def baseNameL = baseName.toLowerCase
 
+lazy val projectVersion      = "0.4.0"
+
+lazy val modelVersion        = "0.3.1+"
+
+lazy val swingPlusVersion    = "0.1.+"
+
+lazy val swingContribVersion = "1.5"
+
 lazy val commonSettings = Project.defaultSettings ++ Seq(
-  version         := "0.4.0-SNAPSHOT",
+  version         := projectVersion,
   organization    := "de.sciss",
   scalaVersion    := "2.10.3",
   homepage        := Some(url("https://github.com/Sciss/" + baseName)),
@@ -55,9 +63,9 @@ lazy val core = Project(
     description := "A library for document based desktop applications",
     libraryDependencies ++= Seq(
       "org.scala-lang"          %  "scala-swing"       % scalaVersion.value,
-      "de.sciss"                %% "model"             % "0.3.+",
-      "de.sciss"                %% "swingplus"         % "0.0.3+",
-      "com.github.benhutchison" %  "scalaswingcontrib" % "1.5"   // using popup menu
+      "de.sciss"                %% "model"             % modelVersion,
+      "de.sciss"                %% "swingplus"         % swingPlusVersion,
+      "com.github.benhutchison" %  "scalaswingcontrib" % swingContribVersion   // using popup menu
     ),
     // ---- build info ----
     sourceGenerators in Compile <+= buildInfo,
