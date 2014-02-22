@@ -49,8 +49,8 @@ abstract class SwingApplicationImpl(val name: String) extends ApplicationImpl wi
 //      title       = name
 //      front()
 //    }
-    windowHandler
     init()
+    windowHandler // makes sure that a main frame is created in interal-frame mode
   }
 
   /** Subclasses may override this to initialize the GUI on the event thread */

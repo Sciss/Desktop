@@ -18,7 +18,9 @@ import java.awt.Rectangle
 import javax.swing.{JInternalFrame, JDesktopPane}
 import scala.collection.immutable.{IndexedSeq => Vec}
 
-final class WindowHandlerImpl(val application: SwingApplication, val menuFactory: Menu.Root) extends WindowHandler {
+/* final */ class WindowHandlerImpl(val application: SwingApplication, val menuFactory: Menu.Root)
+  extends WindowHandler {
+
   impl =>
 
   private var _windows = Vec.empty[Window]
@@ -56,7 +58,7 @@ final class WindowHandlerImpl(val application: SwingApplication, val menuFactory
 
   def mainWindow: Window = MainWindowImpl
 
-  mainWindow.front()
+  if (usesInternalFrames || Desktop.isMac) mainWindow.front()
 
   private object MainWindowImpl extends WindowStub {
     import WindowImpl._

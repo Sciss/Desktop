@@ -53,7 +53,9 @@ object MacPlatform extends Platform with ModelImpl[Desktop.Update] {
       def openFiles(e: OpenFilesEvent): Unit = {
         // println(s"openFiles. EDT? ${java.awt.EventQueue.isDispatchThread}")
         import JavaConverters._
-        val sq = e.getFiles.asScala.toList
+        // the `asInstanceOf` is necessary because while the Apple library uses generic Java,
+        // OrangeExtensions don't, so they return a `java.util.List<?>`
+        val sq = e.getFiles.asScala.toList .asInstanceOf[List[File]]
         dispatch(Desktop.OpenFiles(Option(e.getSearchTerm), sq))
       }
     })
