@@ -17,7 +17,7 @@ import swing.{Action, Component}
 import javax.swing.KeyStroke
 
 import impl.{MenuImpl => Impl}
-import scalaswingcontrib.PopupMenu
+import de.sciss.swingplus.PopupMenu
 
 object Menu {
   sealed trait Element {

@@ -1,9 +1,9 @@
 package de.sciss.desktop
 
-import swing.{Frame, Button, Dialog, Alignment, TextField, Label, Swing}
-import scalaswingcontrib.group.GroupPanel
+import scala.swing._
 import javax.swing.WindowConstants
 import language.reflectiveCalls
+import scala.Some
 
 object DialogFocusTest extends App {
   Swing.onEDT {
@@ -27,13 +27,18 @@ object DialogFocusTest extends App {
     lbKey.horizontalAlignment = Alignment.Trailing
     lbVal.horizontalAlignment = Alignment.Trailing
 
-    val box = new GroupPanel {
-      theHorizontalLayout is Sequential(
-        Parallel(lbKey, lbVal), Parallel(ggKey, ggVal)
-      )
-      theVerticalLayout is Sequential(
-        Parallel(Baseline)(lbKey, ggKey), Parallel(Baseline)(lbVal, ggVal)
-      )
+    val box = new GridBagPanel {
+      val cons = new Constraints()
+      import cons.{gridx, gridy}
+      gridx = 0; gridy = 0
+      layout(lbKey) = cons
+      gridx += 1
+      layout(ggKey) = cons
+      gridx = 0
+      gridy += 1
+      layout(lbVal) = cons
+      gridx += 1
+      layout(ggVal) = cons
     }
 
     val pane  = OptionPane.confirmation(message = box, messageType = Dialog.Message.Question,

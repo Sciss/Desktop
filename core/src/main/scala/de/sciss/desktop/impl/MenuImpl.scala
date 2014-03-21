@@ -16,7 +16,7 @@ package impl
 
 import javax.swing.KeyStroke
 import swing.Action
-import scalaswingcontrib.PopupMenu
+import de.sciss.swingplus.PopupMenu
 
 private[desktop] object MenuImpl {
   i =>

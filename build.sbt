@@ -2,18 +2,19 @@ lazy val baseName = "Desktop"
 
 def baseNameL = baseName.toLowerCase
 
-lazy val projectVersion      = "0.4.2"
+lazy val projectVersion      = "0.5.0-SNAPSHOT"
 
-lazy val modelVersion        = "0.3.1+"
+lazy val modelVersion        = "0.3.2+"
 
-lazy val swingPlusVersion    = "0.1.+"
+lazy val swingPlusVersion    = "0.1.1+"
 
-lazy val swingContribVersion = "1.5"
+// lazy val swingContribVersion = "1.5"
 
 lazy val commonSettings = Project.defaultSettings ++ Seq(
   version         := projectVersion,
   organization    := "de.sciss",
-  scalaVersion    := "2.10.3",
+  scalaVersion    := "2.11.0-RC3",
+  crossScalaVersions := Seq("2.11.0-RC3", "2.10.4"),
   homepage        := Some(url("https://github.com/Sciss/" + baseName)),
   licenses        := Seq("LGPL v3+" -> url("http://www.gnu.org/licenses/lgpl-3.0.txt")),
   initialCommands in console := """import de.sciss.desktop._""",
@@ -61,11 +62,17 @@ lazy val core = Project(
   settings      = commonSettings ++ buildInfoSettings ++ Seq(
     name        := s"$baseName",
     description := "A library for document based desktop applications",
+    libraryDependencies += {
+      val sv = scalaVersion.value
+      if (sv startsWith "2.10")
+        "org.scala-lang" % "scala-swing" % sv
+      else
+        "org.scala-lang.modules" %% "scala-swing" % "1.0.1"
+    },
     libraryDependencies ++= Seq(
-      "org.scala-lang"          %  "scala-swing"       % scalaVersion.value,
       "de.sciss"                %% "model"             % modelVersion,
-      "de.sciss"                %% "swingplus"         % swingPlusVersion,
-      "com.github.benhutchison" %  "scalaswingcontrib" % swingContribVersion   // using popup menu
+      "de.sciss"                %% "swingplus"         % swingPlusVersion
+      // "com.github.benhutchison" %  "scalaswingcontrib" % swingContribVersion   // using popup menu
     ),
     // ---- build info ----
     sourceGenerators in Compile <+= buildInfo,
