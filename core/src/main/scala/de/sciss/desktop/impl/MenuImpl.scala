@@ -22,7 +22,7 @@ private[desktop] object MenuImpl {
   i =>
 
   // ---- constructors ----
-  import Menu.Item.Attributes
+  import Menu.Attributes
 
   def itemApply(key: String, action: Action): Menu.Item = new Item(key, action)
   def itemApply(key: String)(attr: Attributes)(action: => Unit): Menu.Item =
@@ -32,6 +32,16 @@ private[desktop] object MenuImpl {
     val a     = i.noAction(attr.text, attr.keyStroke)
     a.enabled = false
     new Item(key, a)
+  }
+
+  def checkBoxApply(key: String, action: Action): Menu.CheckBox = new CheckBox(key, action)
+  def checkBoxApply(key: String)(attr: Attributes)(action: => Unit): Menu.CheckBox =
+    new CheckBox(key, i.action(attr.text, attr.keyStroke)(action))
+
+  def checkBoxApply(key: String, attr: Attributes): Menu.CheckBox = {
+    val a     = i.noAction(attr.text, attr.keyStroke)
+    a.enabled = false
+    new CheckBox(key, a)
   }
 
   def groupApply(key: String, action: Action): Menu.Group = new Group(key, action)
@@ -86,6 +96,9 @@ private[desktop] object MenuImpl {
     override def toString = s"proxy($title)"
     def apply() = ()
   }
+
+  //  private[this] var _checkBoxSelected = false
+  //  def checkBoxSelected: Boolean = _checkBoxSelected
 
   // ---- node ----
 
@@ -159,11 +172,35 @@ private[desktop] object MenuImpl {
     }
   }
 
+  // private sealed trait LeafItemLike[C <: swing.MenuItem] extends ItemLike[C]
+
   private final class Item(val key: String, val action: Action) extends ItemLike[swing.MenuItem] with Menu.Item {
     protected def prefix = "Item"
 
     def create(w: Window): swing.MenuItem = {
       val c = new swing.MenuItem(actionFor(w))
+      if (!visible) c.visible = false
+      addRealized(w, c)
+      c
+    }
+
+    def destroy(w: Window): Unit = {
+      removeRealized(w)
+      removeAction(w)
+    }
+  }
+
+  private final class CheckBox(val key: String, val action: Action)
+    extends ItemLike[swing.CheckMenuItem] with Menu.CheckBox {
+
+    protected def prefix = "CheckBox"
+
+    def apply(window: Window): swing.CheckMenuItem =
+      getRealized(window).getOrElse(throw new IllegalArgumentException(s"Window $window not realized"))
+
+    def create(w: Window): swing.CheckMenuItem = {
+      val c = new swing.CheckMenuItem("")
+      c.action = actionFor(w)
       if (!visible) c.visible = false
       addRealized(w, c)
       c

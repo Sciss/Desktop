@@ -14,7 +14,7 @@
 package de.sciss.desktop
 
 import javax.{swing => j}
-import scala.swing.{UIElement, Swing, Component, Dialog}
+import scala.swing._
 import javax.swing.{JOptionPane, Icon}
 import scala.swing.Swing.EmptyIcon
 import collection.breakOut
@@ -31,7 +31,7 @@ object OptionPane {
     new Impl[Unit] {
       protected lazy val _messageType = messageType
       lazy val peer = new JOption(message, messageType, Options.Default, icon, Nil, None, focus)
-      def result {}
+      def result = ()
     }
 
   def confirmation(message: Any, optionType: Options.Value = Options.YesNo,

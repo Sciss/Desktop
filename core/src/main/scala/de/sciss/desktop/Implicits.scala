@@ -66,6 +66,19 @@ object Implicits {
     //    }
   }
 
+  implicit final class DesktopActionFactory(val `this`: Action.type) extends AnyVal {
+    def wrap(peer: j.Action): Action = {
+      val j = peer
+      new Action(null) {
+        outer =>
+        override lazy val peer: javax.swing.Action = j
+
+        def apply(): Unit = peer.actionPerformed(
+          new java.awt.event.ActionEvent(outer, java.awt.event.ActionEvent.ACTION_PERFORMED, ""))
+      }
+    }
+  }
+
   //  implicit final class DesktopFile(val file: File) extends AnyVal {
   //    def / ()
   //  }

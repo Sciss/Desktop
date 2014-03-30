@@ -38,6 +38,11 @@ object Menu {
     def destroy(window: Window) = ()
   }
 
+  sealed trait ItemLike[+C <: swing.MenuItem] extends Node[C] {
+    def action: Action
+    var visible: Boolean
+    def bind(window: Window, action: Action): Unit
+  }
   object Item {
     def apply(key: String, action: Action): Item = Impl.itemApply(key, action)
     def apply(key: String)(attr: Attributes)(action: => Unit): Item =
@@ -88,27 +93,40 @@ object Menu {
       * @return         the menu item, possibly a dummy in which case its `visible` attribute is `false`
       */
     def Quit(app: SwingApplication): Item = Impl.quitApply(app)
-
-    object Attributes {
-      implicit final class TextOnly(val text: String) extends Attributes {
-        def keyStroke   = None
-      }
-      implicit final class TextAndKeyStroke(tup: (String, KeyStroke)) extends Attributes {
-        def text        = tup._1
-        def keyStroke   = Some(tup._2)
-      }
-    }
-    sealed trait Attributes {
-      def text: String
-      def keyStroke: Option[KeyStroke]
-    }
-  }
-  sealed trait ItemLike[+C <: swing.MenuItem] extends Node[C] {
-    def action: Action
-    var visible: Boolean
-    def bind(window: Window, action: Action): Unit
   }
   trait Item extends Node[swing.MenuItem] with ItemLike[swing.MenuItem]
+
+  object CheckBox {
+    def apply(key: String, action: Action): CheckBox = Impl.checkBoxApply(key, action)
+
+    def apply(key: String)(attr: Attributes)(action: => Unit): CheckBox =
+      Impl.checkBoxApply(key)(attr)(action)
+
+    def apply(key: String, attr: Attributes): CheckBox = Impl.checkBoxApply(key, attr)
+
+    //    /** A utility method which allows actions to read the state of the check box associated
+    //      * with them. The value returned by this method is only valid inside the action's
+    //      * `apply` body.
+    //      */
+    //    def selected: Boolean = Impl.checkBoxSelected
+  }
+  trait CheckBox extends Node[swing.CheckMenuItem] with ItemLike[swing.CheckMenuItem] {
+    def apply(window: Window): swing.CheckMenuItem
+  }
+
+  object Attributes {
+    implicit final class TextOnly(val text: String) extends Attributes {
+      def keyStroke   = None
+    }
+    implicit final class TextAndKeyStroke(tup: (String, KeyStroke)) extends Attributes {
+      def text        = tup._1
+      def keyStroke   = Some(tup._2)
+    }
+  }
+  sealed trait Attributes {
+    def text: String
+    def keyStroke: Option[KeyStroke]
+  }
 
   object Group {
     def apply(key: String, action: Action): Group = Impl.groupApply(key, action)
@@ -135,7 +153,7 @@ object Menu {
   }
   trait Popup extends GroupLike[PopupMenu]
 
-  def proxy(attr: Item.Attributes): Action = {
+  def proxy(attr: Attributes): Action = {
     val a = Impl.noAction(attr.text, attr.keyStroke)
     a.enabled = false
     a

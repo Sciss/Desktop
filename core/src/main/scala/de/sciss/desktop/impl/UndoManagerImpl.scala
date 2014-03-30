@@ -208,12 +208,10 @@ trait UndoManagerImpl extends UndoManager {
 	}
 
 	object redoAction extends Action("Redo") {
-    val isMac = sys.props("os.name").contains("Mac OS")
-
-    accelerator = Some(if (isMac)
-      KeyStroke.getKeyStroke(KeyEvent.VK_Z, Window.menuShortcut | InputEvent.SHIFT_MASK)
-    else
+    accelerator = Some(if (Desktop.isWindows)
       KeyStroke.getKeyStroke(KeyEvent.VK_Y, Window.menuShortcut)
+    else  // Mac and Linux both use shift-Z
+      KeyStroke.getKeyStroke(KeyEvent.VK_Z, Window.menuShortcut | InputEvent.SHIFT_MASK)
     )
 
 		def apply(): Unit =

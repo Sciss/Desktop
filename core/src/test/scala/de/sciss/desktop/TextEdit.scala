@@ -1,17 +1,22 @@
 package de.sciss.desktop
 
-import impl.{WindowImpl, SwingApplicationImpl}
+import de.sciss.desktop.impl.{WindowHandlerImpl, WindowImpl, SwingApplicationImpl}
 import swing.{Action, Swing}
 import Swing._
 import java.awt
 import awt.event.KeyEvent
 import java.io.File
 import javax.swing.text.PlainDocument
+import java.awt.Color
 
 object TextEdit extends SwingApplicationImpl("TextEdit") {
   override def quit(): Unit = {
     println("Bye bye...")
     sys.exit()
+  }
+
+  override lazy val windowHandler: WindowHandler = new WindowHandlerImpl(this, menuFactory) {
+    override def usesInternalFrames: Boolean = true
   }
 
   private var docs = Map.empty[Document, DocumentWindow]
@@ -33,24 +38,32 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
     recent.add(file)  // put it to the front
   }
 
+  protected lazy val miDarkBackground = {
+    import Menu._
+    CheckBox("darkBg", proxy("Dark Background"))
+  }
+
   protected lazy val menuFactory = {
     import Menu._
     import KeyStrokes._
-    import KeyEvent._
+    import scala.swing.event.Key
 
     Root()
       .add(Group("file", "File")
-        .add(Item("new")("New" -> (menu1 + VK_N))(newDocument()))
-        .add(Item("open")("Open..." -> (menu1 + VK_O)) {
+        .add(Item("new")("New" -> (menu1 + Key.N))(newDocument()))
+        .add(Item("open")("Open..." -> (menu1 + Key.O)) {
           val dlg = FileDialog.open()
           dlg.show(None)
           dlg.file.foreach(openDocument)
         })
         .add(recent.menu)
         .addLine()
-        .add(Item("close",  proxy("Close"      -> (menu1 + VK_W))))
-        .add(Item("save",   proxy("Save"       -> (menu1 + VK_S))))
-        .add(Item("saveAs", proxy("Save As..." -> (menu1 + shift + VK_S))))
+        .add(Item("close",  proxy("Close"      -> (menu1 + Key.W))))
+        .add(Item("save",   proxy("Save"       -> (menu1 + Key.S))))
+        .add(Item("saveAs", proxy("Save As..." -> (menu1 + shift + Key.S))))
+      )
+      .add(Group("view", "View")
+        .add(miDarkBackground)
       )
   }
 
@@ -67,10 +80,13 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
   }
 
   private class DocumentWindow(document: Document) extends WindowImpl {
+    win =>
+
     def handler = TextEdit.windowHandler
     title = document.name
     size  = (400, 200)
     file  = document.file
+    component.background = Color.white
 
     bindMenus(
       "file.close" -> Action("Close") {
@@ -81,6 +97,12 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
       },
       "file.saveAs" -> Action("Save As") {
         println("Save As")
+      },
+      "view.darkBg" -> new Action(null) {
+        def apply(): Unit = {
+          // println(s"Selected: ${Menu.CheckBox.selected}")
+          win.component.background = if (miDarkBackground(win).selected) Color.black else Color.white
+        }
       }
     )
 

@@ -25,6 +25,8 @@ import scala.collection.immutable.{IndexedSeq => Vec}
 
   private var _windows = Vec.empty[Window]
 
+  javax.swing.JFrame.setDefaultLookAndFeelDecorated(!usesNativeDecoration)
+
   def showDialog[A](window: Option[Window], source: DialogSource[A]): A = {
  		// temporarily disable alwaysOnTop
  		val wasOnTop = if (!usesInternalFrames && usesFloatingPalettes) windows.filter { w =>
@@ -52,9 +54,10 @@ import scala.collection.immutable.{IndexedSeq => Vec}
 
   def windows: Iterator[Window] = _windows.iterator
 
-  def usesInternalFrames  : Boolean = !Desktop.isMac
+  def usesInternalFrames  : Boolean = false // !Desktop.isMac
   def usesScreenMenuBar   : Boolean =  Desktop.isMac
   def usesFloatingPalettes: Boolean = true
+  def usesNativeDecoration: Boolean = true
 
   def mainWindow: Window = MainWindowImpl
 
