@@ -2,17 +2,17 @@ lazy val baseName = "Desktop"
 
 def baseNameL = baseName.toLowerCase
 
-lazy val projectVersion      = "0.5.0"
+lazy val projectVersion      = "0.5.1"
 
-lazy val modelVersion        = "0.3.1+"
+lazy val modelVersion        = "0.3.2"
 
-lazy val swingPlusVersion    = "0.1.1+"
+lazy val swingPlusVersion    = "0.1.1"
 
 lazy val commonSettings = Project.defaultSettings ++ Seq(
   version         := projectVersion,
   organization    := "de.sciss",
-  scalaVersion    := "2.10.4",
-  crossScalaVersions := Seq("2.11.0-RC3", "2.10.4"),
+  scalaVersion    := "2.11.0",
+  crossScalaVersions := Seq("2.11.0", "2.10.4"),
   homepage        := Some(url("https://github.com/Sciss/" + baseName)),
   licenses        := Seq("LGPL v3+" -> url("http://www.gnu.org/licenses/lgpl-3.0.txt")),
   initialCommands in console := """import de.sciss.desktop._""",
