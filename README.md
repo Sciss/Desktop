@@ -14,10 +14,10 @@ Furthermore, if you want to support the Mac (OS X) platform, also add the follow
 
     "de.sciss" %% "desktop-mac" % v
 
-The current version `v` is `"0.4.1+"`.
+The current version `v` is `"0.5.1+"`.
 
 ## building
 
-Desktop currently builds against Scala 2.10, using sbt 0.13. To build sub project `"desktop-mac"`, you need either OS X, or otherwise copy the [OrangeExtensions](http://ymasory.github.io/OrangeExtensions/) jar into the unmanaged library folder `lib` (a convenient script `installOrange.sh` is included).
+Desktop currently builds against Scala 2.11, 2.10, using sbt 0.13. To build sub project `"desktop-mac"`, you need either OS X, or otherwise copy the [OrangeExtensions](http://ymasory.github.io/OrangeExtensions/) jar into the unmanaged library folder `lib` (a convenient script `installOrange.sh` is included).
 
 Some demos are available through `sbt desktop/test:run`. For Mac specific demos, `sbt desktop-mac/test:run`.
