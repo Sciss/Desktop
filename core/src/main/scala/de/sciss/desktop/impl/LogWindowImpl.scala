@@ -15,9 +15,8 @@ package de.sciss.desktop
 package impl
 
 import scala.swing.{ScrollPane, Swing}
-import java.io.OutputStream
+import java.io.{PrintStream, OutputStream}
 import javax.swing.BorderFactory
-import scala.swing.event.WindowClosing
 import de.sciss.desktop
 
 abstract class LogWindowImpl extends WindowImpl {
@@ -27,11 +26,21 @@ abstract class LogWindowImpl extends WindowImpl {
 
   val log: LogPane = LogPane(rows = 24)
 
-  private val observer: OutputStream = new OutputStream {
+  @volatile private var becomeVisible = true
+
+  private val observerOut: OutputStream = new OutputStream {
+    override def toString = "observerOut"
+
     override def write(b: Array[Byte], off: Int, len: Int): Unit = {
-      log.makeDefault()               // detaches this observer
+      // incWriteCnt()
+      // log.makeDefault()                     // detaches this observer
       log.outputStream.write(b, off, len)
-      Swing.onEDT(frame.front())      // there we go
+      if (becomeVisible) {
+        becomeVisible = false
+        Swing.onEDT {
+          frame.visible = true
+        }
+      }
     }
 
     def write(b: Int): Unit = {
@@ -41,17 +50,32 @@ abstract class LogWindowImpl extends WindowImpl {
     }
   }
 
-  def observe(): Unit = {
-    Console.setOut(observer)
-    Console.setErr(observer)
-  }
+  private val observerPrint: PrintStream = new PrintStream(observerOut, true)
+  //  {
+  //    override def toString = "observerPrint"
+  //  }
 
-  observe()
+  //  private var obsCnt    = 0
+  //  private var writeCnt  = 0
+  //
+  //  private def updateTitle() = title = s"obs = $obsCnt, write = $writeCnt"
+  //
+  //  private def incObsCnt  () = { obsCnt   += 1; updateTitle() }
+  //  private def incWriteCnt() = { writeCnt += 1; updateTitle() }
+
+  // def observe(): Unit = {
+    // incObsCnt()
+    System.setOut(observerPrint)
+    System.setErr(observerPrint)
+  // }
+
+  // observe()
   closeOperation = desktop.Window.CloseIgnore
   reactions += {
-    case WindowClosing(_) =>
+    case Window.Closing(_) =>
       frame.visible = false
-      observe()
+      // observe()
+      becomeVisible = true
   }
 
   contents = new ScrollPane {

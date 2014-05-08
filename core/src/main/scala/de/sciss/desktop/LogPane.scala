@@ -46,7 +46,7 @@ trait LogPane {
   def clear(): Unit
 
   /** Makes this log pane the default text output for
-    * `Console.out` and optionally for `Console.err` as well.
+    * `System.out` and optionally for `System.err` as well.
     *
     * @return  the method returns the log pane itself for convenience and method concatenation
     */

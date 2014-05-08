@@ -26,7 +26,7 @@ import java.awt.event.ActionEvent
 class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
   pane =>
 
-  override def toString = "LogPane@" + hashCode.toHexString
+  override def toString = s"LogPane@${hashCode.toHexString}"
 
   private val textPane: TextArea = new TextArea(rows0, cols0) {
     me =>
@@ -69,7 +69,7 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
 
   // ---- Writer ----
   val writer: Writer = new Writer {
-    override def toString = pane.toString + ".writer"
+    override def toString = s"$pane.writer"
 
     def close() = ()
 
@@ -83,7 +83,7 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
 
   // ---- OutputStream ----
   val outputStream: OutputStream = new OutputStream {
-    override def toString = pane.toString + ".outputStream"
+    override def toString = s"$pane.outputStream"
 
     override def write(b: Array[Byte], off: Int, len: Int): Unit = {
       val str = new String(b, off, len)
@@ -93,7 +93,10 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
     def write(b: Int): Unit = write(Array(b.toByte), 0, 1)
   }
 
-  private val printStream = new PrintStream(outputStream, true)
+  private val printStream: PrintStream = new PrintStream(outputStream, true)
+  //  {
+  //    override def toString = s"$pane.printStream"
+  //  }
 
   val component: ScrollPane = new ScrollPane(textPane) {
     verticalScrollBarPolicy   = BarPolicy.Always
@@ -111,9 +114,7 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
   def clear(): Unit = textPane.text = null
 
   def makeDefault(error: Boolean): this.type = {
-    // Console.setOut(outputStream)
     System.setOut(printStream)
-    // if (error) Console.setErr(outputStream)
     if (error) System.setErr(printStream)
     this
   }

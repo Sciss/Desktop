@@ -2,7 +2,7 @@ lazy val baseName = "Desktop"
 
 def baseNameL = baseName.toLowerCase
 
-lazy val projectVersion      = "0.5.2"
+lazy val projectVersion      = "0.5.3"
 
 lazy val modelVersion        = "0.3.2"
 
@@ -16,8 +16,8 @@ lazy val commonSettings = Project.defaultSettings ++ Seq(
   homepage        := Some(url("https://github.com/Sciss/" + baseName)),
   licenses        := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
   initialCommands in console := """import de.sciss.desktop._""",
-  retrieveManaged := true,
-  scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
+  // retrieveManaged := true,
+  scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-Xfuture"),
   // ---- publishing ----
   publishMavenStyle := true,
   publishTo := {
@@ -45,10 +45,11 @@ lazy val commonSettings = Project.defaultSettings ++ Seq(
 )
 
 lazy val root = Project(
-  id        = "root",
-  base      = file("."),
-  aggregate = Seq(core, mac),
-  settings  = Project.defaultSettings ++ Seq(
+  id            = "root",
+  base          = file("."),
+  aggregate     = Seq(core, mac),
+  dependencies  = Seq(core, mac),
+  settings      = commonSettings ++ Seq(
     packagedArtifacts := Map.empty           // prevent publishing anything!
   )
 )
