@@ -15,6 +15,7 @@ package de.sciss.desktop
 
 import java.io.{FilenameFilter, File}
 import java.awt
+import javax.swing.UIManager
 import scala.swing.FileChooser
 import javax.swing.filechooser.FileFilter
 
@@ -57,7 +58,11 @@ object FileDialog {
 
     private var _owner: awt.Frame = null
     private var peerInit = false
-    private lazy val peerIsAwt: Boolean = Desktop.isMac || mode != Folder // for folder, use JFileChooser on Windows + Linux
+
+    // JFileChooser is used for WebLaF. Otherwise, AWT is used except where not possible
+    // (Folder on Windows and Linux)
+    private lazy val peerIsAwt: Boolean = (UIManager.getLookAndFeel.getName != "WebLookAndFeel") &&
+      (Desktop.isMac || mode != Folder)
 
     lazy val peer: awt.FileDialog = {
       peerInit = true
@@ -73,7 +78,9 @@ object FileDialog {
       res.peer.setDialogType(awtMode)
       res.title = _title
       if (_filter.isDefined) res.fileFilter = fileFilter
-      res.selectedFile = _file.orNull
+      // Note: WebLaF doesn't handle `null` values!
+      _file.foreach(res.selectedFile = _)
+      // res.selectedFile = _file.orNull
       res.fileSelectionMode = if (_mode == Folder) DirectoriesOnly else FilesOnly
       res
     }
@@ -163,10 +170,15 @@ object FileDialog {
       if (_file != value) {
         _file = value
         if (peerInit) {
-          if (peerIsAwt)
+          if (peerIsAwt) {
             setAwtFile(peer)
-          else
-            peerX.selectedFile = value.orNull
+          } else {
+            try {
+              peerX.selectedFile = value.orNull
+            } catch {
+              case _: NullPointerException =>  // WebLaF has a bug currently, other LaFs support this idiom
+            }
+          }
         }
       }
 
@@ -208,10 +220,18 @@ object FileDialog {
     }
   }
 }
+
+/** A dialog for selecting a file or folder.
+  * This tries to automatically select `java.awt.FileDialog` or `javax.swing.JFileChooser`
+  * depending on the context. With many look-and-feels, the native (AWT) dialog provides a
+  * better experience, for example on OS X. On the other hand, folder selection is not
+  * officially supported by AWT, with OS X providing a tricky work-around.
+  *
+  * The new behaviour selected `JFileChooser` always, when the Web Look-and-Feel is
+  * installed, as its component UI is quite sophisticated.
+  */
 sealed trait FileDialog extends DialogSource[Option[File]] {
-  /** WARNING: this method is deprecated, as it might return an invalid
-    * dialog on Windows and Linux when using `Folder` mode.
-    */
+  @deprecated("This might return an invalid dialog on Windows and Linux when using `Folder` mode.", "0.5.4")
   def peer: awt.FileDialog
 
   var mode  : FileDialog.Mode
