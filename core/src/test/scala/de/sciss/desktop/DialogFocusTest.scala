@@ -1,5 +1,7 @@
 package de.sciss.desktop
 
+import com.alee.laf.WebLookAndFeel
+
 import scala.swing._
 import javax.swing.WindowConstants
 import language.reflectiveCalls
@@ -7,6 +9,8 @@ import scala.Some
 
 object DialogFocusTest extends App {
   Swing.onEDT {
+    WebLookAndFeel.install()
+
     lazy val button: Button = Button("Test") { val res = scalaTest(); button.text = res.toString }
     new Frame {
       title = "Dialog Test"

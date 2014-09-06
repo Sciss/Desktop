@@ -1,3 +1,16 @@
+/*
+ *  DynamicComponentImpl.scala
+ *  (Desktop)
+ *
+ *  Copyright (c) 2013-2014 Hanns Holger Rutz. All rights reserved.
+ *
+ *	This software is published under the GNU Lesser General Public License v2.1+
+ *
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ */
+
 package de.sciss.desktop
 package impl
 
@@ -7,18 +20,19 @@ import java.awt
 import scala.swing.Component
 
 trait DynamicComponentImpl {
+  _: Component =>
+
   private var listening   = false
   private var win         = Option.empty[awt.Window]
 
-  protected def component: Component
   protected def componentShown (): Unit
   protected def componentHidden(): Unit
 
-  final protected def isListening = listening
+  final def isListening = listening
 
   // ---- constructor ----
-  component.peer.addAncestorListener(listener)
-  learnWindow(Option(component.peer.getTopLevelAncestor))
+  peer.addAncestorListener(listener)
+  learnWindow(Option(peer.getTopLevelAncestor))
 
   private def startListening(): Unit =
     if (!listening) {

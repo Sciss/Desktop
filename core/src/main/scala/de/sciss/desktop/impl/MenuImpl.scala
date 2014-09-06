@@ -15,6 +15,7 @@ package de.sciss.desktop
 package impl
 
 import javax.swing.KeyStroke
+import scala.swing.event.Key
 import swing.Action
 import de.sciss.swingplus.PopupMenu
 
@@ -66,16 +67,26 @@ private[desktop] object MenuImpl {
     val supported = Desktop.platform.setPreferencesHandler(action)
     // XXX TODO: localization? shortcuts?
     // cf. http://kb.mozillazine.org/Menu_differences_in_Windows,_Linux,_and_Mac
-    val text      = if (Desktop.isLinux) "Preferences" else if (Desktop.isMac) "Preferences..." else "Options..."
-    val item      = Menu.Item("preferences")(text)(action)
+    val attr: Attributes = if (Desktop.isLinux)
+      "Preferences" -> (KeyStrokes.menu1 + Key.Comma)   // this is not standard, but useful
+    else if (Desktop.isMac)
+      "Preferences..." -> (KeyStrokes.menu1 + Key.Comma)
+    else
+      "Options..."  // XXX TODO - is there a default shortcut?
+
+    val item      = Menu.Item("preferences")(attr)(action)
     item.visible  = !supported
     item
   }
 
   def quitApply(app: SwingApplication): Menu.Item = {
     val supported = Desktop.isQuitSupported
-    val text      = if (Desktop.isWindows) "Exit" else "Quit" // XXX TODO: localization? shortcuts?
-    val item      = Menu.Item("quit")(text) {
+    val attr: Attributes = if (Desktop.isWindows)
+      "Exit" -> (KeyStrokes.menu1 + Key.Q)  // isn't it (KeyStrokes.alt + Key.F4)? Most programs seem to use Ctrl-Q
+    else
+      "Quit" -> (KeyStrokes.menu1 + Key.Q) // XXX TODO: localization?
+
+    val item      = Menu.Item("quit")(attr) {
       if (Desktop.mayQuit()) app.quit()
     }
     item.visible  = !supported

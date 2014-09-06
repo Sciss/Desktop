@@ -19,12 +19,12 @@ import javax.swing.undo.{UndoableEdit, CannotRedoException, CannotUndoException,
 import swing.Action
 import javax.swing.KeyStroke
 import java.awt.event.{InputEvent, KeyEvent}
-import de.sciss.desktop.Window
 
-trait UndoManagerImpl extends UndoManager {
+class UndoManagerImpl extends UndoManager {
   manager =>
 
-  protected var dirty: Boolean
+  /** Subclasses may override this. */
+  protected var dirty: Boolean = false
 
 	/*
 	 *	The concept of pendingEdits is that

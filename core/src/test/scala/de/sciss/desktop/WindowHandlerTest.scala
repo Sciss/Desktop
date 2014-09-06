@@ -1,5 +1,6 @@
 package de.sciss.desktop
 
+import com.alee.laf.WebLookAndFeel
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowImpl, WindowHandlerImpl}
 import de.sciss.desktop.Menu._
 import de.sciss.desktop.KeyStrokes._
@@ -25,11 +26,16 @@ object WindowHandlerTest extends SwingApplicationImpl("Window Handler Test") {
     }
   }))
 
-  override def init(): Unit = new WindowImpl {
-    def handler = windowHandler
-    title = "Main Window"
-    size = (300, 300)
-    closeOperation = Window.CloseExit
-    front()
+  override def init(): Unit = {
+    WebLookAndFeel.install()
+
+    new WindowImpl {
+      def handler = windowHandler
+
+      title = "Main Window"
+      size = (300, 300)
+      closeOperation = Window.CloseExit
+      front()
+    }
   }
 }

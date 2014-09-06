@@ -14,14 +14,13 @@
 package de.sciss.desktop
 package impl
 
-import scala.swing._
+import de.sciss.swingplus.PopupMenu
+
+import scala.swing.{Point, Color, Font, Action, MenuItem, ScrollPane, TextArea}
 import scala.util.control.NonFatal
 import java.io.{PrintStream, OutputStream, Writer}
-import scala.swing.event.MousePressed
-import scala.swing.event.MouseReleased
+import scala.swing.event.{Key, MousePressed, MouseReleased}
 import scala.swing.ScrollPane.BarPolicy
-import javax.swing.{AbstractAction, JPopupMenu}
-import java.awt.event.ActionEvent
 
 class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
   pane =>
@@ -45,7 +44,7 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
       case MouseReleased(_, p, _, _, true) => showPopup(p)
     }
 
-    private def showPopup(p: Point): Unit = popup.show(me.peer, p.x, p.y)
+    private def showPopup(p: Point): Unit = popup.show(me, p.x, p.y)
 
     override def append(str: String): Unit = {
       super.append(str)
@@ -103,12 +102,26 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
     horizontalScrollBarPolicy = BarPolicy.Never
   }
 
-  private val popup = {
-    val p = new JPopupMenu()
-    p.add(new AbstractAction("Clear All") {
-      override def actionPerformed(e: ActionEvent): Unit = clear()
+  private val popup: PopupMenu = {
+    val res       = new PopupMenu
+    // val map       = textPane.peer.getKeymap
+    //    val copy      = textPane.peer.getActionMap.get(DefaultEditorKit.copyAction)
+    //    val selectAll = textPane.peer.getActionMap.get(DefaultEditorKit.selectAllAction)
+
+    res.contents += new MenuItem(new Action("Copy") {
+      def apply(): Unit = textPane.copy()
+      accelerator = Some(KeyStrokes.menu1 + Key.C)
     })
-    p
+    res.contents += new MenuItem(new Action("Select All") {
+      def apply(): Unit = textPane.selectAll()
+      // accelerator = Option(selectAll).flatMap(map.getKeyStrokesForAction(_).headOption)
+      accelerator = Some(KeyStrokes.menu1 + Key.A)
+    })
+    res.contents += new MenuItem(new Action("Clear All") {
+      def apply(): Unit = clear()
+      // accelerator = Some(KeyStrokes.menu1 + KeyStrokes.shift + Key.P)
+    })
+    res
   }
 
   def clear(): Unit = textPane.text = null

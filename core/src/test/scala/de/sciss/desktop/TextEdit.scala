@@ -1,5 +1,6 @@
 package de.sciss.desktop
 
+import com.alee.laf.WebLookAndFeel
 import de.sciss.desktop.impl.{WindowHandlerImpl, WindowImpl, SwingApplicationImpl}
 import swing.{Action, Swing}
 import Swing._
@@ -10,6 +11,8 @@ import javax.swing.text.PlainDocument
 import java.awt.Color
 
 object TextEdit extends SwingApplicationImpl("TextEdit") {
+  override protected def init(): Unit = WebLookAndFeel.install()
+
   override def quit(): Unit = {
     println("Bye bye...")
     sys.exit()
