@@ -2,7 +2,7 @@
  *  RecentFiles.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2014 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2015 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,9 +13,10 @@
 
 package de.sciss.desktop
 
-import java.io.File
-import javax.swing.KeyStroke
 import java.awt.event.{InputEvent, KeyEvent}
+import javax.swing.KeyStroke
+
+import de.sciss.file.File
 
 object RecentFiles {
   private lazy val _defaultKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_O, Window.menuShortcut + InputEvent.ALT_MASK)

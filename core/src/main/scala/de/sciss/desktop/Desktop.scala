@@ -2,7 +2,7 @@
  *  Desktop.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2014 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2015 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,13 +13,15 @@
 
 package de.sciss.desktop
 
-import java.io.File
-import scala.util.Try
-import de.sciss.model.Model
-import scala.swing.Image
 import java.awt
 import java.net.URI
+
+import de.sciss.file.File
+import de.sciss.model.Model
+
 import scala.collection.immutable.{IndexedSeq => Vec}
+import scala.swing.Image
+import scala.util.Try
 
 object Desktop {
   private val osName: String = sys.props("os.name")
@@ -35,7 +37,8 @@ object Desktop {
 
   private[desktop] lazy val platform: Platform = {
     val res = Try {
-      if (isMac) getModule[Platform]("de.sciss.desktop.impl.MacPlatform")
+      if (isLinux)    getModule[Platform]("de.sciss.desktop.impl.LinuxPlatform")
+      else if (isMac) getModule[Platform]("de.sciss.desktop.impl.MacPlatform")
       // else if (isLinux) ...
       // else if (isWindows) ...
       else       impl.DummyPlatform

@@ -2,7 +2,7 @@
  *  Preferences.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2014 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2015 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,12 +13,14 @@
 
 package de.sciss.desktop
 
-import java.util.{prefs => j, StringTokenizer}
-import impl.{PreferencesImpl => Impl}
-import scala.util.control.NonFatal
-import java.io.File
 import java.awt.Dimension
+import java.util.{StringTokenizer, prefs => j}
+
+import de.sciss.desktop.impl.{PreferencesImpl => Impl}
+import de.sciss.file.File
 import de.sciss.model.Model
+
+import scala.util.control.NonFatal
 
 object Preferences {
 
@@ -55,9 +57,9 @@ object Preferences {
     }
 
     implicit object files extends Type[List[File]] {
-      def toString(value: List[File]) = value.map(_.getPath).mkString(File.pathSeparator)
+      def toString(value: List[File]) = value.map(_.getPath).mkString(File.pathSep.toString)
       def valueOf(string: String): Option[List[File]] = {
-        val tok = new StringTokenizer(string, File.pathSeparator)
+        val tok = new StringTokenizer(string, File.pathSep.toString)
         val b   = List.newBuilder[File]
         while (tok.hasMoreTokens) b += new File(tok.nextToken())
         Some(b.result())
@@ -102,7 +104,7 @@ object Preferences {
   }
 }
 trait Preferences {
-  import Preferences.Type
+  import de.sciss.desktop.Preferences.Type
 
   private[desktop] def peer: j.Preferences
 

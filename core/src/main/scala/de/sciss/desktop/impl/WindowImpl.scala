@@ -2,7 +2,7 @@
  *  WindowImpl.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2014 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2015 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -14,12 +14,14 @@
 package de.sciss.desktop
 package impl
 
-import java.awt.{Point, Rectangle, Dimension}
-import java.io.File
-import swing.{Reactions, RootPanel, Action, Component}
-import javax.swing.JInternalFrame
 import java.awt.event.{WindowEvent, WindowListener}
+import java.awt.{Dimension, Point, Rectangle}
+import javax.swing.JInternalFrame
 import javax.swing.event.{InternalFrameEvent, InternalFrameListener}
+
+import de.sciss.file.File
+
+import scala.swing.{Action, Component, Reactions, RootPanel}
 
 object WindowImpl {
   private[impl] object Delegate {
@@ -173,7 +175,7 @@ object WindowImpl {
   }
 }
 trait WindowStub extends Window {
-  import WindowImpl._
+  import de.sciss.desktop.impl.WindowImpl._
 
   protected def style: Window.Style = Window.Regular
 
@@ -312,7 +314,7 @@ trait WindowStub extends Window {
     entries.foreach { case (key, action) => bindMenu(key, action) }
 }
 trait WindowImpl extends WindowStub {
-  import WindowImpl._
+  import de.sciss.desktop.impl.WindowImpl._
 
   protected final lazy val delegate: Delegate = {
     val screen = handler.usesScreenMenuBar

@@ -2,7 +2,7 @@
  *  RecentFilesImpl.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2014 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2015 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -14,11 +14,13 @@
 package de.sciss.desktop
 package impl
 
-import java.io.File
-import javax.swing.{JFileChooser, KeyStroke}
-import scala.swing.{Swing, Action}
-import scala.collection.immutable.{IndexedSeq => Vec}
 import java.awt.EventQueue
+import javax.swing.{JFileChooser, KeyStroke}
+
+import de.sciss.file.File
+
+import scala.collection.immutable.{IndexedSeq => Vec}
+import scala.swing.{Action, Swing}
 
 object RecentFilesImpl {
   private val dummyFile = new File("")
@@ -30,7 +32,7 @@ class RecentFilesImpl(entry: Preferences.Entry[List[File]], maxItems: Int, actio
                          keyStroke: Option[KeyStroke])
   extends RecentFiles {
 
-  import RecentFilesImpl._
+  import de.sciss.desktop.impl.RecentFilesImpl._
 
   private final class FileAction extends Action("file") {
     var file = dummyFile

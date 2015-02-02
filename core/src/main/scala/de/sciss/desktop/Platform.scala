@@ -2,7 +2,7 @@
  *  Platform.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2014 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2015 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,8 +13,9 @@
 
 package de.sciss.desktop
 
-import java.io.File
+import de.sciss.file.File
 import de.sciss.model.Model
+
 import scala.swing.Image
 
 trait Platform extends Model[Desktop.Update] {
@@ -27,7 +28,10 @@ trait Platform extends Model[Desktop.Update] {
   def requestUserAttention (repeat    : Boolean): Unit
   def requestForeground    (allWindows: Boolean): Unit
 
+  /** Returns `true` if the handler is natively supported, otherwise `false`. */
   def setQuitHandler       (test  : => Boolean): Boolean
+  /** Returns `true` if the handler is natively supported, otherwise `false`. */
   def setAboutHandler      (action: => Unit   ): Boolean
+  /** Returns `true` if the handler is natively supported, otherwise `false`. */
   def setPreferencesHandler(action: => Unit   ): Boolean
 }

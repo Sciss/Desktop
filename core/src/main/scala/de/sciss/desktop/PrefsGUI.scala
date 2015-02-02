@@ -2,7 +2,7 @@
  *  PrefsGUI.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2014 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2015 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,14 +13,15 @@
 
 package de.sciss.desktop
 
-import java.io.File
-
-import scala.swing.{CheckBox, FlowPanel, Button, TextField, Component, Alignment, Label}
-import scala.swing.Swing.EmptyIcon
 import javax.swing.{JPanel, SpinnerNumberModel}
-import de.sciss.swingplus.{ComboBox, Spinner}
-import scala.swing.event.{ButtonClicked, SelectionChanged, EditDone, ValueChanged}
+
+import de.sciss.file._
 import de.sciss.swingplus
+import de.sciss.swingplus.{ComboBox, Spinner}
+
+import scala.swing.Swing.EmptyIcon
+import scala.swing.event.{ButtonClicked, EditDone, SelectionChanged, ValueChanged}
+import scala.swing.{Alignment, Button, CheckBox, Component, FlowPanel, Label, TextField}
 
 object PrefsGUI {
   def label(text: String) = new Label(text + ":", EmptyIcon, Alignment.Right)
@@ -43,11 +44,11 @@ object PrefsGUI {
   def pathField(prefs: Preferences.Entry[File], default: => File, title: String,
                 accept: File => Option[File] = Some(_)): Component = {
     def fixDefault: File = default  // XXX TODO: Scalac bug?
-    val tx = new TextField(prefs.getOrElse(default).getPath, 16)
+    val tx = new TextField(prefs.getOrElse(default).path, 16)
     tx.listenTo(tx)
     tx.reactions += {
       case EditDone(_) =>
-        if (tx.text.isEmpty) tx.text = fixDefault.getPath
+        if (tx.text.isEmpty) tx.text = fixDefault.path
         prefs.put(new File(tx.text))
     }
     val bt = Button("…") {
