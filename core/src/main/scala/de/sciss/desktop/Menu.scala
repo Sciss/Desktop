@@ -50,6 +50,11 @@ object Menu {
 
     def apply(key: String, attr: Attributes): Item = Impl.itemApply(key, attr)
 
+    def unapply(n: NodeLike): Option[Item] = n match {
+      case it: Item => Some(it)
+      case _ => None
+    }
+
     /** Creates a special 'About' menu item. If the platform has a special
       * place for this item, the returned object indicates this by being `!visible`.
       * In that case the call site may omit adding the item to the regular menu structure.
@@ -109,6 +114,11 @@ object Menu {
     //      * `apply` body.
     //      */
     //    def selected: Boolean = Impl.checkBoxSelected
+
+    def unapply(n: NodeLike): Option[CheckBox] = n match {
+      case cb: CheckBox => Some(cb)
+      case _ => None
+    }
   }
   trait CheckBox extends Node[swing.CheckMenuItem] with ItemLike[swing.CheckMenuItem] {
     def apply(window: Window): swing.CheckMenuItem
@@ -132,12 +142,23 @@ object Menu {
     def apply(key: String, action: Action): Group = Impl.groupApply(key, action)
     def apply(key: String)(text: String)(action: => Unit): Group = Impl.groupApply(key)(text)(action)
     def apply(key: String, text: String): Group = Impl.groupApply(key, text)
+
+    def unapply(n: NodeLike): Option[Group] = n match {
+      case g: Group => Some(g)
+      case _ => None
+    }
   }
   trait GroupLike[+C <: Component with swing.SequentialContainer] extends Node[C]{
     def add(window: Option[Window], elem: Element): this.type
     def add(elem: Element): this.type
     def get(window: Option[Window], path: String): Option[NodeLike]
     def get(path: String): Option[NodeLike]
+
+    //    def insertBefore(succ: Element, window: Option[Window], elem: Element): this.type
+    //    def insertBefore(succ: Element, elem: Element): this.type
+    //
+    //    def insertAfter (pred: Element, window: Option[Window], elem: Element): this.type
+    //    def insertAfter (pred: Element, elem: Element): this.type
   }
   trait Group extends GroupLike[swing.Menu] with ItemLike[swing.Menu] {
     def addLine(): this.type

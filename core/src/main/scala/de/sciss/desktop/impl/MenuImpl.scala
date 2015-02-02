@@ -250,10 +250,16 @@ private[desktop] object MenuImpl {
     private var proxies       = Map.empty[Window, NodeProxy]
     private val defaultProxy  = new NodeProxy(None)
 
-    private def added(p: NodeProxy, n: Menu.Element): Unit = {
+    private def added(p: NodeProxy, n: Menu.Element, idx: Int): Unit = {
       val isDefault = p.window.isEmpty
       realizedIterator.foreach { case (w, r) =>
-        if (isDefault || p.window == Some(w)) r.contents += n.create(w)
+        if (isDefault || p.window == Some(w)) {
+          val comp = n.create(w)
+          if (idx < 0)
+            r.contents += comp
+          else
+            r.contents.insert(idx, comp)
+        }
       }
     }
 
@@ -278,7 +284,7 @@ private[desktop] object MenuImpl {
       }
     }
 
-    private def add(p: NodeProxy, elem: Menu.Element): Unit = {
+    private def add(p: NodeProxy, elem: Menu.Element, idx: Int): Unit = {
       elem match {
         case n: Menu.NodeLike =>
           require(!p.map.contains(n.key), "Element already added")
@@ -286,21 +292,49 @@ private[desktop] object MenuImpl {
           p.map += n.key -> n
         case _ =>
       }
-      p.seq :+= elem
-      added(p, elem)
+      if (idx < 0)
+        p.seq :+= elem
+      else if (idx == 0)
+        p.seq +:= elem
+      else
+        p.seq = p.seq.patch(idx, elem :: Nil, 0)
+
+      added(p, elem, idx)
     }
 
     // adds window specific action to the tail
     final def add(w: Option[Window], elem: Menu.Element): this.type = {
-      add(proxy(w), elem)
+      add(proxy(w), elem, -1)
       this
     }
 
     // adds to the tail
-    final def add(n: Menu.Element): this.type = {
-      add(defaultProxy, n)
+    final def add(elem: Menu.Element): this.type = {
+      add(defaultProxy, elem, -1)
       this
     }
+
+    //    final def insertAfter(pred: Menu.Element, w: Option[Window], elem: Menu.Element): this.type = {
+    //      val np = proxy(w)
+    //      add(proxy(w), elem, np.seq.indexOf(pred) + 1)
+    //      this
+    //    }
+    //
+    //    final def insertAfter(pred: Menu.Element, elem: Menu.Element): this.type = {
+    //      add(defaultProxy, elem, defaultProxy.seq.indexOf(pred) + 1)
+    //      this
+    //    }
+    //
+    //    final def insertBefore(succ: Menu.Element, w: Option[Window], elem: Menu.Element): this.type = {
+    //      val np = proxy(w)
+    //      add(proxy(w), elem, np.seq.indexOf(succ))
+    //      this
+    //    }
+    //
+    //    final def insertBefore(succ: Menu.Element, elem: Menu.Element): this.type = {
+    //      add(defaultProxy, elem, defaultProxy.seq.indexOf(succ))
+    //      this
+    //    }
 
     private def get(w: Option[Window], p: NodeProxy, path: String): Option[Menu.NodeLike] = {
       val i = path.indexOf('.')
