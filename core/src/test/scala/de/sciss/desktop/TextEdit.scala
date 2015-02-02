@@ -9,10 +9,12 @@ import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl, WindowImp
 import de.sciss.file._
 
 import scala.swing.Swing._
-import scala.swing.{ScrollPane, Action, TextArea}
+import scala.swing.{FlowPanel, Label, ScrollPane, Action, TextArea}
 
-object TextEdit extends SwingApplicationImpl("TextEdit") {
-  override protected def init(): Unit = WebLookAndFeel.install()
+object TextEdit extends SwingApplicationImpl("TextEdit") { app =>
+  val USE_WEBLAF = true
+
+  override protected def init(): Unit = if (USE_WEBLAF) WebLookAndFeel.install()
 
   override def quit(): Unit = {
     println("Bye bye...")
@@ -53,11 +55,11 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
 
     import scala.swing.event.Key
 
-    Root()
+    val root = Root()
       .add(Group("file", "File")
         .add(Item("new")("New" -> (menu1 + Key.N))(newDocument()))
         .add(Item("open")("Open..." -> (menu1 + Key.O)) {
-          val dlg = FileDialog.open()
+          val dlg = FileDialog.open(init = baseDirectoryPrefs.get)
           dlg.show(None)
           dlg.file.foreach(openDocument)
         })
@@ -67,10 +69,25 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
         .add(Item("save",   proxy("Save"       -> (menu1 + Key.S))))
         .add(Item("saveAs", proxy("Save As..." -> (menu1 + shift + Key.S))))
       )
-      .add(Group("view", "View")
+
+    val miPrefs = Menu.Item.Preferences(app)(showPreferences())
+    if (miPrefs.visible) root.add(Group("edit", "Edit").add(miPrefs))
+
+    root.add(Group("view", "View")
         .add(Item("find-window", proxy("Find Window")))
         .add(miDarkBackground)
       )
+    root
+  }
+
+  private lazy val baseDirectoryPrefs = userPrefs[File]("base-directory")
+
+  def showPreferences(): Unit = {
+    import PrefsGUI._
+    val title = "Base Directory"
+    val lb    = new Label(s"$title:")
+    val pf    = pathField1(baseDirectoryPrefs, userHome, title, mode = FileDialog.Folder)
+    OptionPane.message(new FlowPanel(lb, pf)).show(title = "Preferences")
   }
 
   class Document {
