@@ -48,16 +48,16 @@ object PrefsGUI {
   // XXX TODO -- should fuse with `pathField` in next major version
   def pathField1(prefs: Preferences.Entry[File], default: => File, title: String,
                  accept: File => Option[File] = Some(_), mode: FileDialog.Mode = FileDialog.Open): Component = {
-    // def fixDefault: File = default
+    def fixDefault: File = default  // bug in Scala 2.10
     val gg = new PathField
     gg.title  = title
     gg.accept = accept
     gg.mode   = mode
-    gg.value  = prefs.getOrElse(default)
+    gg.value  = prefs.getOrElse(fixDefault)
     gg.reactions += {
       case ValueChanged(_) =>
-        val f = gg.valueOption.getOrElse(default)
-        if (gg.valueOption.isEmpty) gg.value = default
+        val f = gg.valueOption.getOrElse(fixDefault)
+        if (gg.valueOption.isEmpty) gg.value = fixDefault
         prefs.put(f)
     }
     gg
