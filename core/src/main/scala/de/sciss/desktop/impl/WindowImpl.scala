@@ -24,6 +24,9 @@ import de.sciss.file.File
 import scala.swing.{Action, Component, Reactions, RootPanel}
 
 object WindowImpl {
+  // we store this client property in the root panel; the value is the desktop.Window
+  private[desktop] final val Property = "de.sciss.desktop.Window"
+
   private[impl] object Delegate {
     def internalFrame(window: Window, peer: JInternalFrame, hasMenuBar: Boolean): Delegate =
       new InternalFrame(window, peer, hasMenuBar = hasMenuBar)
@@ -39,6 +42,7 @@ object WindowImpl {
       val reactions: Reactions = new Reactions.Impl
 
       peer.addInternalFrameListener(this)
+      peer.getRootPane.putClientProperty(Property, window)
       if (hasMenuBar) peer.setJMenuBar(window.handler.menuFactory.create(window).peer)
 
       def closeOperation        : Window.CloseOperation        = Window.CloseOperation(peer.getDefaultCloseOperation)
@@ -92,6 +96,7 @@ object WindowImpl {
       val reactions = new Reactions.Impl
 
       peer.addWindowListener(this)
+      peer.getRootPane.putClientProperty(Property, window)
       if (hasMenuBar) component.menuBar = window.handler.menuFactory.create(window)
 
       def closeOperation        : Window.CloseOperation        = Window.CloseOperation(peer.getDefaultCloseOperation)

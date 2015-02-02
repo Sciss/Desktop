@@ -16,6 +16,8 @@ package de.sciss.desktop
 import javax.swing.{JFrame, RootPaneContainer, SwingUtilities, WindowConstants}
 import java.awt.event.WindowEvent
 import javax.swing.event.InternalFrameEvent
+import de.sciss.desktop.impl.WindowImpl
+
 import annotation.switch
 import java.awt
 import awt.{GraphicsEnvironment, Toolkit, Point, Dimension, Rectangle}
@@ -93,7 +95,7 @@ object Window {
   def find(component: UIElement): Option[Window] = {
     val rp = SwingUtilities.getAncestorOfClass(classOf[RootPaneContainer], component.peer)
     if (rp == null) return None
-    val w = rp.asInstanceOf[RootPaneContainer].getRootPane.getClientProperty("de.sciss.desktop.Window")
+    val w = rp.asInstanceOf[RootPaneContainer].getRootPane.getClientProperty(WindowImpl.Property)
     if (w == null) return None
     Some(w.asInstanceOf[Window])
   }

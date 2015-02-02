@@ -1,14 +1,15 @@
 package de.sciss.desktop
 
-import com.alee.laf.WebLookAndFeel
-import de.sciss.desktop.impl.{WindowHandlerImpl, WindowImpl, SwingApplicationImpl}
-import swing.{Action, Swing}
-import Swing._
-import java.awt
-import awt.event.KeyEvent
-import java.io.File
-import javax.swing.text.PlainDocument
 import java.awt.Color
+import java.io.IOException
+import javax.swing.text.PlainDocument
+
+import com.alee.laf.WebLookAndFeel
+import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl, WindowImpl}
+import de.sciss.file._
+
+import scala.swing.Swing._
+import scala.swing.{ScrollPane, Action, TextArea}
 
 object TextEdit extends SwingApplicationImpl("TextEdit") {
   override protected def init(): Unit = WebLookAndFeel.install()
@@ -42,13 +43,14 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
   }
 
   protected lazy val miDarkBackground = {
-    import Menu._
+    import de.sciss.desktop.Menu._
     CheckBox("darkBg", proxy("Dark Background"))
   }
 
   protected lazy val menuFactory = {
-    import Menu._
-    import KeyStrokes._
+    import de.sciss.desktop.KeyStrokes._
+    import de.sciss.desktop.Menu._
+
     import scala.swing.event.Key
 
     Root()
@@ -66,20 +68,15 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
         .add(Item("saveAs", proxy("Save As..." -> (menu1 + shift + Key.S))))
       )
       .add(Group("view", "View")
+        .add(Item("find-window", proxy("Find Window")))
         .add(miDarkBackground)
       )
   }
 
   class Document {
-    def name: String = file match {
-      case Some(f) =>
-        val n = f.getName
-        val i = n.lastIndexOf('.')
-        if (i < 0) n else n.substring(0, i)
-      case _ => "Untitled"
-    }
     var file  = Option.empty[File]
     val peer  = new PlainDocument()
+    def name: String = file.fold("Untitled")(_.base)
   }
 
   private class DocumentWindow(document: Document) extends WindowImpl {
@@ -91,6 +88,10 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
     file  = document.file
     component.background = Color.white
 
+    contents = new ScrollPane(new TextArea(12, 60) {
+      peer.setDocument(win.document.peer)
+    })
+
     bindMenus(
       "file.close" -> Action("Close") {
         closeDocument(document)
@@ -100,6 +101,12 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
       },
       "file.saveAs" -> Action("Save As") {
         println("Save As")
+      },
+      "view.find-window" -> new Action(null) {
+        def apply(): Unit = {
+          val winOpt = Window.find(contents.head)
+          OptionPane.message(s"Found: ${winOpt.map(_.title)}").show(winOpt)
+        }
       },
       "view.darkBg" -> new Action(null) {
         def apply(): Unit = {
@@ -121,6 +128,20 @@ object TextEdit extends SwingApplicationImpl("TextEdit") {
   def newDocument(file: Option[File] = None): Unit = {
     val doc   = new Document
     doc.file  = file
+    file.foreach { f =>
+      try {
+        val source = io.Source.fromFile(f, "UTF-8")
+        try {
+          val text = source.getLines().mkString("\n")
+          doc.peer.insertString(0, text, null)
+        } finally {
+          source.close()
+        }
+      } catch {
+        case ex: IOException =>
+          Window.showDialog(ex -> s"Open ${f.name}")
+      }
+    }
     documentHandler.addDocument(doc)
     val w     = new DocumentWindow(doc)
     docs     += doc -> w

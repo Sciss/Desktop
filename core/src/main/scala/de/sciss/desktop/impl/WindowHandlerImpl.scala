@@ -78,6 +78,7 @@ import scala.collection.immutable.{IndexedSeq => Vec}
       bounds      = new Rectangle(Short.MaxValue, Short.MaxValue, 0, 0)
     } else {
       bounds      = Window.availableSpace
+      title       = application.name
     }
 
     private val desktop: Option[JDesktopPane] =
