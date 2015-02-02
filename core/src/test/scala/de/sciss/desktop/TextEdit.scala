@@ -59,9 +59,11 @@ object TextEdit extends SwingApplicationImpl("TextEdit") { app =>
       .add(Group("file", "File")
         .add(Item("new")("New" -> (menu1 + Key.N))(newDocument()))
         .add(Item("open")("Open..." -> (menu1 + Key.O)) {
+          println(baseDirectoryPrefs.get)
           val dlg = FileDialog.open(init = baseDirectoryPrefs.get)
-          dlg.show(None)
-          dlg.file.foreach(openDocument)
+          dlg.multiple = true
+          val ok  = dlg.show(None).isDefined
+          if (ok) dlg.files.foreach(openDocument)
         })
         .add(recent.menu)
         .addLine()
@@ -142,25 +144,23 @@ object TextEdit extends SwingApplicationImpl("TextEdit") { app =>
     docs -= doc
   }
 
-  def newDocument(file: Option[File] = None): Unit = {
-    val doc   = new Document
-    doc.file  = file
-    file.foreach { f =>
-      try {
+  def newDocument(file: Option[File] = None): Unit =
+    try {
+      val text = file.fold("") { f =>
         val source = io.Source.fromFile(f, "UTF-8")
         try {
-          val text = source.getLines().mkString("\n")
-          doc.peer.insertString(0, text, null)
+          source.getLines().mkString("\n")
         } finally {
           source.close()
         }
-      } catch {
-        case ex: IOException =>
-          Window.showDialog(ex -> s"Open ${f.name}")
       }
+      val doc   = new Document
+      if (text.nonEmpty) doc.peer.insertString(0, text, null)
+      documentHandler.addDocument(doc)
+      val w     = new DocumentWindow(doc)
+      docs     += doc -> w
+    } catch {
+      case ex: IOException =>
+        Window.showDialog(ex -> s"Open ${file.map(_.name).orNull}")
     }
-    documentHandler.addDocument(doc)
-    val w     = new DocumentWindow(doc)
-    docs     += doc -> w
-  }
 }

@@ -58,13 +58,25 @@ object FileDialog {
 
     private var _owner: awt.Frame = null
     private var peerInit = false
+    private var _multiple = false
+
+    def multiple: Boolean = _multiple
+    def multiple_=(value: Boolean): Unit =
+      if (_multiple != value) {
+        _multiple = value
+        if (peerInit) {
+          if (peerIsAwt) throw new UnsupportedOperationException("AWT cannot handle FileDialog.multiple = true")
+          peerSwing.peer.setDialogType(awtMode)
+          peerSwing.multiSelectionEnabled = value
+        }
+      }
 
     // JFileChooser is used for WebLaF. Otherwise, AWT is used except where not possible
-    // (Folder on Windows and Linux)
-    private lazy val peerIsAwt: Boolean = (UIManager.getLookAndFeel.getName != "WebLookAndFeel") &&
+    // (multiple selection, Folder on Windows and Linux)
+    private lazy val peerIsAwt: Boolean = (UIManager.getLookAndFeel.getName != "WebLookAndFeel") && !multiple &&
       (Desktop.isMac || mode != Folder)
 
-    lazy val peer: awt.FileDialog = {
+    private lazy val peerAwt: awt.FileDialog = {
       peerInit = true
       val res = new awt.FileDialog(_owner, _title, awtMode)
       if (_filter.isDefined) res.setFilenameFilter(fileNameFilter)
@@ -72,16 +84,16 @@ object FileDialog {
       res
     }
 
-    private lazy val peerX: FileChooser = {
+    private lazy val peerSwing: FileChooser = {
       peerInit  = true
       val res   = new FileChooser
       res.peer.setDialogType(awtMode)
       res.title = _title
       if (_filter.isDefined) res.fileFilter = fileFilter
       // Note: WebLaF doesn't handle `null` values!
-      _file.foreach(res.selectedFile = _)
-      // res.selectedFile = _file.orNull
-      res.fileSelectionMode = if (_mode == Folder) DirectoriesOnly else FilesOnly
+      if (_file.isDefined) setSwingFile(res)
+      res.fileSelectionMode     = if (_mode == Folder) DirectoriesOnly else FilesOnly
+      res.multiSelectionEnabled = _multiple
       res
     }
 
@@ -111,10 +123,10 @@ object FileDialog {
         _mode = value
         if (peerInit) {
           if (peerIsAwt) {
-            peer.setMode(awtMode)
+            peerAwt.setMode(awtMode)
           } else {
-            peerX.peer.setDialogType(awtMode)
-            peerX.fileSelectionMode = if (value == Folder) DirectoriesOnly else FilesOnly
+            peerSwing.peer.setDialogType(awtMode)
+            peerSwing.fileSelectionMode = if (value == Folder) DirectoriesOnly else FilesOnly
           }
         }
       }
@@ -126,9 +138,9 @@ object FileDialog {
         _title = value
         if (peerInit) {
           if (peerIsAwt)
-            peer.setTitle(value)
+            peerAwt.setTitle(value)
           else
-            peerX.title = value
+            peerSwing.title = value
         }
       }
 
@@ -139,9 +151,9 @@ object FileDialog {
         _filter = value
         if (peerInit) {
           if (peerIsAwt)
-            peer.setFilenameFilter(fileNameFilter)
+            peerAwt.setFilenameFilter(fileNameFilter)
           else
-            peerX.fileFilter = fileFilter
+            peerSwing.fileFilter = fileFilter
         }
       }
 
@@ -153,14 +165,14 @@ object FileDialog {
     def file: Option[File] = {
       if (peerInit) {
         if (peerIsAwt) {
-          val dir   = peer.getDirectory
-          val file  = peer.getFile
+          val dir   = peerAwt.getDirectory
+          val file  = peerAwt.getFile
           if (file != null)
             Some(new File(dir, file))
           else
             None
         } else {
-          Option(peerX.selectedFile)
+          Option(peerSwing.selectedFile)
         }
 
       } else _file
@@ -171,16 +183,24 @@ object FileDialog {
         _file = value
         if (peerInit) {
           if (peerIsAwt) {
-            setAwtFile(peer)
+            setAwtFile(peerAwt)
           } else {
             try {
-              peerX.selectedFile = value.orNull
+              setSwingFile(peerSwing)
             } catch {
               case _: NullPointerException =>  // WebLaF has a bug currently, other LaFs support this idiom
             }
           }
         }
       }
+
+    def files: List[File] = if (multiple && peerInit) peerSwing.selectedFiles.toList else file.toList
+
+    private def setSwingFile(dlg: FileChooser): Unit = {
+      val vn = _file.orNull
+      if (vn != null && mode != Folder && vn.isDirectory) dlg.peer.setCurrentDirectory(vn)
+      else dlg.selectedFile = vn
+    }
 
     private def setAwtFile(dlg: awt.FileDialog): Unit = {
       val dir   = _file.map(_.getParent).orNull
@@ -193,13 +213,13 @@ object FileDialog {
 
     private def showAwtDialog(window: Option[Window]): Option[File] = {
       if (!peerInit) _owner = window.map(Window.peer).orNull
-      val dlg = peer
+      val dlg = peerAwt
       if (mode == Folder) {
         val key       = "apple.awt.fileDialogForDirectories"
         val props     = sys.props
         val oldValue  = props.put(key, "true")
         try {
-          peer.show() // "deprecated", but stupidly necessary, because `setVisible` does _not_ the same thing
+          peerAwt.show() // "deprecated", but stupidly necessary, because `setVisible` does _not_ the same thing
         } finally {
           oldValue match {
             case Some(v)  => props.put(key, v)
@@ -213,7 +233,7 @@ object FileDialog {
     }
 
     private def showJavaxDialog(window: Option[Window]): Option[File] = {
-      val dlg   = peerX
+      val dlg   = peerSwing
       val code  = dlg.peer.showDialog(window.map(_.component.peer).orNull, null) // stupid Scala swing doesn't allow RootPanel
       val res   = FileChooser.Result(code)
       if (res == FileChooser.Result.Approve) Option(dlg.selectedFile) else None
@@ -230,14 +250,30 @@ object FileDialog {
   * The new behaviour selected `JFileChooser` always, when the Web Look-and-Feel is
   * installed, as its component UI is quite sophisticated.
   */
-sealed trait FileDialog extends DialogSource[Option[File]] {
-  @deprecated("This might return an invalid dialog on Windows and Linux when using `Folder` mode.", "0.5.4")
-  def peer: awt.FileDialog
-
+trait FileDialog extends DialogSource[Option[File]] {
+  /** Whether the dialog should allow the selection of an existing file
+    * (`Open`), an existing folder (`Folder`) or a new file/folder (`Save`)
+    */
   var mode  : FileDialog.Mode
+
+  /** Whether it is possible to select multiple files. Defaults to `false`.
+    * Since the `show` method returns an `Option[File]`, the correct procedure is
+    * to check if the option is defined, and if so, to query `files`.
+    */
+  var multiple: Boolean
+
   var file  : Option[File]
   var title : String
+
+  /** A predicate to filter the visible files in the dialog. Files are shown
+    * for which the function returns `true`.
+    */
   var filter: Option[File => Boolean]
+
+  /** For single-selection mode, returns `file.toList`, for multiple-selection mode,
+    * returns all selected files.
+    */
+  def files : List[File]
 
   /** Convenience method which will wrap the function in an `Option` and call `filter_=` */
   def setFilter(fun: File => Boolean): Unit

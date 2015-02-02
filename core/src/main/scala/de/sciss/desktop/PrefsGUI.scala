@@ -55,7 +55,7 @@ object PrefsGUI {
     gg.mode   = mode
     gg.value  = prefs.getOrElse(default)
     gg.reactions += {
-      case EditDone(_) =>
+      case ValueChanged(_) =>
         val f = gg.valueOption.getOrElse(default)
         if (gg.valueOption.isEmpty) gg.value = default
         prefs.put(f)
