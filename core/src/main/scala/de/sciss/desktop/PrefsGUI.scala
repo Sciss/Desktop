@@ -13,7 +13,7 @@
 
 package de.sciss.desktop
 
-import javax.swing.{JPanel, SpinnerNumberModel}
+import javax.swing.SpinnerNumberModel
 
 import de.sciss.file._
 import de.sciss.swingplus
@@ -21,7 +21,7 @@ import de.sciss.swingplus.{ComboBox, Spinner}
 
 import scala.swing.Swing.EmptyIcon
 import scala.swing.event.{ButtonClicked, EditDone, SelectionChanged, ValueChanged}
-import scala.swing.{Alignment, Button, CheckBox, Component, FlowPanel, Label, TextField}
+import scala.swing.{Alignment, CheckBox, Component, Label, TextField}
 
 object PrefsGUI {
   def label(text: String) = new Label(text + ":", EmptyIcon, Alignment.Right)
@@ -47,34 +47,18 @@ object PrefsGUI {
 
   // XXX TODO -- should fuse with `pathField` in next major version
   def pathField1(prefs: Preferences.Entry[File], default: => File, title: String,
-                accept: File => Option[File] = Some(_), mode: FileDialog.Mode = FileDialog.Open): Component = {
-    def fixDefault: File = default  // XXX TODO: Scalac bug?
-    val tx = new TextField(prefs.getOrElse(default).path, 16)
-    tx.listenTo(tx)
-    tx.reactions += {
+                 accept: File => Option[File] = Some(_), mode: FileDialog.Mode = FileDialog.Open): Component = {
+    // def fixDefault: File = default
+    val gg = new PathField
+    gg.title  = title
+    gg.accept = accept
+    gg.mode   = mode
+    gg.value  = prefs.getOrElse(default)
+    gg.reactions += {
       case EditDone(_) =>
-        if (tx.text.isEmpty) tx.text = fixDefault.path
-        prefs.put(new File(tx.text))
-    }
-    val bt = Button("…") {
-      val dlg   = FileDialog()
-      dlg.mode  = mode
-      dlg.file  = prefs.get
-      dlg.title = title
-      dlg.show(None).flatMap(accept).foreach { f =>
-        tx.text = f.getPath
+        val f = gg.valueOption.getOrElse(default)
+        if (gg.valueOption.isEmpty) gg.value = default
         prefs.put(f)
-      }
-    }
-    bt.peer.putClientProperty("JButton.buttonType", "square")
-    val gg = new FlowPanel(tx, bt) {
-      override lazy val peer: JPanel =
-        new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.TRAILING, 0, 0)) with SuperMixin {
-          override def getBaseline(width: Int, height: Int): Int = {
-            val res = tx.peer.getBaseline(width, height)
-            res + tx.peer.getY
-          }
-        }
     }
     gg
   }
