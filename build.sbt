@@ -9,6 +9,7 @@ lazy val projectVersion     = "0.7.1-SNAPSHOT"
 lazy val modelVersion       = "0.3.2"
 lazy val swingPlusVersion   = "0.2.0"
 lazy val fileUtilVersion    = "1.1.1"
+lazy val orangeVersion      = "1.3.0"
 
 // ---- test dependencies ----
 
@@ -91,7 +92,16 @@ lazy val mac = Project(id = s"$baseNameL-mac", base = file("mac")).
   settings(commonSettings).
   settings(
     name        := s"$baseName-mac",
-    description := "Macintosh specific adaptors for Desktop"
+    description := "Macintosh specific adaptors for Desktop",
+    libraryDependencies ++= {
+      val eawt = try {
+          Class.forName("com.apple.eawt.Application")
+          true
+        } catch {
+          case _: ClassNotFoundException => false
+        }
+      if (eawt) Nil else Seq("com.yuvimasory" % "orange-extensions" % orangeVersion % "provided")
+    }
   )
 
 // ---- ls.implicit.ly ----

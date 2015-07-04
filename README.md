@@ -22,6 +22,7 @@ The current version `v` is `"0.7.0"`.
 
 ## building
 
-Desktop currently builds against Scala 2.11, 2.10, using sbt 0.13. To build sub project `"desktop-mac"`, you need either OS X, or otherwise copy the [OrangeExtensions](http://ymasory.github.io/OrangeExtensions/) jar into the unmanaged library folder `lib` (a convenient script `installOrange.sh` is included).
+Desktop currently builds against Scala 2.11, 2.10, using sbt 0.13. To build sub project `"desktop-mac"`, you need either OS X with Apple's EAWT extensions,
+or otherwise the dummy [OrangeExtensions](http://ymasory.github.io/OrangeExtensions/) are used.
 
 Some demos are available through `sbt desktop/test:run`. For Mac specific demos, `sbt desktop-mac/test:run`.
