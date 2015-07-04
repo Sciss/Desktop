@@ -54,8 +54,9 @@ object DialogSource {
         } else loc
       }
       var lineLen = 0
-      val options = Seq("Ok", "Show Stack Trace")
-      val tok     = new StringTokenizer(message)
+      val optionOk  = "Ok"
+      val options   = Seq(optionOk, "Show Stack Trace")
+      val tok       = new StringTokenizer(message)
       strBuf.append(":\n")
       while (tok.hasMoreTokens) {
         val word = tok.nextToken()
@@ -68,7 +69,7 @@ object DialogSource {
         lineLen += word.length() + 1
       }
       val op = desktop.OptionPane(message = strBuf.toString(), messageType = desktop.OptionPane.Message.Error,
-        optionType = desktop.OptionPane.Options.YesNo, entries = options, initial = Some(options(0)))
+        optionType = desktop.OptionPane.Options.YesNo, entries = options, initial = Some(optionOk))
       op.title = title
 
       if (op.show(window).id == 1) {

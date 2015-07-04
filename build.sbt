@@ -2,22 +2,24 @@ lazy val baseName = "Desktop"
 
 def baseNameL = baseName.toLowerCase
 
-lazy val projectVersion     = "0.7.0"
+lazy val projectVersion     = "0.7.1-SNAPSHOT"
+
+// ---- main dependencies ----
 
 lazy val modelVersion       = "0.3.2"
-
 lazy val swingPlusVersion   = "0.2.0"
-
 lazy val fileUtilVersion    = "1.1.1"
+
+// ---- test dependencies ----
 
 lazy val webLaFVersion      = "1.28"
 
-lazy val commonSettings = Project.defaultSettings ++ Seq(
+lazy val commonSettings = Seq(
   version         := projectVersion,
   organization    := "de.sciss",
-  scalaVersion    := "2.11.5",
-  crossScalaVersions := Seq("2.11.5", "2.10.4"),
-  homepage        := Some(url("https://github.com/Sciss/" + baseName)),
+  scalaVersion    := "2.11.7",
+  crossScalaVersions := Seq("2.11.7", "2.10.5"),
+  homepage        := Some(url(s"https://github.com/Sciss/$baseName")),
   licenses        := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
   initialCommands in console := """import de.sciss.desktop._; import de.sciss.file._""",
   // retrieveManaged := true,
@@ -48,30 +50,20 @@ lazy val commonSettings = Project.defaultSettings ++ Seq(
   }
 )
 
-lazy val root = Project(
-  id            = "root",
-  base          = file("."),
-  aggregate     = Seq(core, linux, mac),
-  dependencies  = Seq(core, linux, mac),
-  settings      = commonSettings ++ Seq(
+lazy val root = Project(id = "root", base = file(".")).
+  aggregate(core, linux, mac).
+  dependsOn(core, linux, mac).
+  settings(commonSettings).
+  settings(
     packagedArtifacts := Map.empty           // prevent publishing anything!
   )
-)
 
-lazy val core = Project(
-  id            = s"$baseNameL",
-  base          = file("core"),
-  // dependencies  = Seq(platform),
-  settings      = commonSettings ++ buildInfoSettings ++ Seq(
+lazy val core = Project(id = s"$baseNameL", base = file("core")).
+  enablePlugins(BuildInfoPlugin).
+  settings(commonSettings).
+  settings(
     name        := s"$baseName",
     description := "A library for document based desktop applications",
-    // libraryDependencies += {
-    //   val sv = scalaVersion.value
-    //   if (sv startsWith "2.10")
-    //     "org.scala-lang" % "scala-swing" % sv
-    //   else
-    //     "org.scala-lang.modules" %% "scala-swing" % "1.0.1"
-    // },
     libraryDependencies ++= Seq(
       "de.sciss" %% "model"     % modelVersion,
       "de.sciss" %% "swingplus" % swingPlusVersion,
@@ -79,42 +71,33 @@ lazy val core = Project(
       "de.sciss" %  "weblaf"    % webLaFVersion % "test"
     ),
     // ---- build info ----
-    sourceGenerators in Compile <+= buildInfo,
     buildInfoKeys := Seq(name, organization, version, scalaVersion, description,
       BuildInfoKey.map(homepage) { case (k, opt)           => k -> opt.get },
       BuildInfoKey.map(licenses) { case (_, Seq((lic, _))) => "license" -> lic }
     ),
     buildInfoPackage := "de.sciss.desktop"
   )
-)
 
-lazy val linux = Project(
-  id            = s"$baseNameL-linux",
-  base          = file("linux"),
-  dependencies  = Seq(core),
-  settings      = commonSettings ++ Seq(
+lazy val linux = Project(id = s"$baseNameL-linux", base = file("linux")).
+  dependsOn(core).
+  settings(commonSettings).
+  settings(
     name        := s"$baseName-linux",
     description := "Linux specific adaptors for Desktop"
   )
-)
 
-lazy val mac = Project(
-  id            = s"$baseNameL-mac",
-  base          = file("mac"),
-  dependencies  = Seq(core /* platform */),
-  settings      = commonSettings ++ Seq(
+lazy val mac = Project(id = s"$baseNameL-mac", base = file("mac")).
+  dependsOn(core /* platform */).
+  settings(commonSettings).
+  settings(
     name        := s"$baseName-mac",
     description := "Macintosh specific adaptors for Desktop"
   )
-)
 
 // ---- ls.implicit.ly ----
 
-seq(lsSettings :_*)
-
-(LsKeys.tags   in LsKeys.lsync) := Seq("swing", "desktop", "application")
-
-(LsKeys.ghUser in LsKeys.lsync) := Some("Sciss")
-
-(LsKeys.ghRepo in LsKeys.lsync) := Some(baseName)
-
+// seq(lsSettings :_*)
+// 
+// (LsKeys.tags   in LsKeys.lsync) := Seq("swing", "desktop", "application")
+// (LsKeys.ghUser in LsKeys.lsync) := Some("Sciss")
+// (LsKeys.ghRepo in LsKeys.lsync) := Some(baseName)

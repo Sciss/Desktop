@@ -209,7 +209,11 @@ object FileDialog {
       dlg.setFile(name)
     }
 
-    def show(window: Option[Window]): Option[File] = if (peerIsAwt) showAwtDialog(window) else showJavaxDialog(window)
+    def show(window: Option[Window]): Option[File] = {
+      val res = if (peerIsAwt) showAwtDialog(window) else showJavaxDialog(window)
+      window.foreach(_.front())
+      res
+    }
 
     private def showAwtDialog(window: Option[Window]): Option[File] = {
       if (!peerInit) _owner = window.map(Window.peer).orNull

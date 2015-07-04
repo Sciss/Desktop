@@ -1,28 +1,47 @@
 package de.sciss.desktop
 
 import com.alee.laf.WebLookAndFeel
+import de.sciss.desktop.impl.{SwingApplicationImpl, WindowImpl}
 
+import scala.language.reflectiveCalls
 import scala.swing._
-import javax.swing.WindowConstants
-import language.reflectiveCalls
-import scala.Some
+import scala.swing.event.Key
 
-object DialogFocusTest extends App {
-  Swing.onEDT {
+object DialogFocusTest extends SwingApplicationImpl("Dialog Focus Test") {
+  type Document = Unit
+
+  override protected def init(): Unit = {
     WebLookAndFeel.install()
-
-    lazy val button: Button = Button("Test") { val res = scalaTest(); button.text = res.toString }
-    new Frame {
-      title = "Dialog Test"
-      contents = button
-      peer.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
-      pack()
-      centerOnScreen()
-      open()
-    }
+    import Implicits._
+    label.addAction("de.sciss.desktop.Foo", action, FocusType.Window)
+    frame.front()
   }
 
-  private def scalaTest(): OptionPane.Result.Value = {
+  lazy val button: Button = Button("Test") {
+    val res = test()
+    button.text = res.toString
+  }
+  lazy val label = new Label("Label reacts to Control-L")
+
+  lazy val action = new Action("Foo") {
+    accelerator = Some(KeyStrokes.ctrl + Key.L)
+
+    def apply(): Unit = label.text = s"${label.text}!"
+  }
+
+  lazy val frame = new WindowImpl {
+    title           = "Dialog Test"
+    contents        = new FlowPanel(button, label)
+    closeOperation  = Window.CloseExit
+    pack()
+    Util.centerOnScreen(this)
+
+    def handler: WindowHandler = windowHandler
+  }
+  
+  protected def menuFactory: Menu.Root = Menu.Root()
+
+  def test(): OptionPane.Result.Value = {
     val lbKey = new Label("Key:")
     val lbVal = new Label("Value:")
     val ggKey = new TextField(16)
@@ -33,7 +52,7 @@ object DialogFocusTest extends App {
 
     val box = new GridBagPanel {
       val cons = new Constraints()
-      import cons.{gridx, gridy}
+      import cons._
       gridx = 0; gridy = 0
       layout(lbKey) = cons
       gridx += 1
@@ -47,8 +66,7 @@ object DialogFocusTest extends App {
 
     val pane  = OptionPane.confirmation(message = box, messageType = Dialog.Message.Question,
       optionType = Dialog.Options.OkCancel, focus = Some(ggVal))
-    val dlg   = pane.peer.createDialog(null, "New Entry")
-    dlg.setVisible(true)
+    pane.show(Some(frame), "New Entry")
     pane.result
   }
 }

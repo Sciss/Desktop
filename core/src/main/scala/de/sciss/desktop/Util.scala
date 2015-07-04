@@ -19,14 +19,17 @@ import javax.swing.Timer
 import scala.swing.{Point, Rectangle, Component, Swing}
 
 object Util {
+  /** Positions a window on the center of the default screen device. */
   def centerOnScreen(w: Window): Unit = placeWindow(w, 0.5f, 0.5f, 0)
 
+  /** Executes a code block once after a given delay on the event-dispatch-thread. */
   def delay(millis: Int)(block: => Unit): Unit = {
     val timer = new Timer(millis, Swing.ActionListener(_ => block))
     timer.setRepeats(false)
     timer.start()
   }
 
+  /** Sets a component's minimum and maximum size to match the preferred size. */
   def fixSize(c: Component): Unit = {
     val d = c.preferredSize
     c.preferredSize = d
@@ -34,6 +37,10 @@ object Util {
     c.maximumSize   = d
   }
 
+  /** Sets the minimum and maximum width of a component.
+    *
+    * @param width  the width to use or `-1` to query the preferred width instead.
+    */
   def fixWidth(c: Component, width: Int = -1): Unit = {
     val w         = if (width < 0) c.preferredSize.width else width
     val min       = c.minimumSize
@@ -44,24 +51,21 @@ object Util {
     c.maximumSize = max
   }
 
-  //  def findWindow(c: Component): Option[Window] = {
-  //    @tailrec def loop(p: JComponent): Option[Window] =
-  //      p.getClientProperty(WindowImpl.WindowKey) match {
-  //        case f: Window => Some(f)
-  //        case _ => c.peer.getParent match {
-  //          case pp: JComponent => loop(pp)
-  //          case _ => None
-  //        }
-  //      }
-  //
-  //    loop(c.peer)
-  //  }
-
+  /** Returns the maximum bounds a window should have on the default screen device. */
   def maximumWindowBounds: Rectangle = {
     val ge  = GraphicsEnvironment.getLocalGraphicsEnvironment
     ge.getMaximumWindowBounds
   }
 
+  /** Positions a window on the default screen device.
+    *
+    * @param horizontal the horizontal placement from 0.0 (left-most) to 1.0 (right-most)
+    * @param vertical   the vertical placement from 0.0 (top-most) to 1.0 (bottom-most)
+    * @param padding    additional padding in pixels from the screen's margins. For example,
+    *                   if horizontal is `1.0` and padding is `40`, the window will be
+    *                   placed so that its right border is spaced 40 pixels from the right
+    *                   margin of the screen.
+    */
   def placeWindow(w: Window, horizontal: Float, vertical: Float, padding: Int): Unit = {
     val bs  = maximumWindowBounds
     val b   = w.size
