@@ -35,17 +35,20 @@ object Desktop {
 
   private def getModule[A](name: String): A = Class.forName(name + "$").getField("MODULE$").get(null).asInstanceOf[A]
 
-  private[desktop] lazy val platform: Platform = {
-    val res = Try {
-      if (isLinux)    getModule[Platform]("de.sciss.desktop.impl.LinuxPlatform")
-      else if (isMac) getModule[Platform]("de.sciss.desktop.impl.MacPlatform")
+  private[desktop] lazy val platform: Platform =
+    Try {
+      if      (isLinux)          getModule[Platform]("de.sciss.desktop.impl.LinuxPlatform")
+      else if (isMac && hasEAWT) getModule[Platform]("de.sciss.desktop.impl.MacPlatform"  )
       // else if (isLinux) ...
       // else if (isWindows) ...
       else       impl.DummyPlatform
     } .getOrElse(impl.DummyPlatform)
 
-    // println(s"Installed platform: '$res'")
-    res
+  private[this] def hasEAWT: Boolean = try {
+    Class.forName("com.apple.eawt.Application")
+    true
+  } catch {
+    case _: ClassNotFoundException => false
   }
 
   // ---- platform ----
