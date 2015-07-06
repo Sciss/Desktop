@@ -18,7 +18,7 @@ Furthermore, if you want to support the Mac (OS X) platform, also add the follow
 
     "de.sciss" %% "desktop-mac" % v
 
-The current version `v` is `"0.7.0"`.
+The current version `v` is `"0.7.1"`.
 
 ## building
 

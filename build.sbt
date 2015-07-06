@@ -2,7 +2,7 @@ lazy val baseName = "Desktop"
 
 def baseNameL = baseName.toLowerCase
 
-lazy val projectVersion     = "0.7.1-SNAPSHOT"
+lazy val projectVersion     = "0.7.1"
 
 // ---- main dependencies ----
 
