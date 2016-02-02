@@ -26,3 +26,8 @@ Desktop currently builds against Scala 2.11, 2.10, using sbt 0.13. To build sub 
 or otherwise the dummy [OrangeExtensions](http://ymasory.github.io/OrangeExtensions/) are used.
 
 Some demos are available through `sbt desktop/test:run`. For Mac specific demos, `sbt desktop-mac/test:run`.
+
+## contributing
+
+Please see the file [CONTRIBUTING.md](CONTRIBUTING.md)
+
