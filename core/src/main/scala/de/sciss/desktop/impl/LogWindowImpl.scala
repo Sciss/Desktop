@@ -78,10 +78,11 @@ abstract class LogWindowImpl extends WindowImpl {
       becomeVisible = true
   }
 
-  contents = new ScrollPane {
-    contents  = log.component
-    border    = BorderFactory.createEmptyBorder()
-  }
+  contents = log.component
+//  new ScrollPane {
+//    contents  = log.component
+//    border    = BorderFactory.createEmptyBorder()
+//  }
 
   title   = "Log"
   pack()

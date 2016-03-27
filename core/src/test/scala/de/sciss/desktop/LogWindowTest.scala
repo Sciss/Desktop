@@ -3,6 +3,7 @@ package de.sciss.desktop
 import com.alee.laf.WebLookAndFeel
 import de.sciss.desktop.impl.{WindowImpl, LogWindowImpl, SwingApplicationImpl}
 import de.sciss.desktop.Menu.Root
+import de.sciss.submin.Submin
 import scala.swing.{FlowPanel, Rectangle, Button}
 
 object LogWindowTest extends SwingApplicationImpl("Log Test") {
@@ -11,7 +12,8 @@ object LogWindowTest extends SwingApplicationImpl("Log Test") {
   type Document = Unit
 
   override protected def init(): Unit = {
-    WebLookAndFeel.install()
+    val isDark = args.contains("--dark")
+    Submin.install(isDark)
 
     new LogWindowImpl {
       def handler: WindowHandler = LogWindowTest.windowHandler

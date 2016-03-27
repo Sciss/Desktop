@@ -98,6 +98,7 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
   //  }
 
   val component: ScrollPane = new ScrollPane(textPane) {
+    peer.putClientProperty("styleId", "undecorated")
     verticalScrollBarPolicy   = BarPolicy.Always
     horizontalScrollBarPolicy = BarPolicy.Never
   }

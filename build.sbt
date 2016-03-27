@@ -2,24 +2,24 @@ lazy val baseName = "Desktop"
 
 def baseNameL = baseName.toLowerCase
 
-lazy val projectVersion     = "0.7.1"
+lazy val projectVersion     = "0.7.2-SNAPSHOT"
 
 // ---- main dependencies ----
 
 lazy val modelVersion       = "0.3.2"
-lazy val swingPlusVersion   = "0.2.0"
+lazy val swingPlusVersion   = "0.2.1"
 lazy val fileUtilVersion    = "1.1.1"
 lazy val orangeVersion      = "1.3.0"
 
 // ---- test dependencies ----
 
-lazy val webLaFVersion      = "1.28"
+lazy val subminVersion      = "0.1.0-SNAPSHOT"
 
 lazy val commonSettings = Seq(
   version         := projectVersion,
   organization    := "de.sciss",
-  scalaVersion    := "2.11.7",
-  crossScalaVersions := Seq("2.11.7", "2.10.5"),
+  scalaVersion    := "2.11.8",
+  crossScalaVersions := Seq("2.11.8", "2.10.6"),
   homepage        := Some(url(s"https://github.com/Sciss/$baseName")),
   licenses        := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
   initialCommands in console := """import de.sciss.desktop._; import de.sciss.file._""",
@@ -51,25 +51,25 @@ lazy val commonSettings = Seq(
   }
 )
 
-lazy val root = Project(id = "root", base = file(".")).
-  aggregate(core, linux, mac).
-  dependsOn(core, linux, mac).
-  settings(commonSettings).
-  settings(
+lazy val root = Project(id = "root", base = file("."))
+  .aggregate(core, linux, mac)
+  .dependsOn(core, linux, mac)
+  .settings(commonSettings)
+  .settings(
     packagedArtifacts := Map.empty           // prevent publishing anything!
   )
 
-lazy val core = Project(id = s"$baseNameL", base = file("core")).
-  enablePlugins(BuildInfoPlugin).
-  settings(commonSettings).
-  settings(
+lazy val core = Project(id = s"$baseNameL", base = file("core"))
+  .enablePlugins(BuildInfoPlugin)
+  .settings(commonSettings)
+  .settings(
     name        := s"$baseName",
     description := "A library for document based desktop applications",
     libraryDependencies ++= Seq(
       "de.sciss" %% "model"     % modelVersion,
       "de.sciss" %% "swingplus" % swingPlusVersion,
       "de.sciss" %% "fileutil"  % fileUtilVersion,
-      "de.sciss" %  "weblaf"    % webLaFVersion % "test"
+      "de.sciss" %  "submin"    % subminVersion % "test"
     ),
     // ---- build info ----
     buildInfoKeys := Seq(name, organization, version, scalaVersion, description,
@@ -79,18 +79,18 @@ lazy val core = Project(id = s"$baseNameL", base = file("core")).
     buildInfoPackage := "de.sciss.desktop"
   )
 
-lazy val linux = Project(id = s"$baseNameL-linux", base = file("linux")).
-  dependsOn(core).
-  settings(commonSettings).
-  settings(
+lazy val linux = Project(id = s"$baseNameL-linux", base = file("linux"))
+  .dependsOn(core)
+  .settings(commonSettings)
+  .settings(
     name        := s"$baseName-linux",
     description := "Linux specific adaptors for Desktop"
   )
 
-lazy val mac = Project(id = s"$baseNameL-mac", base = file("mac")).
-  dependsOn(core /* platform */).
-  settings(commonSettings).
-  settings(
+lazy val mac = Project(id = s"$baseNameL-mac", base = file("mac"))
+  .dependsOn(core /* platform */)
+  .settings(commonSettings)
+  .settings(
     name        := s"$baseName-mac",
     description := "Macintosh specific adaptors for Desktop",
     libraryDependencies ++= {
@@ -103,11 +103,3 @@ lazy val mac = Project(id = s"$baseNameL-mac", base = file("mac")).
       if (eawt) Nil else Seq("com.yuvimasory" % "orange-extensions" % orangeVersion % "provided")
     }
   )
-
-// ---- ls.implicit.ly ----
-
-// seq(lsSettings :_*)
-// 
-// (LsKeys.tags   in LsKeys.lsync) := Seq("swing", "desktop", "application")
-// (LsKeys.ghUser in LsKeys.lsync) := Some("Sciss")
-// (LsKeys.ghRepo in LsKeys.lsync) := Some(baseName)

@@ -4,17 +4,20 @@ import java.awt.Color
 import java.io.IOException
 import javax.swing.text.PlainDocument
 
-import com.alee.laf.WebLookAndFeel
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl, WindowImpl}
 import de.sciss.file._
+import de.sciss.submin.Submin
 
 import scala.swing.Swing._
-import scala.swing.{FlowPanel, Label, ScrollPane, Action, TextArea}
+import scala.swing.{Action, FlowPanel, Label, ScrollPane, TextArea}
 
 object TextEdit extends SwingApplicationImpl("TextEdit") { app =>
   val USE_WEBLAF = true
 
-  override protected def init(): Unit = if (USE_WEBLAF) WebLookAndFeel.install()
+  override protected def init(): Unit = if (USE_WEBLAF) {
+    val isDark = args.contains("--dark")
+    Submin.install(isDark)
+  }
 
   override def quit(): Unit = {
     println("Bye bye...")
@@ -109,7 +112,9 @@ object TextEdit extends SwingApplicationImpl("TextEdit") { app =>
 
     contents = new ScrollPane(new TextArea(12, 60) {
       peer.setDocument(win.document.peer)
-    })
+    }) {
+      peer.putClientProperty("styleId", "undecorated")
+    }
 
     bindMenus(
       "file.close" -> Action("Close") {
