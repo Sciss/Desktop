@@ -74,8 +74,8 @@ object FileDialog {
     // JFileChooser is used for WebLaF. Otherwise, AWT is used except where not possible
     // (multiple selection, Folder on Windows and Linux)
     private lazy val peerIsAwt: Boolean = {
-      val laf = UIManager.getLookAndFeel.getName
-      laf != "WebLookAndFeel" && laf != "WebLaF" && !multiple && (Desktop.isMac || mode != Folder)
+      val lafId = UIManager.getLookAndFeel.getID
+      lafId != "submin" && lafId != "weblaf" && !multiple && (Desktop.isMac || mode != Folder)
     }
 
     private lazy val peerAwt: awt.FileDialog = {

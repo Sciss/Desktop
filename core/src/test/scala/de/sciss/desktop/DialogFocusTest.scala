@@ -1,7 +1,7 @@
 package de.sciss.desktop
 
-import com.alee.laf.WebLookAndFeel
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowImpl}
+import de.sciss.submin.Submin
 
 import scala.language.reflectiveCalls
 import scala.swing._
@@ -11,7 +11,8 @@ object DialogFocusTest extends SwingApplicationImpl("Dialog Focus Test") {
   type Document = Unit
 
   override protected def init(): Unit = {
-    WebLookAndFeel.install()
+    val isDark = args.contains("--dark")
+    Submin.install(isDark)
     import Implicits._
     label.addAction("de.sciss.desktop.Foo", action, FocusType.Window)
     frame.front()

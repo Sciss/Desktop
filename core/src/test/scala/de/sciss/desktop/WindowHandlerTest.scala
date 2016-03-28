@@ -1,11 +1,10 @@
 package de.sciss.desktop
 
-import java.awt.EventQueue
-
-import com.alee.laf.WebLookAndFeel
-import de.sciss.desktop.impl.{SwingApplicationImpl, WindowImpl, WindowHandlerImpl}
-import de.sciss.desktop.Menu._
 import de.sciss.desktop.KeyStrokes._
+import de.sciss.desktop.Menu._
+import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl, WindowImpl}
+import de.sciss.submin.Submin
+
 import scala.swing.Swing._
 import scala.swing.event.Key
 
@@ -32,7 +31,8 @@ object WindowHandlerTest extends SwingApplicationImpl("Window Handler Test") {
   )
 
   override def init(): Unit = {
-    WebLookAndFeel.install()
+    val isDark = args.contains("--dark")
+    Submin.install(isDark)
 
     new WindowImpl { win =>
       def handler = windowHandler

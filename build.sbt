@@ -2,7 +2,7 @@ lazy val baseName = "Desktop"
 
 def baseNameL = baseName.toLowerCase
 
-lazy val projectVersion     = "0.7.2-SNAPSHOT"
+lazy val projectVersion     = "0.7.2"
 
 // ---- main dependencies ----
 
@@ -13,7 +13,7 @@ lazy val orangeVersion      = "1.3.0"
 
 // ---- test dependencies ----
 
-lazy val subminVersion      = "0.1.0-SNAPSHOT"
+lazy val subminVersion      = "0.1.0"
 
 lazy val commonSettings = Seq(
   version         := projectVersion,

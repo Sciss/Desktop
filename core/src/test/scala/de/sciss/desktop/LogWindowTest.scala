@@ -1,10 +1,10 @@
 package de.sciss.desktop
 
-import com.alee.laf.WebLookAndFeel
-import de.sciss.desktop.impl.{WindowImpl, LogWindowImpl, SwingApplicationImpl}
 import de.sciss.desktop.Menu.Root
+import de.sciss.desktop.impl.{LogWindowImpl, SwingApplicationImpl, WindowImpl}
 import de.sciss.submin.Submin
-import scala.swing.{FlowPanel, Rectangle, Button}
+
+import scala.swing.{Button, FlowPanel, Rectangle}
 
 object LogWindowTest extends SwingApplicationImpl("Log Test") {
   protected lazy val menuFactory: Root = Root()
