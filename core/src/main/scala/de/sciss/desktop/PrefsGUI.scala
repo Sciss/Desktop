@@ -77,9 +77,9 @@ object PrefsGUI {
   }
 
   def combo[A](prefs: Preferences.Entry[A], default: => A, values: Seq[A])(implicit view: A => String): Component = {
-    val gg = new ComboBox[A](values)
-    gg.renderer = swingplus.ListView.Renderer(view)
-    gg.peer.putClientProperty("JComboBox.isSquare", true)
+    val gg      = new ComboBox[A](values)
+    gg.renderer = swingplus.ListView.Renderer(view)(gg.renderer.asInstanceOf[swingplus.ListView.Renderer[String]])
+    // gg.peer.putClientProperty("JComboBox.isSquare", true)
     val idx0 = values.indexOf(prefs.getOrElse(default))
     if (idx0 >= 0) gg.selection.index = idx0
     gg.listenTo(gg.selection)
