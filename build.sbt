@@ -2,24 +2,25 @@ lazy val baseName = "Desktop"
 
 def baseNameL = baseName.toLowerCase
 
-lazy val projectVersion     = "0.7.2"
+lazy val projectVersion     = "0.7.3"
+lazy val mimaVersion        = "0.7.0"
 
 // ---- main dependencies ----
 
-lazy val modelVersion       = "0.3.2"
-lazy val swingPlusVersion   = "0.2.1"
-lazy val fileUtilVersion    = "1.1.1"
+lazy val modelVersion       = "0.3.3"
+lazy val swingPlusVersion   = "0.2.2"
+lazy val fileUtilVersion    = "1.1.2"
 lazy val orangeVersion      = "1.3.0"
 
 // ---- test dependencies ----
 
-lazy val subminVersion      = "0.1.0"
+lazy val subminVersion      = "0.2.1"
 
 lazy val commonSettings = Seq(
   version         := projectVersion,
   organization    := "de.sciss",
   scalaVersion    := "2.11.8",
-  crossScalaVersions := Seq("2.11.8", "2.10.6"),
+  crossScalaVersions := Seq("2.12.1", "2.11.8", "2.10.6"),
   homepage        := Some(url(s"https://github.com/Sciss/$baseName")),
   licenses        := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
   initialCommands in console := """import de.sciss.desktop._; import de.sciss.file._""",
@@ -71,6 +72,7 @@ lazy val core = Project(id = s"$baseNameL", base = file("core"))
       "de.sciss" %% "fileutil"  % fileUtilVersion,
       "de.sciss" %  "submin"    % subminVersion % "test"
     ),
+    mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
     // ---- build info ----
     buildInfoKeys := Seq(name, organization, version, scalaVersion, description,
       BuildInfoKey.map(homepage) { case (k, opt)           => k -> opt.get },
@@ -84,7 +86,8 @@ lazy val linux = Project(id = s"$baseNameL-linux", base = file("linux"))
   .settings(commonSettings)
   .settings(
     name        := s"$baseName-linux",
-    description := "Linux specific adaptors for Desktop"
+    description := "Linux specific adaptors for Desktop",
+    mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-linux" % mimaVersion)
   )
 
 lazy val mac = Project(id = s"$baseNameL-mac", base = file("mac"))
@@ -101,5 +104,6 @@ lazy val mac = Project(id = s"$baseNameL-mac", base = file("mac"))
           case _: ClassNotFoundException => false
         }
       if (eawt) Nil else Seq("com.yuvimasory" % "orange-extensions" % orangeVersion % "provided")
-    }
+    },
+    mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-mac" % mimaVersion)
   )
