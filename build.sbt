@@ -2,7 +2,7 @@ lazy val baseName        = "Desktop"
 lazy val baseNameL       = baseName.toLowerCase
 lazy val baseDescription = "A library for document based desktop applications"
 
-lazy val projectVersion     = "0.7.4-SNAPSHOT"
+lazy val projectVersion     = "0.7.4"
 lazy val mimaVersion        = "0.7.3"
 
 // ---- main dependencies ----
