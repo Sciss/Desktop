@@ -26,10 +26,13 @@ class PathField extends Component {
   private[this] var _title: String  = _
 
   // Note: must be lazy to be used in `peer`
-  private[this] lazy val tx = new TextField(16)
+  private[this] lazy val tx = new TextField(24)
 
   /** The default mode is `Open`. */
   var mode: FileDialog.Mode = FileDialog.Open
+
+  def textField: TextField  = tx
+  def button   : Button     = bt
 
   def title: String =
     if (_title != null) _title else mode match {
