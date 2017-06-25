@@ -2,7 +2,7 @@
  *  PathField.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2015 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -20,11 +20,13 @@ import de.sciss.file._
 import scala.swing.event.{EditDone, ValueChanged}
 import scala.swing.{Button, Component, TextField}
 
-class PathField
-  extends Component {
+class PathField extends Component {
 
-  private var _value: File = _
-  private var _title: String = _
+  private[this] var _value: File    = _
+  private[this] var _title: String  = _
+
+  // Note: must be lazy to be used in `peer`
+  private[this] lazy val tx = new TextField(16)
 
   /** The default mode is `Open`. */
   var mode: FileDialog.Mode = FileDialog.Open
@@ -57,13 +59,14 @@ class PathField
       publish(new ValueChanged(this))
     }
 
-  private lazy val tx = new TextField(16)
   tx.listenTo(tx)
   tx.reactions += {
     case EditDone(_) =>
       setValue(new File(tx.text))
   }
-  private lazy val bt = Button("…") {
+
+  // Note: must be lazy to be used in `peer`
+  private[this] lazy val bt = Button("…") {
     val dlg   = FileDialog()
     dlg.mode  = mode
     dlg.file  = valueOption
@@ -73,6 +76,14 @@ class PathField
 
   valueOption = None
   bt.tooltip = "Show File Chooser"
+
+  override def tooltip_=(value: String): Unit = {
+    super.tooltip_=(value)
+    tx.tooltip = value
+  }
+
+  override def requestFocus()         : Unit    = tx.requestFocus()
+  override def requestFocusInWindow() : Boolean = tx.requestFocusInWindow()
 
   override lazy val peer: JComponent =
     new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.TRAILING, 0, 0)) with SuperMixin {

@@ -1,14 +1,14 @@
-lazy val baseName = "Desktop"
+lazy val baseName        = "Desktop"
+lazy val baseNameL       = baseName.toLowerCase
+lazy val baseDescription = "A library for document based desktop applications"
 
-def baseNameL = baseName.toLowerCase
-
-lazy val projectVersion     = "0.7.3"
-lazy val mimaVersion        = "0.7.0"
+lazy val projectVersion     = "0.7.4-SNAPSHOT"
+lazy val mimaVersion        = "0.7.3"
 
 // ---- main dependencies ----
 
-lazy val modelVersion       = "0.3.3"
-lazy val swingPlusVersion   = "0.2.2"
+lazy val modelVersion       = "0.3.4"
+lazy val swingPlusVersion   = "0.2.3"
 lazy val fileUtilVersion    = "1.1.2"
 lazy val orangeVersion      = "1.3.0"
 
@@ -19,8 +19,8 @@ lazy val subminVersion      = "0.2.1"
 lazy val commonSettings = Seq(
   version         := projectVersion,
   organization    := "de.sciss",
-  scalaVersion    := "2.11.8",
-  crossScalaVersions := Seq("2.12.1", "2.11.8", "2.10.6"),
+  scalaVersion    := "2.12.2",
+  crossScalaVersions := Seq("2.12.2", "2.11.11", "2.10.6"),
   homepage        := Some(url(s"https://github.com/Sciss/$baseName")),
   licenses        := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
   initialCommands in console := """import de.sciss.desktop._; import de.sciss.file._""",
@@ -52,20 +52,25 @@ lazy val commonSettings = Seq(
   }
 )
 
-lazy val root = Project(id = "root", base = file("."))
+lazy val root = Project(id = baseNameL, base = file("."))
   .aggregate(core, linux, mac)
   .dependsOn(core, linux, mac)
   .settings(commonSettings)
   .settings(
-    packagedArtifacts := Map.empty           // prevent publishing anything!
+    description := baseDescription,
+    publishArtifact in(Compile, packageBin) := false, // there are no binaries
+    publishArtifact in(Compile, packageDoc) := false, // there are no javadocs
+    publishArtifact in(Compile, packageSrc) := false, // there are no sources
+    // packagedArtifacts := Map.empty
+    autoScalaLibrary := false
   )
 
-lazy val core = Project(id = s"$baseNameL", base = file("core"))
+lazy val core = Project(id = s"$baseNameL-core", base = file("core"))
   .enablePlugins(BuildInfoPlugin)
   .settings(commonSettings)
   .settings(
-    name        := s"$baseName",
-    description := "A library for document based desktop applications",
+    name        := s"$baseName-core",
+    description := baseDescription,
     libraryDependencies ++= Seq(
       "de.sciss" %% "model"     % modelVersion,
       "de.sciss" %% "swingplus" % swingPlusVersion,

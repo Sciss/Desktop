@@ -2,7 +2,7 @@
  *  LinuxPlatform.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2015 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -28,9 +28,33 @@ import scala.swing.Image
 object LinuxPlatform extends Platform {
   override def toString = "LinuxPlatform"
 
+  private[this] val execDirs = Array[String]("/usr/local/bin", "/usr/bin")
+
+  private def findExec(fileName: String): Option[File] = {
+    var i = 0
+    val folders = execDirs
+    while (i < folders.length) {
+      val folder = folders(i)
+      val f = new File(folder, fileName)
+      if (f.canExecute) return Some(f)
+      i += 1
+    }
+    None
+  }
+
   def revealFile(file: File): Unit = {
+    val fileAbs = file.absolute
     import sys.process._
-    Seq("xdg-open", file.absolutePath).!
+    findExec("nautilus") match {
+      case Some(cmd) => Seq(cmd.path, fileAbs.path).!
+      case None =>
+        for {
+          cmd     <- findExec("xdg-open")
+          parent  <- fileAbs.parentOption
+        } {
+          Seq(cmd.path, parent.path).!
+        }
+    }
   }
 
   private def xdgDataHome(): File = sys.env.get("XDG_DATA_HOME").fold(userHome / ".local" / "share")(file)
