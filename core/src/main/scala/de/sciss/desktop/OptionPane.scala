@@ -31,7 +31,9 @@ object OptionPane {
               focus: Option[Component] = None): OptionPane[Unit] =
     new Impl[Unit] {
       protected lazy val _messageType: Message.Value = messageType
+
       lazy val peer = new JOption(message, messageType, Options.Default, icon, Nil, None, focus)
+
       def result: Unit = ()
     }
 
@@ -40,7 +42,9 @@ object OptionPane {
                    focus: Option[Component] = None): OptionPane[Result.Value] =
     new Impl[Result.Value] {
       protected lazy val _messageType: Message.Value = messageType
+
       lazy val peer = new JOption(message, messageType, optionType, icon, Nil, None, focus)
+
       def result: Result.Value = {
         val j = peer.getValue match {
           case i: Integer => i.intValue()
@@ -54,6 +58,7 @@ object OptionPane {
                initial: String): OptionPane[Option[String]] =
     new Impl[Option[String]] {
       protected lazy val _messageType: Message.Value = messageType
+
       lazy val peer = new JOption(message, messageType, Options.OkCancel, icon, Nil, None, None)
 
       peer.setWantsInput(true)
@@ -69,6 +74,7 @@ object OptionPane {
                options: Seq[A], initial: A): OptionPane[Option[A]] =
     new Impl[Option[A]] {
       protected lazy val _messageType: Message.Value = messageType
+
       lazy val peer = new JOption(message, messageType, Options.OkCancel, icon, Nil, None, None)
 
       peer.setWantsInput(true)
@@ -87,7 +93,9 @@ object OptionPane {
             focus: Option[Component] = None): OptionPane[Result.Value] =
     new Impl[Result.Value] {
       protected lazy val _messageType: Message.Value = messageType
+
       lazy val peer = new JOption(message, messageType, optionType, icon, entries, initial, focus)
+
       def result: Result.Value = {
         val i = peer.getValue
         val j = if (i == null) JOptionPane.CLOSED_OPTION else {
@@ -107,7 +115,9 @@ object OptionPane {
 
   private abstract class Impl[A] extends OptionPane[A] {
     override def toString = s"OptionPane@${hashCode().toHexString}"
+
     protected def _messageType: Message.Value
+
     var title: String = _messageType match {
       case Message.Plain    => "Message"
       case Message.Info     => "Notice"
@@ -115,6 +125,9 @@ object OptionPane {
       case Message.Warning  => "Warning"
       case Message.Error    => "Error"
     }
+
+    var modal     = true
+    var resizable = false
   }
 
   private def wrapMessage(message: Any): Any = message match {
@@ -139,15 +152,19 @@ object OptionPane {
 }
 sealed trait OptionPane[A] extends DialogSource[A] {
   /** The underlying `javax.swing` peer. */
-  def peer: j.JOptionPane
-  def result: A
-  var title: String
+  def peer      : j.JOptionPane
+  def result    : A
+  var title     : String
+  var modal     : Boolean
+  var resizable : Boolean
 
-  def show(window: Option[Window]): A = show(window, this.title)
+  def show(window: Option[Window]): A = show(window, title = title)
 
   def show(window: Option[Window] = None, title: String = this.title): A = {
     val parent  = window.map(Window.peer).orNull
     val jDlg    = peer.createDialog(parent, title)
+    if (!modal   ) jDlg.setModal    (false)
+    if (resizable) jDlg.setResizable(true )
     jDlg.setVisible(true)
     window.foreach(_.front())
     result

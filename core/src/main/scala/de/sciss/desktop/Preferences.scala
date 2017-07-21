@@ -43,6 +43,7 @@ object Preferences {
     def get: Option[A]
     def getOrElse(default: => A): A
     def put(value: A): Unit
+    def remove(): Unit
   }
 
   object Type {
@@ -112,6 +113,8 @@ trait Preferences {
   def getOrElse[A: Type](key: String, default: => A): A
   def put[A: Type](key: String, value: A): Unit
   def / (key: String): Preferences
+
+  def remove(key: String): Unit
 
   def apply[A: Type](key: String): Preferences.Entry[A]
 }

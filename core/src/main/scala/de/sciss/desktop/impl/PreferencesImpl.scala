@@ -48,8 +48,12 @@ object PreferencesImpl {
       preferences.peer.removePreferenceChangeListener(prefsListener)
 
     def get: Option[A] = preferences.get(key)
+
     def getOrElse(default: => A): A = preferences.getOrElse(key, default)
+
     def put(value: A): Unit = preferences.put(key, value)
+
+    def remove(): Unit = preferences.remove(key)
   }
 
   private final class Impl(val peer: j.Preferences, isSystem: Boolean, name: String) extends Preferences {
@@ -73,5 +77,7 @@ object PreferencesImpl {
 
     def put[A](key: String, value: A)(implicit tpe: Type[A]): Unit =
       peer.put(key, tpe.toString(value))
+
+    def remove(key: String): Unit = peer.remove(key)
   }
 }

@@ -14,19 +14,26 @@
 package de.sciss
 package desktop
 
+import de.sciss.desktop.OptionPane.Result
+
 object DialogSource {
   implicit final class Dialog(val source: swing.Dialog) extends DialogSource[Unit] {
     def show(window: Option[Window]): Unit = source.open()
   }
 
+  def exceptionToOptionPane(exception: scala.Throwable): OptionPane[Result.Value] = {
+    val message   = Util.formatException(exception, margin = 40, stackTraceLines = 0)
+    val optionOk  = "Ok"
+    val options   = Seq(optionOk, "Show Stack Trace")
+    val op        = desktop.OptionPane(message = message, messageType = desktop.OptionPane.Message.Error,
+      optionType = desktop.OptionPane.Options.YesNo, entries = options, initial = Some(optionOk))
+    op
+  }
+
   implicit final class Exception(val source: (scala.Throwable, String)) extends DialogSource[Unit] {
     def show(window: Option[Window]): Unit = {
       val (exception, title) = source
-      val message   = Util.formatException(exception, margin = 40, stackTraceLines = 0)
-      val optionOk  = "Ok"
-      val options   = Seq(optionOk, "Show Stack Trace")
-      val op = desktop.OptionPane(message = message, messageType = desktop.OptionPane.Message.Error,
-        optionType = desktop.OptionPane.Options.YesNo, entries = options, initial = Some(optionOk))
+      val op = exceptionToOptionPane(exception)
       op.title = title
 
       if (op.show(window).id == 1) {
