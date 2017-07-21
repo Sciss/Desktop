@@ -55,7 +55,7 @@ private[desktop] object MenuImpl {
 
   def popupApply(): Menu.Popup = new Popup
 
-  def aboutApply(app: SwingApplication)(action: => Unit): Menu.Item = {
+  def aboutApply(app: SwingApplication[_])(action: => Unit): Menu.Item = {
     val supported = Desktop.platform.setAboutHandler(action)
     val text      = s"About ${app.name}" // XXX TODO: localization? shortcuts?
     val item      = Menu.Item("about")(text)(action)
@@ -63,7 +63,7 @@ private[desktop] object MenuImpl {
     item
   }
 
-  def prefsApply(app: SwingApplication)(action: => Unit): Menu.Item = {
+  def prefsApply(app: SwingApplication[_])(action: => Unit): Menu.Item = {
     val supported = Desktop.platform.setPreferencesHandler(action)
     // XXX TODO: localization? shortcuts?
     // cf. http://kb.mozillazine.org/Menu_differences_in_Windows,_Linux,_and_Mac
@@ -79,7 +79,7 @@ private[desktop] object MenuImpl {
     item
   }
 
-  def quitApply(app: SwingApplication): Menu.Item = {
+  def quitApply(app: SwingApplication[_]): Menu.Item = {
     val supported = Desktop.isQuitSupported
     val attr: Attributes = if (Desktop.isWindows)
       "Exit" -> (KeyStrokes.menu1 + Key.Q)  // isn't it (KeyStrokes.alt + Key.F4)? Most programs seem to use Ctrl-Q
@@ -105,7 +105,7 @@ private[desktop] object MenuImpl {
     accelerator = stroke
 
     override def toString = s"proxy($title)"
-    def apply() = ()
+    def apply(): Unit = ()
   }
 
   //  private[this] var _checkBoxSelected = false
@@ -155,10 +155,10 @@ private[desktop] object MenuImpl {
     private var mapWindowActions  = Map.empty[Window, Action] withDefaultValue action
     private var _visible          = true
 
-    final def enabled = action.enabled
+    final def enabled: Boolean = action.enabled
     final def enabled_=(value: Boolean): Unit = action.enabled = value
 
-    final def visible = _visible
+    final def visible: Boolean = _visible
     final def visible_=(value: Boolean): Unit =
       if (_visible != value) {
         _visible = value
@@ -401,7 +401,7 @@ private[desktop] object MenuImpl {
       destroyProxy(w)
     }
 
-    final def enabled = _enabled
+    final def enabled: Boolean = _enabled
     final def enabled_=(value: Boolean): Unit = { // XXX TODO: should we filter _enabled != value ?
       _enabled = value
       realizedIterator.foreach(_._2.enabled = value)

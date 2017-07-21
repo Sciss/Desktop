@@ -70,9 +70,9 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
   val writer: Writer = new Writer {
     override def toString = s"$pane.writer"
 
-    def close() = ()
+    def close(): Unit = ()
 
-    def flush() = ()
+    def flush(): Unit = ()
 
     def write(ch: Array[Char], off: Int, len: Int): Unit = {
       val str = new String(ch, off, len)

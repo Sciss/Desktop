@@ -15,10 +15,12 @@ package de.sciss.desktop
 package impl
 
 import javax.{swing => j}
-import javax.swing.undo.{UndoableEdit, CannotRedoException, CannotUndoException, CompoundEdit}
+import javax.swing.undo.{CannotRedoException, CannotUndoException, CompoundEdit, UndoableEdit}
+
 import swing.Action
 import javax.swing.KeyStroke
 import java.awt.event.{InputEvent, KeyEvent}
+import java.util
 
 class UndoManagerImpl extends UndoManager {
   manager =>
@@ -66,7 +68,7 @@ class UndoManagerImpl extends UndoManager {
     override def editToBeUndone: UndoableEdit = super.editToBeUndone
     override def editToBeRedone: UndoableEdit = super.editToBeRedone
 
-    def _edits = edits  // widening visibility
+    def _edits: util.Vector[UndoableEdit] = edits  // widening visibility
 
     override def addEdit(anEdit: UndoableEdit): Boolean = {
       if (anEdit.isSignificant) {

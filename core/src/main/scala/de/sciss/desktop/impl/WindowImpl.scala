@@ -38,7 +38,7 @@ object WindowImpl {
       extends Delegate with InternalFrameListener {
       delegate =>
 
-      val component: RootPanel = new RootPanel { def peer = delegate.peer }
+      val component: RootPanel = new RootPanel { def peer: JInternalFrame = delegate.peer }
       val reactions: Reactions = new Reactions.Impl
 
       peer.addInternalFrameListener(this)
@@ -184,7 +184,7 @@ trait WindowStub extends Window {
 
   protected def style: Window.Style = Window.Regular
 
-  final protected def application: SwingApplication = handler.application
+  final protected def application: SwingApplication[_] = handler.application
 
   final def size                  : Dimension                     = component.size
   final def size_=          (value: Dimension             ): Unit = component.peer.setSize(value)
@@ -223,8 +223,10 @@ trait WindowStub extends Window {
   final def visible               : Boolean                       = component.visible
   final def visible_=       (value: Boolean               ): Unit = component.visible = value
 
-  private var _dirty = false
+  private[this] var _dirty = false
+
   final def dirty: Boolean = _dirty
+
   final def dirty_=(value: Boolean): Unit =
     if (_dirty != value) {
       _dirty = value
@@ -259,15 +261,19 @@ trait WindowStub extends Window {
   // 		}
   // 	}
 
-  private var _file = Option.empty[File]
-  final def file = _file
+  private[this] var _file = Option.empty[File]
+
+  final def file: Option[File] = _file
+
   final def file_=(value: Option[File]): Unit = {
     _file = value
     putClientProperty("Window.documentFile", value.orNull)
   }
 
-  private var _alpha = 1f
-  final def alpha = _alpha
+  private[this] var _alpha = 1f
+
+  final def alpha: Float = _alpha
+
   final def alpha_=(value: Float): Unit = {
     _alpha = value
     putClientProperty("Window.alpha", value)

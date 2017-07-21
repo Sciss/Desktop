@@ -13,11 +13,12 @@
 
 package de.sciss.desktop
 
+import javax.swing.{Icon, JOptionPane}
 import javax.{swing => j}
-import scala.swing._
-import javax.swing.{JOptionPane, Icon}
+
+import scala.collection.breakOut
 import scala.swing.Swing.EmptyIcon
-import collection.breakOut
+import scala.swing._
 
 object OptionPane {
   val Message = Dialog.Message
@@ -29,16 +30,16 @@ object OptionPane {
   def message(message: Any, messageType: Message.Value = Message.Info, icon: Icon = EmptyIcon,
               focus: Option[Component] = None): OptionPane[Unit] =
     new Impl[Unit] {
-      protected lazy val _messageType = messageType
+      protected lazy val _messageType: Message.Value = messageType
       lazy val peer = new JOption(message, messageType, Options.Default, icon, Nil, None, focus)
-      def result = ()
+      def result: Unit = ()
     }
 
   def confirmation(message: Any, optionType: Options.Value = Options.YesNo,
                    messageType: Message.Value = Message.Question, icon: Icon = EmptyIcon,
                    focus: Option[Component] = None): OptionPane[Result.Value] =
     new Impl[Result.Value] {
-      protected lazy val _messageType = messageType
+      protected lazy val _messageType: Message.Value = messageType
       lazy val peer = new JOption(message, messageType, optionType, icon, Nil, None, focus)
       def result: Result.Value = {
         val j = peer.getValue match {
@@ -52,13 +53,13 @@ object OptionPane {
   def textInput(message: Any, messageType: Message.Value = Message.Question, icon: Icon = EmptyIcon,
                initial: String): OptionPane[Option[String]] =
     new Impl[Option[String]] {
-      protected lazy val _messageType = messageType
+      protected lazy val _messageType: Message.Value = messageType
       lazy val peer = new JOption(message, messageType, Options.OkCancel, icon, Nil, None, None)
 
       peer.setWantsInput(true)
       peer.setInitialSelectionValue(initial)
 
-      def result = peer.getInputValue match {
+      def result: Option[String] = peer.getInputValue match {
         case JOptionPane.UNINITIALIZED_VALUE => None
         case value => Some(value.toString)
       }
@@ -67,7 +68,7 @@ object OptionPane {
   def comboInput[A](message: Any, messageType: Message.Value = Message.Question, icon: Icon = EmptyIcon,
                options: Seq[A], initial: A): OptionPane[Option[A]] =
     new Impl[Option[A]] {
-      protected lazy val _messageType = messageType
+      protected lazy val _messageType: Message.Value = messageType
       lazy val peer = new JOption(message, messageType, Options.OkCancel, icon, Nil, None, None)
 
       peer.setWantsInput(true)
@@ -75,7 +76,7 @@ object OptionPane {
       peer.setSelectionValues(if (options.isEmpty) new Array[AnyRef](0) else optionsToJava(options))
       peer.setInitialSelectionValue(initial)
 
-      def result = peer.getInputValue match {
+      def result: Option[A] = peer.getInputValue match {
         case JOptionPane.UNINITIALIZED_VALUE => None
         case value => Option(value.asInstanceOf[A]) // with empty options, value might be null
       }
@@ -85,7 +86,7 @@ object OptionPane {
             icon: Icon = EmptyIcon, entries: Seq[Any] = Nil, initial: Option[Any] = None,
             focus: Option[Component] = None): OptionPane[Result.Value] =
     new Impl[Result.Value] {
-      protected lazy val _messageType = messageType
+      protected lazy val _messageType: Message.Value = messageType
       lazy val peer = new JOption(message, messageType, optionType, icon, entries, initial, focus)
       def result: Result.Value = {
         val i = peer.getValue
@@ -107,7 +108,7 @@ object OptionPane {
   private abstract class Impl[A] extends OptionPane[A] {
     override def toString = s"OptionPane@${hashCode().toHexString}"
     protected def _messageType: Message.Value
-    var title = _messageType match {
+    var title: String = _messageType match {
       case Message.Plain    => "Message"
       case Message.Info     => "Notice"
       case Message.Question => "Request"

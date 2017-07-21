@@ -14,10 +14,11 @@
 package de.sciss.desktop
 package impl
 
-import scala.swing.{ScrollPane, Swing}
-import java.io.{PrintStream, OutputStream}
-import javax.swing.BorderFactory
+import java.io.{OutputStream, PrintStream}
+
 import de.sciss.desktop
+
+import scala.swing.Swing
 
 abstract class LogWindowImpl extends WindowImpl {
   frame =>

@@ -11,7 +11,15 @@ import de.sciss.submin.Submin
 import scala.swing.Swing._
 import scala.swing.{Action, FlowPanel, Label, ScrollPane, TextArea}
 
-object TextEdit extends SwingApplicationImpl("TextEdit") { app =>
+class TextEditDocument {
+  var file  = Option.empty[File]
+  val peer  = new PlainDocument()
+  def name: String = file.fold("Untitled")(_.base)
+}
+
+object TextEdit extends SwingApplicationImpl[TextEditDocument]("TextEdit") { app =>
+  type Document = TextEditDocument
+
   val USE_WEBLAF = true
 
   override protected def init(): Unit = if (USE_WEBLAF) {
@@ -47,12 +55,12 @@ object TextEdit extends SwingApplicationImpl("TextEdit") { app =>
     recent.add(file)  // put it to the front
   }
 
-  protected lazy val miDarkBackground = {
+  protected lazy val miDarkBackground: Menu.CheckBox = {
     import de.sciss.desktop.Menu._
     CheckBox("darkBg", proxy("Dark Background"))
   }
 
-  protected lazy val menuFactory = {
+  protected lazy val menuFactory: Menu.Root = {
     import de.sciss.desktop.KeyStrokes._
     import de.sciss.desktop.Menu._
 
@@ -95,16 +103,11 @@ object TextEdit extends SwingApplicationImpl("TextEdit") { app =>
     OptionPane.message(new FlowPanel(lb, pf)).show(title = "Preferences")
   }
 
-  class Document {
-    var file  = Option.empty[File]
-    val peer  = new PlainDocument()
-    def name: String = file.fold("Untitled")(_.base)
-  }
-
   private class DocumentWindow(document: Document) extends WindowImpl {
     win =>
 
-    def handler = TextEdit.windowHandler
+    def handler: WindowHandler = TextEdit.windowHandler
+
     title = document.name
     size  = (400, 200)
     file  = document.file

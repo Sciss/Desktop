@@ -47,17 +47,17 @@ object Preferences {
 
   object Type {
     implicit object string extends Type[String] {
-      def toString(value: String) = value
+      def toString(value: String): String = value
       def valueOf(string: String): Option[String] = Some(string)
     }
 
     implicit object file extends Type[File] {
-      def toString(value: File) = value.getPath
+      def toString(value: File): String = value.getPath
       def valueOf(string: String): Option[File] = Some(new File(string))
     }
 
     implicit object files extends Type[List[File]] {
-      def toString(value: List[File]) = value.map(_.getPath).mkString(File.pathSep.toString)
+      def toString(value: List[File]): String = value.map(_.getPath).mkString(File.pathSep.toString)
       def valueOf(string: String): Option[List[File]] = {
         val tok = new StringTokenizer(string, File.pathSep.toString)
         val b   = List.newBuilder[File]
@@ -67,7 +67,7 @@ object Preferences {
     }
 
     implicit object int extends Type[Int] {
-      def toString(value: Int) = value.toString
+      def toString(value: Int): String = value.toString
       def valueOf(string: String): Option[Int] = try {
         Some(string.toInt)
       } catch {
@@ -76,7 +76,7 @@ object Preferences {
     }
 
     implicit object boolean extends Type[Boolean] {
-      def toString(value: Boolean) = value.toString
+      def toString(value: Boolean): String = value.toString
       def valueOf(string: String): Option[Boolean] = try {
         Some(string.toBoolean)
       } catch {

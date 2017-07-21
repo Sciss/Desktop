@@ -57,7 +57,7 @@ object PreferencesImpl {
 
     override def toString = s"Preferences.${if (isSystem) "system" else "user"}($name)"
 
-    def apply[A: Type](key: String) = Preferences.Entry[A](this, key)
+    def apply[A: Type](key: String): Preferences.Entry[A] = Preferences.Entry(this, key)
 
     def / (key: String): Preferences = new Impl(peer.node(key), isSystem = isSystem, name = s"$name.key")
 

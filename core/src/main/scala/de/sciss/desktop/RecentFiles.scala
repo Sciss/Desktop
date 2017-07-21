@@ -21,7 +21,7 @@ import de.sciss.file.File
 object RecentFiles {
   private lazy val _defaultKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_O, Window.menuShortcut + InputEvent.ALT_MASK)
 
-  def defaultKeyStroke = _defaultKeyStroke
+  def defaultKeyStroke: KeyStroke = _defaultKeyStroke
 
   def apply(entry: Preferences.Entry[List[File]], maxItems: Int = 10,
             keyStroke: Option[KeyStroke] = Some(defaultKeyStroke))

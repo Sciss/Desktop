@@ -8,7 +8,7 @@ import de.sciss.submin.Submin
 import scala.swing.Swing._
 import scala.swing.event.Key
 
-object WindowHandlerTest extends SwingApplicationImpl("Window Handler Test") {
+object WindowHandlerTest extends SwingApplicationImpl[Unit]("Window Handler Test") {
   type Document = Unit
 
   override lazy val windowHandler: WindowHandler = new WindowHandlerImpl(this, menuFactory) {
@@ -19,7 +19,7 @@ object WindowHandlerTest extends SwingApplicationImpl("Window Handler Test") {
   lazy val menuFactory: Root = Root().add(Group("file", "File")
     .add(Item("new")("New" -> (menu1 + Key.N)) {
       new WindowImpl {
-        def handler = windowHandler
+        def handler: WindowHandler = windowHandler
         override def style: Window.Style = Window.Auxiliary
         title     = "Foo Bar"
         size      = (300, 300)
@@ -35,7 +35,7 @@ object WindowHandlerTest extends SwingApplicationImpl("Window Handler Test") {
     Submin.install(isDark)
 
     new WindowImpl { win =>
-      def handler = windowHandler
+      def handler: WindowHandler = windowHandler
 
       //      val Some(Group(mFile))  = menuFactory.get("file")
       //      val Some(Item(it))      = mFile.get("new")

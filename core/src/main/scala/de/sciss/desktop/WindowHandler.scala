@@ -50,7 +50,7 @@ package de.sciss.desktop
 //  //  def showAction(w: Window): Action = Impl.showAction(w)
 //}
 trait WindowHandler {
-  def application: SwingApplication
+  def application: SwingApplication[_]
 
   def addWindow   (w: Window): Unit
   def removeWindow(w: Window): Unit

@@ -16,14 +16,14 @@ package impl
 
 import de.sciss.model.impl.ModelImpl
 
-class DocumentHandlerImpl[A] extends DocumentHandler with ModelImpl[DocumentHandler.Update[A]] {
+class DocumentHandlerImpl[A] extends DocumentHandler[A] with ModelImpl[DocumentHandler.Update[A]] {
   private var _active     = Option.empty[Document]
   private var _documents  = Vector.empty[Document]
   private val sync        = new AnyRef
 
   final type Document = A
 
-  override def toString = "DocumentHandler@" + hashCode().toHexString
+  override def toString = s"DocumentHandler@${hashCode().toHexString}"
 
   final def documents: Iterator[Document] = _documents.iterator
 

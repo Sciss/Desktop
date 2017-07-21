@@ -56,9 +56,9 @@ object FileDialog {
 
     import FileChooser.SelectionMode.{DirectoriesOnly, FilesOnly}
 
-    private var _owner: awt.Frame = null
-    private var peerInit = false
-    private var _multiple = false
+    private[this] var _owner: awt.Frame = _
+    private[this] var peerInit  = false
+    private[this] var _multiple = false
 
     def multiple: Boolean = _multiple
     def multiple_=(value: Boolean): Unit =
@@ -118,8 +118,10 @@ object FileDialog {
     // note: compatible with JFileChooser (LOAD == OPEN_DIALOG, SAVE == SAVE_DIALOG)
     private def awtMode: Int = if (_mode == Save) awt.FileDialog.SAVE else awt.FileDialog.LOAD
 
-    private var _mode: Mode = Open
-    def mode = _mode
+    private[this] var _mode: Mode = Open
+
+    def mode: Mode = _mode
+
     def mode_=(value: Mode): Unit =
       if (_mode != value) {
         _mode = value
@@ -133,8 +135,10 @@ object FileDialog {
         }
       }
 
-    private var _title = "Open"
-    def title = _title
+    private[this] var _title = "Open"
+
+    def title: String = _title
+
     def title_=(value: String): Unit =
       if (_title != value) {
         _title = value
@@ -146,8 +150,10 @@ object FileDialog {
         }
       }
 
-    private var _filter = Option.empty[File => Boolean]
-    def filter = _filter
+    private[this] var _filter = Option.empty[File => Boolean]
+
+    def filter: Option[(File) => Boolean] = _filter
+
     def filter_=(value: Option[File => Boolean]): Unit =
       if (_filter != value) {
         _filter = value
@@ -162,7 +168,7 @@ object FileDialog {
     // got to have sum fun!
     def setFilter(fun: (File) => Boolean): Unit = filter = Some(fun)
 
-    private var _file = Option.empty[File]
+    private[this] var _file = Option.empty[File]
 
     def file: Option[File] = {
       if (peerInit) {

@@ -21,10 +21,8 @@ object DocumentHandler {
 
   type Listener[A] = PartialFunction[Update[A], Unit]
 }
-trait DocumentHandler {
+trait DocumentHandler[Document] {
   import DocumentHandler._
-
-  type Document
 
   var activeDocument: Option  [Document]
   def documents     : Iterator[Document]

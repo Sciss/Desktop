@@ -22,13 +22,13 @@ import scala.swing.Component
 trait DynamicComponentImpl {
   _: Component =>
 
-  private var listening   = false
-  private var win         = Option.empty[awt.Window]
+  private[this] var listening   = false
+  private[this] var win         = Option.empty[awt.Window]
 
   protected def componentShown (): Unit
   protected def componentHidden(): Unit
 
-  final def isListening = listening
+  final def isListening: Boolean = listening
 
   // ---- constructor ----
   peer.addAncestorListener(listener)
@@ -69,17 +69,17 @@ trait DynamicComponentImpl {
     def windowOpened     (e: WindowEvent): Unit = startListening()
  		def windowClosed     (e: WindowEvent): Unit = stopListening ()
 
-    def windowClosing    (e: WindowEvent) = ()
-    def windowIconified  (e: WindowEvent) = ()
-    def windowDeiconified(e: WindowEvent) = ()
-    def windowActivated  (e: WindowEvent) = ()
-    def windowDeactivated(e: WindowEvent) = ()
+    def windowClosing    (e: WindowEvent): Unit = ()
+    def windowIconified  (e: WindowEvent): Unit = ()
+    def windowDeiconified(e: WindowEvent): Unit = ()
+    def windowActivated  (e: WindowEvent): Unit = ()
+    def windowDeactivated(e: WindowEvent): Unit = ()
 
     def componentShown  (e: ComponentEvent): Unit = startListening()
     def componentHidden (e: ComponentEvent): Unit = stopListening ()
 
-    def componentResized(e: ComponentEvent) = ()
-    def componentMoved  (e: ComponentEvent) = ()
+    def componentResized(e: ComponentEvent): Unit = ()
+    def componentMoved  (e: ComponentEvent): Unit = ()
 
     def ancestorAdded(e: AncestorEvent): Unit = {
       val c = Option(e.getComponent.getTopLevelAncestor)
@@ -91,7 +91,7 @@ trait DynamicComponentImpl {
 
     def ancestorRemoved(e: AncestorEvent): Unit = forgetWindow()
 
-    def ancestorMoved  (e: AncestorEvent) = ()
+    def ancestorMoved  (e: AncestorEvent): Unit = ()
   }
 
 //	def remove(): Unit = {

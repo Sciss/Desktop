@@ -18,7 +18,7 @@ import java.awt.Rectangle
 import javax.swing.{JInternalFrame, JDesktopPane}
 import scala.collection.immutable.{IndexedSeq => Vec}
 
-/* final */ class WindowHandlerImpl(val application: SwingApplication, val menuFactory: Menu.Root)
+/* final */ class WindowHandlerImpl[Document](val application: SwingApplication[Document], val menuFactory: Menu.Root)
   extends WindowHandler {
 
   impl =>
@@ -67,10 +67,11 @@ import scala.collection.immutable.{IndexedSeq => Vec}
     import WindowImpl._
 
     // protected def style = Window.Regular
-    def handler = impl
+    def handler: WindowHandler = impl
 
     private val frame = new swing.Frame
-    protected val delegate =
+
+    protected val delegate: Delegate =
       Delegate.frame(this, frame, hasMenuBar = true, screen = impl.usesScreenMenuBar)
 
     if (Desktop.isMac) {

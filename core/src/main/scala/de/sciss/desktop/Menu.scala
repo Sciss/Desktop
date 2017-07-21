@@ -35,7 +35,7 @@ object Menu {
   }
   object Line extends Element {
     def create (window: Window) = new swing.Separator
-    def destroy(window: Window) = ()
+    def destroy(window: Window): Unit = ()
   }
 
   sealed trait ItemLike[+C <: swing.MenuItem] extends Node[C] {
@@ -67,7 +67,7 @@ object Menu {
       * @param action   the action to execute when the menu item is selected
       * @return         the menu item, possibly a dummy in which case its `visible` attribute is `false`
       */
-    def About(app: SwingApplication)(action: => Unit): Item = Impl.aboutApply(app)(action)
+    def About(app: SwingApplication[_])(action: => Unit): Item = Impl.aboutApply(app)(action)
 
     /** Creates a special 'Preferences' menu item. If the platform has a special
       * place for this item, the returned object indicates this by being `!visible`.
@@ -81,7 +81,7 @@ object Menu {
       * @param action   the action to execute when the menu item is selected
       * @return         the menu item, possibly a dummy in which case its `visible` attribute is `false`
       */
-    def Preferences(app: SwingApplication)(action: => Unit): Item = Impl.prefsApply(app)(action)
+    def Preferences(app: SwingApplication[_])(action: => Unit): Item = Impl.prefsApply(app)(action)
 
     /** Creates a special 'Quit' menu item. If the platform has a special
       * place for this item, the returned object indicates this by being `!visible`.
@@ -97,7 +97,7 @@ object Menu {
       * @param app      the Swing application which is used to determine the item name.
       * @return         the menu item, possibly a dummy in which case its `visible` attribute is `false`
       */
-    def Quit(app: SwingApplication): Item = Impl.quitApply(app)
+    def Quit(app: SwingApplication[_]): Item = Impl.quitApply(app)
   }
   trait Item extends Node[swing.MenuItem] with ItemLike[swing.MenuItem]
 
@@ -129,8 +129,8 @@ object Menu {
       def keyStroke   = None
     }
     implicit final class TextAndKeyStroke(tup: (String, KeyStroke)) extends Attributes {
-      def text        = tup._1
-      def keyStroke   = Some(tup._2)
+      def text      : String            = tup._1
+      def keyStroke : Option[KeyStroke] = Some(tup._2)
     }
   }
   sealed trait Attributes {

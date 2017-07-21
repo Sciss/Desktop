@@ -22,7 +22,7 @@ object KeyStrokes {
 
   object Modifiers {
     //    def unapply(modifiers: Modifiers): Option[Int] = Some(modifiers.mask)
-    def apply(mask: Int): Modifiers = new Impl(mask)
+    def apply(mask: Int): Modifiers = Impl(mask)
 
     final case class Impl(mask: Int) extends Modifiers {
       override def productPrefix = "Modifiers"
@@ -43,7 +43,7 @@ object KeyStrokes {
     def apply(code: Int ): KeyStroke = KeyStroke.getKeyStroke(code, 0)
     def apply(char: Char): KeyStroke = KeyStroke.getKeyStroke(char)
   }
-  case object menu1 extends Modifiers { val mask = Window.menuShortcut }
-  case object menu2 extends Modifiers { val mask = if (menu1.mask == CTRL_MASK) CTRL_MASK | ALT_MASK   else CTRL_MASK }
-  case object menu3 extends Modifiers { val mask = if (menu1.mask == CTRL_MASK) CTRL_MASK | SHIFT_MASK else CTRL_MASK }
+  case object menu1 extends Modifiers { val mask: Int = Window.menuShortcut }
+  case object menu2 extends Modifiers { val mask: Int = if (menu1.mask == CTRL_MASK) CTRL_MASK | ALT_MASK   else CTRL_MASK }
+  case object menu3 extends Modifiers { val mask: Int = if (menu1.mask == CTRL_MASK) CTRL_MASK | SHIFT_MASK else CTRL_MASK }
 }

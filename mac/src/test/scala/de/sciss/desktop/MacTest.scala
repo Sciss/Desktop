@@ -52,8 +52,8 @@ object MacTest extends App with Runnable {
       def openFiles(e: OpenFilesEvent): Unit = {
         println("OPEN FILES")
         println(s"search term = '${e.getSearchTerm}'")
-        import scala.collection.JavaConversions._
-        println(s"files = ${e.getFiles.mkString("[", ", ", "]")}")
+        import scala.collection.JavaConverters._
+        println(s"files = ${e.getFiles.asScala.mkString("[", ", ", "]")}")
       }
     })
 
@@ -152,7 +152,7 @@ object MacTest extends App with Runnable {
     }
 
     new JFrame("MacAdaptor") {
-      val cp = getContentPane
+      private[this] val cp = getContentPane
       val ggAttFalse = new JButton("Attention (false)")
       count(ggAttFalse)(app.requestUserAttention(false))
       val ggAttTrue = new JButton("Attention (true)")

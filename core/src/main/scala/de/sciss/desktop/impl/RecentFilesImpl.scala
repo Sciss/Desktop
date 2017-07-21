@@ -35,7 +35,7 @@ class RecentFilesImpl(entry: Preferences.Entry[List[File]], maxItems: Int, actio
   import de.sciss.desktop.impl.RecentFilesImpl._
 
   private final class FileAction extends Action("file") {
-    var file = dummyFile
+    var file: File = dummyFile
 
     def apply(): Unit =
       if (file != dummyFile) action(file)
