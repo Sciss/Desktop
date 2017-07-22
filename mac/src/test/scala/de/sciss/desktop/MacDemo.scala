@@ -1,10 +1,13 @@
 package de.sciss.desktop
 
 import java.io.File
-import de.sciss.desktop.impl.{WindowImpl, SwingApplicationImpl}
-import scala.swing.{ToggleButton, ScrollPane, TextArea, Button, FlowPanel}
-import scala.swing.event.ButtonClicked
 import java.net.URI
+
+import de.sciss.desktop.impl.{SwingApplicationImpl, WindowImpl}
+
+import scala.concurrent.Promise
+import scala.swing.event.ButtonClicked
+import scala.swing.{Button, FlowPanel, ScrollPane, Swing, TextArea, ToggleButton}
 
 object MacDemo extends SwingApplicationImpl("Mac Test") {
   protected lazy val menuFactory: Menu.Root = {
@@ -72,15 +75,22 @@ object MacDemo extends SwingApplicationImpl("Mac Test") {
       }
 
       Desktop.addQuitAcceptor {
-        val pane = OptionPane.confirmation(message = "Really quit?!")
-        val res  = pane.show(Some(win), title = "Quit Application")
-        res == OptionPane.Result.Yes
+        val p = Promise[Unit]()
+        Swing.onEDT {
+          val pane = OptionPane.confirmation(message = "Really quit?!")
+          val res = pane.show(Some(win), title = "Quit Application")
+          val ok = res == OptionPane.Result.Yes
+          if (ok) p.success(()) else p.failure(new Exception("Aborted"))
+        }
+        p.future
       }
 
       closeOperation = Window.CloseIgnore
 
       reactions += {
-        case Window.Closing(_) => if (Desktop.mayQuit()) quit()
+        case Window.Closing(_) =>
+          import scala.concurrent.ExecutionContext.Implicits.global
+          Desktop.mayQuit().foreach(_ => quit())
       }
 
       pack()

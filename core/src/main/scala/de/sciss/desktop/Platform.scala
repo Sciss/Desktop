@@ -16,6 +16,7 @@ package de.sciss.desktop
 import de.sciss.file.File
 import de.sciss.model.Model
 
+import scala.concurrent.Future
 import scala.swing.Image
 
 trait Platform extends Model[Desktop.Update] {
@@ -29,7 +30,7 @@ trait Platform extends Model[Desktop.Update] {
   def requestForeground    (allWindows: Boolean): Unit
 
   /** Returns `true` if the handler is natively supported, otherwise `false`. */
-  def setQuitHandler       (test  : => Boolean): Boolean
+  def setQuitHandler       (test  : => Future[Unit]): Boolean
   /** Returns `true` if the handler is natively supported, otherwise `false`. */
   def setAboutHandler      (action: => Unit   ): Boolean
   /** Returns `true` if the handler is natively supported, otherwise `false`. */

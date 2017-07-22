@@ -23,6 +23,7 @@ import de.sciss.file._
 import de.sciss.model.Model
 
 import scala.annotation.tailrec
+import scala.concurrent.Future
 import scala.swing.Image
 
 object LinuxPlatform extends Platform {
@@ -122,7 +123,8 @@ object LinuxPlatform extends Platform {
   def requestUserAttention (repeat    : Boolean): Unit = ()
   def requestForeground    (allWindows: Boolean): Unit = ()
 
-  def setQuitHandler       (test  : => Boolean): Boolean = false
-  def setAboutHandler      (action: => Unit   ): Boolean = false
-  def setPreferencesHandler(action: => Unit   ): Boolean = false
+  def setQuitHandler       (test  : => Future[Unit]): Boolean = false
+
+  def setAboutHandler      (action: => Unit): Boolean = false
+  def setPreferencesHandler(action: => Unit): Boolean = false
 }

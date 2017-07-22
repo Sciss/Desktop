@@ -20,8 +20,9 @@ import de.sciss.file.File
 import de.sciss.model.Model
 
 import scala.collection.immutable.{IndexedSeq => Vec}
+import scala.concurrent.Future
 import scala.swing.Image
-import scala.util.Try
+import scala.util.{Success, Try}
 
 object Desktop {
   private val osName: String = sys.props("os.name")
@@ -161,8 +162,8 @@ object Desktop {
   def addListener   (pf: Listener): pf.type = platform addListener    pf
   def removeListener(pf: Listener): Unit    = platform removeListener pf
 
-  private val sync = new AnyRef
-  private var quitAcceptors = Vec.empty[() => Boolean]
+  private val sync                                    = new AnyRef
+  private var quitAcceptors: Vec[() => Future[Unit]]  = Vector.empty
 
   private[desktop] lazy val isQuitSupported: Boolean = initQuit()
 
@@ -174,20 +175,42 @@ object Desktop {
     * @param accept   the function to invoke when attempting to quit.
     * @return         the function argument for convenience
     */
-  def addQuitAcceptor(accept: => Boolean): () => Boolean = sync.synchronized {
+  def addQuitAcceptor(accept: => Future[Unit]): () => Future[Unit] = sync.synchronized {
     isQuitSupported
     val fun = () => accept
     quitAcceptors :+= fun
     fun
   }
 
-  def removeQuitAcceptor(accept: () => Boolean): Unit = sync.synchronized {
+  def removeQuitAcceptor(accept: () => Future[Unit]): Unit = sync.synchronized {
     val idx = quitAcceptors.indexOf(accept)
     if (idx >= 0) quitAcceptors = quitAcceptors.patch(idx, Nil, 1)
   }
 
-  /** Traverses the registered quit interceptors. If all of them accept the quit action, returns `true`. If any
-    * of them refuses the request, returns `false`.
+  /** Traverses the registered quit interceptors. If all of them accept the quit action,
+    * successfully completes the future. If any
+    * of them refuses the request, aborts the future with failure.
     */
-  def mayQuit(): Boolean = sync.synchronized(quitAcceptors.forall(_.apply()))
+  def mayQuit(): Future[Unit] = {
+    val allAcc = sync.synchronized(quitAcceptors)
+
+    def loop(in: Future[Unit], rem: List[() => Future[Unit]]): Future[Unit] = rem match {
+      case Nil => in
+      case head :: tail =>
+        in.value match {
+          case Some(Success(())) =>
+            val andThen = head.apply()
+            loop(andThen, tail)
+
+          case _ =>
+            import scala.concurrent.ExecutionContext.Implicits.global
+            in.flatMap { _ =>
+              val andThen = head.apply()
+              loop(andThen, tail)
+            }
+        }
+    }
+
+    loop(Future.successful(()), allAcc.toList)
+  }
 }

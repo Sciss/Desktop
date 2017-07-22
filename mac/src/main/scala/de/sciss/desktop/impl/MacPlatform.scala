@@ -14,14 +14,18 @@
 package de.sciss.desktop.impl
 
 import java.io.File
+
 import com.apple.eio.FileManager
 import de.sciss.desktop.{Desktop, Platform}
 import de.sciss.model.impl.ModelImpl
 import com.apple.eawt
-import com.apple.eawt.{PreferencesHandler, AboutHandler, QuitResponse, QuitHandler, OpenFilesHandler, AppHiddenListener, AppForegroundListener}
-import com.apple.eawt.AppEvent.{PreferencesEvent, AboutEvent, QuitEvent, OpenFilesEvent, AppHiddenEvent, AppForegroundEvent}
+import com.apple.eawt.{AboutHandler, AppForegroundListener, AppHiddenListener, OpenFilesHandler, PreferencesHandler, QuitHandler, QuitResponse}
+import com.apple.eawt.AppEvent.{AboutEvent, AppForegroundEvent, AppHiddenEvent, OpenFilesEvent, PreferencesEvent, QuitEvent}
+
 import scala.collection.JavaConverters
+import scala.concurrent.Future
 import scala.swing.Image
+import scala.util.{Failure, Success}
 
 object MacPlatform extends Platform with ModelImpl[Desktop.Update] {
   override def toString = "MacPlatform"
@@ -65,11 +69,16 @@ object MacPlatform extends Platform with ModelImpl[Desktop.Update] {
     // }
   }
 
-  def setQuitHandler(test: => Boolean): Boolean = {
+  def setQuitHandler(test: => Future[Unit]): Boolean = {
     // if (true) return false  // simulate non-support
     app.setQuitHandler(new QuitHandler {
-      def handleQuitRequestWith(e: QuitEvent, response: QuitResponse): Unit =
-        if (test) response.performQuit() else response.cancelQuit()
+      def handleQuitRequestWith(e: QuitEvent, response: QuitResponse): Unit = {
+        import scala.concurrent.ExecutionContext.Implicits.global
+        test.onComplete {
+          case Success(())  => response.performQuit()
+          case Failure(_)   => response.cancelQuit ()
+        }
+      }
     })
     true
   }

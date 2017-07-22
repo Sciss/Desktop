@@ -87,7 +87,8 @@ private[desktop] object MenuImpl {
       "Quit" -> (KeyStrokes.menu1 + Key.Q) // XXX TODO: localization?
 
     val item      = Menu.Item("quit")(attr) {
-      if (Desktop.mayQuit()) app.quit()
+      import scala.concurrent.ExecutionContext.Implicits.global
+      Desktop.mayQuit().foreach(_ => app.quit())
     }
     item.visible  = !supported
     item

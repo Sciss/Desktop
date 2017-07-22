@@ -18,6 +18,7 @@ import de.sciss.desktop.Desktop.Update
 import de.sciss.file.File
 import de.sciss.model.Model
 
+import scala.concurrent.Future
 import scala.swing.Image
 
 /** The fall back "platform" has no-ops for most of the API. */
@@ -36,7 +37,8 @@ object DummyPlatform extends Platform {
   def requestUserAttention (repeat    : Boolean): Unit = ()
   def requestForeground    (allWindows: Boolean): Unit = ()
 
-  def setQuitHandler       (test  : => Boolean): Boolean = false
-  def setAboutHandler      (action: => Unit   ): Boolean = false
-  def setPreferencesHandler(action: => Unit   ): Boolean = false
+  def setQuitHandler       (test  : => Future[Unit]): Boolean = false
+
+  def setAboutHandler      (action: => Unit): Boolean = false
+  def setPreferencesHandler(action: => Unit): Boolean = false
 }
