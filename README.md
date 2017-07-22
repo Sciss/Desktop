@@ -19,7 +19,7 @@ Furthermore, if you want to support a particular platform, also add some of the 
     "de.sciss" %% "desktop-mac" % v
     "de.sciss" %% "desktop-linux" % v
 
-The current version `v` is `"0.7.5"`.
+The current version `v` is `"0.8.0"`.
 
 ## building
 
