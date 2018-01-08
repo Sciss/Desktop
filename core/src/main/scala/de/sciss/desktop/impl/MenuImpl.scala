@@ -2,7 +2,7 @@
  *  MenuImpl.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -15,9 +15,11 @@ package de.sciss.desktop
 package impl
 
 import javax.swing.KeyStroke
-import scala.swing.event.Key
-import swing.Action
+
 import de.sciss.swingplus.PopupMenu
+
+import scala.swing.Action
+import scala.swing.event.Key
 
 private[desktop] object MenuImpl {
   i =>
@@ -123,7 +125,7 @@ private[desktop] object MenuImpl {
 
   // ---- realizable tracking ----
   private trait Realizable[C <: swing.Component] extends Node {
-    private var mapRealized = Map.empty[Window, C]
+    private[this] var mapRealized = Map.empty[Window, C]
 
     final protected def getRealized(w: Window): Option[C] = mapRealized.get(w)
     final protected def realizedIterator: Iterator[(Window, C)] = mapRealized.iterator
@@ -153,8 +155,8 @@ private[desktop] object MenuImpl {
   private trait ItemLike[C <: swing.MenuItem] extends CanEnable with Realizable[C] {
     protected def action: Action
 
-    private var mapWindowActions  = Map.empty[Window, Action] withDefaultValue action
-    private var _visible          = true
+    private[this] var mapWindowActions  = Map.empty[Window, Action] withDefaultValue action
+    private[this] var _visible          = true
 
     final def enabled: Boolean = action.enabled
     final def enabled_=(value: Boolean): Unit = action.enabled = value
@@ -248,8 +250,8 @@ private[desktop] object MenuImpl {
   private trait GroupLike[C <: swing.Component with swing.SequentialContainer]
     extends Realizable[C] {
 
-    private var proxies       = Map.empty[Window, NodeProxy]
-    private val defaultProxy  = new NodeProxy(None)
+    private[this] var proxies       = Map.empty[Window, NodeProxy]
+    private[this] val defaultProxy  = new NodeProxy(None)
 
     private def added(p: NodeProxy, n: Menu.Element, idx: Int): Unit = {
       val isDefault = p.window.isEmpty
@@ -385,7 +387,7 @@ private[desktop] object MenuImpl {
   private sealed trait RootLike[C <: swing.Component with swing.SequentialContainer]
     extends GroupLike[C] with Menu.GroupLike[C] with CanEnable {
 
-    private var _enabled = true
+    private[this] var _enabled = true
 
     protected def createEmptyRoot(): C
 

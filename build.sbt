@@ -2,25 +2,25 @@ lazy val baseName        = "Desktop"
 lazy val baseNameL       = baseName.toLowerCase
 lazy val baseDescription = "A library for document based desktop applications"
 
-lazy val projectVersion     = "0.8.0"
+lazy val projectVersion     = "0.8.1"
 lazy val mimaVersion        = "0.8.0"
 
 // ---- main dependencies ----
 
 lazy val modelVersion       = "0.3.4"
-lazy val swingPlusVersion   = "0.2.3"
-lazy val fileUtilVersion    = "1.1.2"
+lazy val swingPlusVersion   = "0.2.4"
+lazy val fileUtilVersion    = "1.1.3"
 lazy val orangeVersion      = "1.3.0"
 
 // ---- test dependencies ----
 
-lazy val subminVersion      = "0.2.1"
+lazy val subminVersion      = "0.2.2"
 
 lazy val commonSettings = Seq(
   version         := projectVersion,
   organization    := "de.sciss",
-  scalaVersion    := "2.12.2",
-  crossScalaVersions := Seq("2.12.2", "2.11.11", "2.10.6"),
+  scalaVersion    := "2.12.4",
+  crossScalaVersions := Seq("2.12.4", "2.11.12"),
   homepage        := Some(url(s"https://github.com/Sciss/$baseName")),
   licenses        := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
   initialCommands in console := """import de.sciss.desktop._; import de.sciss.file._""",
@@ -77,7 +77,7 @@ lazy val core = Project(id = s"$baseNameL-core", base = file("core"))
       "de.sciss" %% "fileutil"  % fileUtilVersion,
       "de.sciss" %  "submin"    % subminVersion % "test"
     ),
-    mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
+    mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-core" % mimaVersion),
     // ---- build info ----
     buildInfoKeys := Seq(name, organization, version, scalaVersion, description,
       BuildInfoKey.map(homepage) { case (k, opt)           => k -> opt.get },

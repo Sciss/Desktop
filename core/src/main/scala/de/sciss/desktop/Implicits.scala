@@ -2,7 +2,7 @@
  *  Implicits.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,9 +13,10 @@
 
 package de.sciss.desktop
 
-import scala.swing.{Component, Action}
+import javax.swing.KeyStroke
 import javax.{swing => j}
-import j.KeyStroke
+
+import scala.swing.{Action, Component}
 
 object Implicits {
   //  implicit object ParamPrefs extends Preferences.Type[Param] {

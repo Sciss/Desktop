@@ -2,7 +2,7 @@
  *  UndoManagerImpl.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -14,13 +14,13 @@
 package de.sciss.desktop
 package impl
 
-import javax.{swing => j}
-import javax.swing.undo.{CannotRedoException, CannotUndoException, CompoundEdit, UndoableEdit}
-
-import swing.Action
-import javax.swing.KeyStroke
 import java.awt.event.{InputEvent, KeyEvent}
 import java.util
+import javax.swing.KeyStroke
+import javax.swing.undo.{CannotRedoException, CannotUndoException, CompoundEdit, UndoableEdit}
+import javax.{swing => j}
+
+import scala.swing.Action
 
 class UndoManagerImpl extends UndoManager {
   manager =>
@@ -43,8 +43,8 @@ class UndoManagerImpl extends UndoManager {
 	 *	pendingEdits will only be added to the real
 	 *	undo history when the next significant edit comes in.
 	 */
-	private var pendingEditCount  = 0  // have to count separately, because CompoundEdit hasn't got getter methods
-  private var pendingEdits      = new CompoundEdit()
+	private[this] var pendingEditCount  = 0  // have to count separately, because CompoundEdit hasn't got getter methods
+  private[this] var pendingEdits      = new CompoundEdit()
 
   object peer extends j.undo.UndoManager {
     override def redo(): Unit =
@@ -232,13 +232,14 @@ class UndoManagerImpl extends UndoManager {
 
 			Console.err.println(s"Undo buffer contains $num edits.")
 
-      for(i <- 0 until num) {
+			for (i <- 0 until num) {
 				val edit = manager.peer._edits.get(i)
-        Console.err.print(if( edit == redoEdit ) "R"
-				  else if( edit == undoEdit ) "U"
-          else " "
-        )
-				Console.err.println(s" edit #${i+1} = ${edit.getPresentationName}")
+				Console.err.print(
+					if      (edit == redoEdit) "R"
+				  else if (edit == undoEdit) "U"
+          else                       " "
+				)
+				Console.err.println(s" edit #${i + 1} = ${edit.getPresentationName}")
 			}
 		}
 	}

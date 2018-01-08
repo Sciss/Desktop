@@ -2,7 +2,7 @@
  *  Window.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,15 +13,16 @@
 
 package de.sciss.desktop
 
-import javax.swing.{JFrame, RootPaneContainer, SwingUtilities, WindowConstants}
+import java.awt
 import java.awt.event.WindowEvent
+import java.awt.{Dimension, GraphicsEnvironment, Point, Rectangle, Toolkit}
 import javax.swing.event.InternalFrameEvent
+import javax.swing.{JFrame, RootPaneContainer, SwingUtilities, WindowConstants}
+
 import de.sciss.desktop.impl.WindowImpl
 
-import annotation.switch
-import java.awt
-import awt.{GraphicsEnvironment, Toolkit, Point, Dimension, Rectangle}
-import swing.{Reactions, RootPanel, Action, UIElement}
+import scala.annotation.switch
+import scala.swing.{Action, Reactions, RootPanel, UIElement}
 
 object Window {
   sealed trait Style

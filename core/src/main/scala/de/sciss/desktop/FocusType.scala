@@ -2,7 +2,7 @@
  *  FocusType.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -15,8 +15,8 @@ package de.sciss.desktop
 
 object FocusType {
   import javax.swing.JComponent._
-  case object Default   extends FocusType { def id = WHEN_FOCUSED }
-  case object Window    extends FocusType { def id = WHEN_IN_FOCUSED_WINDOW }
-  case object Ancestor  extends FocusType { def id = WHEN_ANCESTOR_OF_FOCUSED_COMPONENT }
+  case object Default   extends FocusType { def id: Int = WHEN_FOCUSED }
+  case object Window    extends FocusType { def id: Int = WHEN_IN_FOCUSED_WINDOW }
+  case object Ancestor  extends FocusType { def id: Int = WHEN_ANCESTOR_OF_FOCUSED_COMPONENT }
 }
 sealed trait FocusType { def id: Int }

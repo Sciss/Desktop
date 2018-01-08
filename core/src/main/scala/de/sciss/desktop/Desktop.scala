@@ -2,7 +2,7 @@
  *  Desktop.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -22,7 +22,7 @@ import de.sciss.model.Model
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.Future
 import scala.swing.Image
-import scala.util.{Success, Try}
+import scala.util.Success
 
 object Desktop {
   private val osName: String = sys.props("os.name")
@@ -37,13 +37,15 @@ object Desktop {
   private def getModule[A](name: String): A = Class.forName(name + "$").getField("MODULE$").get(null).asInstanceOf[A]
 
   private[desktop] lazy val platform: Platform =
-    Try {
+    try {
       if      (isLinux)          getModule[Platform]("de.sciss.desktop.impl.LinuxPlatform")
       else if (isMac && hasEAWT) getModule[Platform]("de.sciss.desktop.impl.MacPlatform"  )
       // else if (isLinux) ...
       // else if (isWindows) ...
       else       impl.DummyPlatform
-    } .getOrElse(impl.DummyPlatform)
+    } catch {
+      case _: Throwable => impl.DummyPlatform
+    }
 
   private[this] def hasEAWT: Boolean = try {
     Class.forName("com.apple.eawt.Application")

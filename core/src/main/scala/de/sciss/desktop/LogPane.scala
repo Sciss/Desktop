@@ -2,7 +2,7 @@
  *  LogPane.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -14,7 +14,8 @@
 package de.sciss.desktop
 
 import java.io.{OutputStream, Writer}
-import scala.swing.{Component, Font, Color}
+
+import scala.swing.{Color, Component, Font}
 
 object LogPane {
   def apply(rows: Int = 10, columns: Int = 60): LogPane = new impl.LogPaneImpl(rows, columns)

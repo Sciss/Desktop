@@ -2,7 +2,7 @@
  *  DocumentHandlerImpl.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -17,9 +17,9 @@ package impl
 import de.sciss.model.impl.ModelImpl
 
 class DocumentHandlerImpl[A] extends DocumentHandler[A] with ModelImpl[DocumentHandler.Update[A]] {
-  private var _active     = Option.empty[Document]
-  private var _documents  = Vector.empty[Document]
-  private val sync        = new AnyRef
+  private[this] var _active     = Option.empty[Document]
+  private[this] var _documents  = Vector.empty[Document]
+  private[this] val sync        = new AnyRef
 
   final type Document = A
 

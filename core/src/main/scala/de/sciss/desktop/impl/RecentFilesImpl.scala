@@ -2,7 +2,7 @@
  *  RecentFilesImpl.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -41,16 +41,35 @@ class RecentFilesImpl(entry: Preferences.Entry[List[File]], maxItems: Int, actio
       if (file != dummyFile) action(file)
   }
 
-  private val actions: Vec[FileAction] = Vec.fill(maxItems)(new FileAction)
+  private[this] val actions: Vec[FileAction] = Vec.fill(maxItems)(new FileAction)
   actions(0).accelerator = keyStroke
 
   // cf http://nadeausoftware.com/node/89
 
-  private val chooser = new JFileChooser()
+  private[this] lazy val chooser = new JFileChooser()
 
-  private val l = entry.addListener {
+  private[this] val l = entry.addListener {
     case Some(entries) => fork(updateEntries(entries))
   }
+
+  private[this] val items = actions.zipWithIndex.map { case (ac, i) =>
+    val it      = Menu.Item("file" + i, ac)
+    it.visible  = false
+    it
+  }
+
+  private[this] val group = Menu.Group("openrecent", "Open Recent")
+
+  val menu: Menu.Group = {
+    items.foreach(group add _)
+    group.addLine()
+    group.add(Menu.Item("clear")("Clear Menu") {
+      entry.put(Nil)
+    })
+    group
+  }
+
+  fork(updateEntries(files))
 
   // runs on EDT!
   private def updateEntries(entries: List[File]): Unit = {
@@ -87,31 +106,12 @@ class RecentFilesImpl(entry: Preferences.Entry[List[File]], maxItems: Int, actio
     group.enabled = v.nonEmpty
   }
 
-  private val items = actions.zipWithIndex.map { case (ac, i) =>
-    val it      = Menu.Item("file" + i, ac)
-    it.visible  = false
-    it
-  }
-
-  private val group = Menu.Group("openrecent", "Open Recent")
-
-  val menu: Menu.Group = {
-    items.foreach(group add _)
-    group.addLine()
-    group.add(Menu.Item("clear")("Clear Menu") {
-      entry.put(Nil)
-    })
-    group
-  }
-
-  fork(updateEntries(files))
-
   def add(file: File): Unit = {
     val f0  = files
-    if (f0.headOption == Some(file)) return // already at top
+    if (f0.headOption.contains(file)) return // already at top
     val f1  = f0.filterNot(_ == file)
     val f2  = file :: f1
-    val f3  = if (f2.size > maxItems) f2.take(maxItems) else f2
+    val f3  = if (f2.lengthCompare(maxItems) > 0) f2.take(maxItems) else f2
     entry.put(f3)
   }
 

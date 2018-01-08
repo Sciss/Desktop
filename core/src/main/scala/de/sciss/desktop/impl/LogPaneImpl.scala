@@ -2,7 +2,7 @@
  *  LogPaneImpl.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -14,23 +14,24 @@
 package de.sciss.desktop
 package impl
 
+import java.io.{OutputStream, PrintStream, Writer}
+
 import de.sciss.swingplus.PopupMenu
 
-import scala.swing.{Point, Color, Font, Action, MenuItem, ScrollPane, TextArea}
-import scala.util.control.NonFatal
-import java.io.{PrintStream, OutputStream, Writer}
-import scala.swing.event.{Key, MousePressed, MouseReleased}
 import scala.swing.ScrollPane.BarPolicy
+import scala.swing.event.{Key, MousePressed, MouseReleased}
+import scala.swing.{Action, Color, Font, MenuItem, Point, ScrollPane, TextArea}
+import scala.util.control.NonFatal
 
 class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
   pane =>
 
   override def toString = s"LogPane@${hashCode.toHexString}"
 
-  private val textPane: TextArea = new TextArea(rows0, cols0) {
+  private[this] val textPane: TextArea = new TextArea(rows0, cols0) {
     me =>
 
-    private var totalLength = 0
+    private[this] var totalLength = 0
 
     // setFont(Helper.createFont(config.font))
     editable  = false
@@ -92,7 +93,7 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
     def write(b: Int): Unit = write(Array(b.toByte), 0, 1)
   }
 
-  private val printStream: PrintStream = new PrintStream(outputStream, true)
+  private[this] val printStream: PrintStream = new PrintStream(outputStream, true)
   //  {
   //    override def toString = s"$pane.printStream"
   //  }
@@ -103,7 +104,7 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
     horizontalScrollBarPolicy = BarPolicy.Never
   }
 
-  private val popup: PopupMenu = {
+  private[this] val popup: PopupMenu = {
     val res       = new PopupMenu
     // val map       = textPane.peer.getKeymap
     //    val copy      = textPane.peer.getActionMap.get(DefaultEditorKit.copyAction)

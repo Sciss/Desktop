@@ -2,7 +2,7 @@
  *  LogWindowImpl.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -23,13 +23,13 @@ import scala.swing.Swing
 abstract class LogWindowImpl extends WindowImpl {
   frame =>
 
-  override protected def style = Window.Auxiliary
+  override protected def style /* : Window.Style */ = Window.Auxiliary
 
   val log: LogPane = LogPane(rows = 24)
 
-  @volatile private var becomeVisible = true
+  @volatile private[this] var becomeVisible = true
 
-  private val observerOut: OutputStream = new OutputStream {
+  private[this] val observerOut: OutputStream = new OutputStream {
     override def toString = "observerOut"
 
     override def write(b: Array[Byte], off: Int, len: Int): Unit = {
@@ -51,7 +51,7 @@ abstract class LogWindowImpl extends WindowImpl {
     }
   }
 
-  private val observerPrint: PrintStream = new PrintStream(observerOut, true)
+  private[this] val observerPrint: PrintStream = new PrintStream(observerOut, true)
   //  {
   //    override def toString = "observerPrint"
   //  }

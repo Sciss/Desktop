@@ -2,7 +2,7 @@
  *  WindowHandlerImpl.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -15,7 +15,8 @@ package de.sciss.desktop
 package impl
 
 import java.awt.Rectangle
-import javax.swing.{JInternalFrame, JDesktopPane}
+import javax.swing.{JDesktopPane, JInternalFrame}
+
 import scala.collection.immutable.{IndexedSeq => Vec}
 
 /* final */ class WindowHandlerImpl[Document](val application: SwingApplication[Document], val menuFactory: Menu.Root)
@@ -23,7 +24,7 @@ import scala.collection.immutable.{IndexedSeq => Vec}
 
   impl =>
 
-  private var _windows = Vec.empty[Window]
+  private[this] var _windows = Vec.empty[Window]
 
   javax.swing.JFrame.setDefaultLookAndFeelDecorated(!usesNativeDecoration)
 
@@ -69,7 +70,7 @@ import scala.collection.immutable.{IndexedSeq => Vec}
     // protected def style = Window.Regular
     def handler: WindowHandler = impl
 
-    private val frame = new swing.Frame
+    private[this] val frame = new swing.Frame
 
     protected val delegate: Delegate =
       Delegate.frame(this, frame, hasMenuBar = true, screen = impl.usesScreenMenuBar)
@@ -82,7 +83,7 @@ import scala.collection.immutable.{IndexedSeq => Vec}
       title       = application.name
     }
 
-    private val desktop: Option[JDesktopPane] =
+    private[this] val desktop: Option[JDesktopPane] =
       if (impl.usesInternalFrames) {
         val res = new JDesktopPane
         frame.peer.setContentPane(res)

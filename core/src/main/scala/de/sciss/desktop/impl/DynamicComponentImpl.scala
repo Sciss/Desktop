@@ -2,7 +2,7 @@
  *  DynamicComponentImpl.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -14,9 +14,10 @@
 package de.sciss.desktop
 package impl
 
-import java.awt.event.{ComponentEvent, ComponentListener, WindowListener, WindowEvent}
-import javax.swing.event.{AncestorEvent, AncestorListener}
 import java.awt
+import java.awt.event.{ComponentEvent, ComponentListener, WindowEvent, WindowListener}
+import javax.swing.event.{AncestorEvent, AncestorListener}
+
 import scala.swing.Component
 
 trait DynamicComponentImpl {

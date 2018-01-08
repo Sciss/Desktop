@@ -2,7 +2,7 @@
  *  WindowImpl.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -92,7 +92,7 @@ object WindowImpl {
     private final class Frame(window: Window, val component: swing.Frame, hasMenuBar: Boolean, screen: Boolean)
       extends Delegate with WindowListener {
 
-      private val peer = component.peer
+      private[this] val peer = component.peer
       val reactions = new Reactions.Impl
 
       peer.addWindowListener(this)

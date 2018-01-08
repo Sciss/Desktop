@@ -2,7 +2,7 @@
  *  Menu.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,11 +13,12 @@
 
 package de.sciss.desktop
 
-import swing.{Action, Component}
 import javax.swing.KeyStroke
 
-import impl.{MenuImpl => Impl}
+import de.sciss.desktop.impl.{MenuImpl => Impl}
 import de.sciss.swingplus.PopupMenu
+
+import scala.swing.{Action, Component}
 
 object Menu {
   sealed trait Element {
@@ -126,7 +127,7 @@ object Menu {
 
   object Attributes {
     implicit final class TextOnly(val text: String) extends Attributes {
-      def keyStroke   = None
+      def keyStroke /* : Option[KeyStroke] */ = None
     }
     implicit final class TextAndKeyStroke(tup: (String, KeyStroke)) extends Attributes {
       def text      : String            = tup._1

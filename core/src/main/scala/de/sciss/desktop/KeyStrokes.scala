@@ -2,7 +2,7 @@
  *  KeyStrokes.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -15,6 +15,7 @@ package de.sciss.desktop
 
 import java.awt.event.InputEvent
 import javax.swing.KeyStroke
+
 import scala.swing.event.Key
 
 object KeyStrokes {

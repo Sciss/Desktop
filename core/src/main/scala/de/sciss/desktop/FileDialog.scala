@@ -2,7 +2,7 @@
  *  FileDialog.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,11 +13,12 @@
 
 package de.sciss.desktop
 
-import java.io.{FilenameFilter, File}
 import java.awt
+import java.io.{File, FilenameFilter}
 import javax.swing.UIManager
-import scala.swing.FileChooser
 import javax.swing.filechooser.FileFilter
+
+import scala.swing.FileChooser
 
 object FileDialog {
   sealed trait Mode
