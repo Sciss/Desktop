@@ -126,7 +126,6 @@ object OptionPane {
       case Message.Error    => "Error"
     }
 
-    var modal     = true
     var resizable = false
   }
 
@@ -155,18 +154,28 @@ sealed trait OptionPane[A] extends DialogSource[A] {
   def peer      : j.JOptionPane
   def result    : A
   var title     : String
-  var modal     : Boolean
   var resizable : Boolean
 
   def show(window: Option[Window]): A = show(window, title = title)
 
   def show(window: Option[Window] = None, title: String = this.title): A = {
+    showImpl(window, title = title, modal = true)
+    result
+  }
+
+  def showNonModal(window: Option[Window]): Unit = showNonModal(window, title = title)
+
+  def showNonModal(window: Option[Window] = None, title: String = this.title): Unit = {
+    showImpl(window, title = title, modal = false)
+    result
+  }
+
+  private def showImpl(window: Option[Window], title: String, modal: Boolean): Unit = {
     val parent  = window.map(Window.peer).orNull
     val jDlg    = peer.createDialog(parent, title)
     if (!modal   ) jDlg.setModal    (false)
     if (resizable) jDlg.setResizable(true )
     jDlg.setVisible(true)
     window.foreach(_.front())
-    result
   }
 }
