@@ -16,22 +16,22 @@ package impl
 
 import java.awt.event.{WindowEvent, WindowListener}
 import java.awt.{Dimension, Point, Rectangle}
-import javax.swing.JInternalFrame
-import javax.swing.event.{InternalFrameEvent, InternalFrameListener}
 
+import javax.swing.{JFrame, JInternalFrame}
+import javax.swing.event.{InternalFrameEvent, InternalFrameListener}
 import de.sciss.file.File
 
 import scala.swing.{Action, Component, Reactions, RootPanel}
 
 object WindowImpl {
   // we store this client property in the root panel; the value is the desktop.Window
-  private[desktop] final val Property = "de.sciss.desktop.Window"
+  final val Property = "de.sciss.desktop.Window"
 
-  private[impl] object Delegate {
+  object Delegate {
     def internalFrame(window: Window, peer: JInternalFrame, hasMenuBar: Boolean): Delegate =
       new InternalFrame(window, peer, hasMenuBar = hasMenuBar)
 
-    def frame(window: Window, peer: swing.Frame, hasMenuBar: Boolean, screen: Boolean): Delegate =
+    def frame(window: Window, peer: JFrame, hasMenuBar: Boolean, screen: Boolean): Delegate =
       new Frame(window, peer, hasMenuBar = hasMenuBar, screen = screen)
 
     private final class InternalFrame(window: Window, peer: JInternalFrame, hasMenuBar: Boolean)
@@ -89,24 +89,25 @@ object WindowImpl {
       def internalFrameDeactivated(e: InternalFrameEvent): Unit = reactions(Window.Deactivated(window))
     }
 
-    private final class Frame(window: Window, val component: swing.Frame, hasMenuBar: Boolean, screen: Boolean)
+    private final class Frame(window: Window, peer: JFrame, hasMenuBar: Boolean, screen: Boolean)
       extends Delegate with WindowListener {
+      delegate =>
 
-      private[this] val peer = component.peer
+      val component: RootPanel = new RootPanel { def peer: JFrame = delegate.peer }
       val reactions = new Reactions.Impl
 
       peer.addWindowListener(this)
       peer.getRootPane.putClientProperty(Property, window)
-      if (hasMenuBar) component.menuBar = window.handler.menuFactory.create(window)
+      if (hasMenuBar) peer.setJMenuBar(window.handler.menuFactory.create(window).peer)
 
       def closeOperation        : Window.CloseOperation        = Window.CloseOperation(peer.getDefaultCloseOperation)
       def closeOperation_=(value: Window.CloseOperation): Unit = peer.setDefaultCloseOperation(value.id)
 
-      def title                 : String                       = component.title
-      def title_=         (value: String               ): Unit = component.title = value
+      def title                 : String                       = peer.getTitle
+      def title_=         (value: String               ): Unit = peer.setTitle(value)
 
-      def resizable             : Boolean                      = component.resizable
-      def resizable_=     (value: Boolean              ): Unit = component.resizable = value
+      def resizable             : Boolean                      = peer.isResizable
+      def resizable_=     (value: Boolean              ): Unit = peer.setResizable(value)
 
       def alwaysOnTop           : Boolean                      = peer.isAlwaysOnTop
       def alwaysOnTop_=   (value: Boolean              ): Unit = peer.setAlwaysOnTop(value)
@@ -115,10 +116,10 @@ object WindowImpl {
 
       def active: Boolean = peer.isActive
 
-      def pack(): Unit = component.pack()
+      def pack(): Unit = peer.pack()
 
       def dispose(): Unit = {
-        component.dispose()
+        peer.dispose()
         if (hasMenuBar) window.handler.menuFactory.destroy(window)
       }
 
@@ -164,7 +165,7 @@ object WindowImpl {
       def windowDeactivated (e: WindowEvent): Unit = reactions(Window.Deactivated (window))
     }
   }
-  private[impl] sealed trait Delegate {
+  trait Delegate {
     def component         : RootPanel
     var closeOperation    : Window.CloseOperation
     var title             : String
@@ -341,7 +342,7 @@ trait WindowImpl extends WindowStub {
       Delegate.internalFrame(this, jif, hasMenuBar = hasMenuBar)
 
     } else {
-      val f = new swing.Frame
+      val f = new JFrame // swing.Frame
       val hasMenuBar = screen || (style == Window.Regular)
       Delegate.frame(this, f, screen = screen, hasMenuBar = hasMenuBar)
     }

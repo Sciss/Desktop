@@ -15,7 +15,8 @@ package de.sciss.desktop
 package impl
 
 import java.awt.Rectangle
-import javax.swing.{JDesktopPane, JInternalFrame}
+
+import javax.swing.{JDesktopPane, JFrame, JInternalFrame}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 
@@ -70,7 +71,7 @@ import scala.collection.immutable.{IndexedSeq => Vec}
     // protected def style = Window.Regular
     def handler: WindowHandler = impl
 
-    private[this] val frame = new swing.Frame
+    private[this] val frame = new JFrame
 
     protected val delegate: Delegate =
       Delegate.frame(this, frame, hasMenuBar = true, screen = impl.usesScreenMenuBar)
@@ -86,7 +87,7 @@ import scala.collection.immutable.{IndexedSeq => Vec}
     private[this] val desktop: Option[JDesktopPane] =
       if (impl.usesInternalFrames) {
         val res = new JDesktopPane
-        frame.peer.setContentPane(res)
+        frame.setContentPane(res)
         Some(res)
       } else None
 
