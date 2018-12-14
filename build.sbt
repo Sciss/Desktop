@@ -2,29 +2,31 @@ lazy val baseName        = "Desktop"
 lazy val baseNameL       = baseName.toLowerCase
 lazy val baseDescription = "A library for document based desktop applications"
 
-lazy val projectVersion     = "0.9.2"
-lazy val mimaVersion        = "0.9.0"
+lazy val projectVersion     = "0.10.0-SNAPSHOT"
+lazy val mimaVersion        = "0.10.0"
 
-// ---- main dependencies ----
+// ---- dependencies ----
 
-lazy val modelVersion       = "0.3.4"
-lazy val swingPlusVersion   = "0.3.0"
-lazy val fileUtilVersion    = "1.1.3"
-lazy val orangeVersion      = "1.3.0"
-
-// ---- test dependencies ----
-
-lazy val subminVersion      = "0.2.2"
+lazy val deps = new {
+  val main = new {
+    val model       = "0.3.4"
+    val swingPlus   = "0.4.0-SNAPSHOT"
+    val fileUtil    = "1.1.3"
+    val orange      = "1.3.0"
+  }
+  val test = new {
+    val submin      = "0.2.2"
+  }
+}
 
 lazy val commonSettings = Seq(
-  version         := projectVersion,
-  organization    := "de.sciss",
-  scalaVersion    := "2.12.5",
-  crossScalaVersions := Seq("2.12.5", "2.11.12"),
-  homepage        := Some(url(s"https://github.com/Sciss/$baseName")),
-  licenses        := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
+  version            := projectVersion,
+  organization       := "de.sciss",
+  scalaVersion       := "2.13.0-M5",
+  crossScalaVersions := Seq("2.12.8", "2.11.12", "2.13.0-M5"),
+  homepage           := Some(url(s"https://git.iem.at/sciss/$baseName")),
+  licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
   initialCommands in console := """import de.sciss.desktop._; import de.sciss.file._""",
-  // retrieveManaged := true,
   scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture"),
   // ---- publishing ----
   publishMavenStyle := true,
@@ -39,8 +41,8 @@ lazy val commonSettings = Seq(
   pomIncludeRepository := { _ => false },
   pomExtra := { val n = baseName
     <scm>
-      <url>git@github.com:Sciss/{n}.git</url>
-      <connection>scm:git:git@github.com:Sciss/{n}.git</connection>
+      <url>git@git.iem.at:sciss/{n}.git</url>
+      <connection>scm:git:git@git.iem.at.com:sciss/{n}.git</connection>
     </scm>
     <developers>
       <developer>
@@ -52,7 +54,7 @@ lazy val commonSettings = Seq(
   }
 )
 
-lazy val root = Project(id = baseNameL, base = file("."))
+lazy val root = project.withId(baseNameL).in(file("."))
   .aggregate(core, linux, mac)
   .dependsOn(core, linux, mac)
   .settings(commonSettings)
@@ -65,17 +67,17 @@ lazy val root = Project(id = baseNameL, base = file("."))
     autoScalaLibrary := false
   )
 
-lazy val core = Project(id = s"$baseNameL-core", base = file("core"))
+lazy val core = project.withId(s"$baseNameL-core").in(file("core"))
   .enablePlugins(BuildInfoPlugin)
   .settings(commonSettings)
   .settings(
     name        := s"$baseName-core",
     description := baseDescription,
     libraryDependencies ++= Seq(
-      "de.sciss" %% "model"     % modelVersion,
-      "de.sciss" %% "swingplus" % swingPlusVersion,
-      "de.sciss" %% "fileutil"  % fileUtilVersion,
-      "de.sciss" %  "submin"    % subminVersion % "test"
+      "de.sciss" %% "model"     % deps.main.model,
+      "de.sciss" %% "swingplus" % deps.main.swingPlus,
+      "de.sciss" %% "fileutil"  % deps.main.fileUtil,
+      "de.sciss" %  "submin"    % deps.test.submin % Test
     ),
     mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-core" % mimaVersion),
     // ---- build info ----
@@ -86,7 +88,7 @@ lazy val core = Project(id = s"$baseNameL-core", base = file("core"))
     buildInfoPackage := "de.sciss.desktop"
   )
 
-lazy val linux = Project(id = s"$baseNameL-linux", base = file("linux"))
+lazy val linux = project.withId(s"$baseNameL-linux").in(file("linux"))
   .dependsOn(core)
   .settings(commonSettings)
   .settings(
@@ -95,7 +97,7 @@ lazy val linux = Project(id = s"$baseNameL-linux", base = file("linux"))
     mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-linux" % mimaVersion)
   )
 
-lazy val mac = Project(id = s"$baseNameL-mac", base = file("mac"))
+lazy val mac = project.withId(s"$baseNameL-mac").in(file("mac"))
   .dependsOn(core /* platform */)
   .settings(commonSettings)
   .settings(
@@ -108,7 +110,7 @@ lazy val mac = Project(id = s"$baseNameL-mac", base = file("mac"))
         } catch {
           case _: ClassNotFoundException => false
         }
-      if (eawt) Nil else Seq("com.yuvimasory" % "orange-extensions" % orangeVersion % "provided")
+      if (eawt) Nil else Seq("com.yuvimasory" % "orange-extensions" % deps.main.orange % Provided)
     },
     mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-mac" % mimaVersion)
   )

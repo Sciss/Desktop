@@ -155,7 +155,7 @@ private[desktop] object MenuImpl {
   private trait ItemLike[C <: swing.MenuItem] extends CanEnable with Realizable[C] {
     protected def action: Action
 
-    private[this] var mapWindowActions  = Map.empty[Window, Action] withDefaultValue action
+    private[this] var mapWindowActions: Map[Window, Action] = Map.empty withDefaultValue action
     private[this] var _visible          = true
 
     final def enabled: Boolean = action.enabled

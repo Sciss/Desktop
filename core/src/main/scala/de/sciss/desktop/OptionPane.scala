@@ -16,9 +16,8 @@ package de.sciss.desktop
 import javax.swing.{Icon, JOptionPane}
 import javax.{swing => j}
 
-import scala.collection.breakOut
+import scala.swing.{Component, Dialog, Swing, UIElement}
 import scala.swing.Swing.EmptyIcon
-import scala.swing._
 
 object OptionPane {
   val Message = Dialog.Message
@@ -135,7 +134,7 @@ object OptionPane {
   }
 
   private def optionsToJava(options: Seq[Any]): Array[AnyRef] =
-    if (options.isEmpty) null else options.map(wrapMessage(_).asInstanceOf[AnyRef])(breakOut)
+    if (options.isEmpty) null else options.iterator.map(wrapMessage(_).asInstanceOf[AnyRef]).toArray
 
   private final class JOption(message: Any, messageType: Message.Value, optionType: Options.Value, icon: Icon,
                               options: Seq[Any], initialValue: Option[Any], focus: Option[Component])
@@ -171,7 +170,7 @@ sealed trait OptionPane[A] extends DialogSource[A] {
   }
 
   private def showImpl(window: Option[Window], title: String, modal: Boolean): Unit = {
-    val parent  = window.map(Window.peer).orNull
+    val parent  = window.map(w => Window.peer(w)).orNull
     val jDlg    = peer.createDialog(parent, title)
     if (!modal   ) jDlg.setModal    (false)
     if (resizable) jDlg.setResizable(true )

@@ -207,7 +207,7 @@ trait WindowStub extends Window {
 
   final def pack(): Unit = delegate.pack()
 
-  final def contents              : Seq[Component]                = component.contents
+  final def contents              : swing.Seq[Component]          = component.contents
   final def contents_=      (value: Component             ): Unit = component.contents = value
 
   final def active                : Boolean                       = delegate.active
