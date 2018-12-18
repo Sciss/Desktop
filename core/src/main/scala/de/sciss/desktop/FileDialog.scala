@@ -153,7 +153,7 @@ object FileDialog {
 
     private[this] var _filter = Option.empty[File => Boolean]
 
-    def filter: Option[(File) => Boolean] = _filter
+    def filter: Option[File => Boolean] = _filter
 
     def filter_=(value: Option[File => Boolean]): Unit =
       if (_filter != value) {
@@ -167,7 +167,7 @@ object FileDialog {
       }
 
     // got to have sum fun!
-    def setFilter(fun: (File) => Boolean): Unit = filter = Some(fun)
+    def setFilter(fun: File => Boolean): Unit = filter = Some(fun)
 
     private[this] var _file = Option.empty[File]
 

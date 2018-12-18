@@ -21,6 +21,7 @@ import javax.swing.{JFrame, JInternalFrame}
 import javax.swing.event.{InternalFrameEvent, InternalFrameListener}
 import de.sciss.file.File
 
+import scala.collection.immutable
 import scala.swing.{Action, Component, Reactions, RootPanel}
 
 object WindowImpl {
@@ -207,7 +208,7 @@ trait WindowStub extends Window {
 
   final def pack(): Unit = delegate.pack()
 
-  final def contents              : swing.Seq[Component]          = component.contents
+  final def contents              : immutable.Seq[Component]      = component.contents
   final def contents_=      (value: Component             ): Unit = component.contents = value
 
   final def active                : Boolean                       = delegate.active
