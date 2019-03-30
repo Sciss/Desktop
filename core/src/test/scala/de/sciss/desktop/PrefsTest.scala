@@ -18,16 +18,16 @@ object PrefsTest extends SimpleSwingApplication {
     import PrefsGUI._
     import de.sciss.file._
 
-    val base    = Preferences.user(getClass)
-    val ggCheck = checkBox(base[Boolean]("boolean"), default = false)
-    val ggCombo = combo(base[String]("string"), default = "foo", values = Seq("foo", "bar", "baz"))
-    val ggInt   = intField(base[Int]("integer"), 1000)
-    val ggPath  = pathField1(base[File]("file"), default = userHome, title = "Select File")
+    private val base    = Preferences.user(getClass)
+    private val ggCheck = checkBox  (base[Boolean ]("boolean"), default = false)
+    private val ggCombo = combo     (base[String  ]("string"), default = "foo", values = Seq("foo", "bar", "baz"))
+    private val ggInt   = intField  (base[Int     ]("integer"), 1000)
+    private val ggPath  = pathField1(base[File    ]("file"), default = userHome, title = "Select File")
 
-    val labels  = Seq("Boolean", "String", "Integer", "File").map(label)
-    val values  = Seq(ggCheck  , ggCombo , ggInt    , ggPath)
+    private val labels  = Seq("Boolean", "String", "Integer", "File").map(label)
+    private val values  = Seq(ggCheck  , ggCombo , ggInt    , ggPath)
 
-    val p = new GroupPanel {
+    private val p = new GroupPanel {
       import GroupPanel.Element
       horizontal = Seq(
         Par(labels.map(Element(_)): _*),

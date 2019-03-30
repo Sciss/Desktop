@@ -4,8 +4,8 @@ import de.sciss.desktop.impl.{SwingApplicationImpl, WindowImpl}
 import de.sciss.submin.Submin
 
 import scala.language.reflectiveCalls
-import scala.swing._
 import scala.swing.event.Key
+import scala.swing.{Action, Alignment, Button, Dialog, FlowPanel, GridBagPanel, Label, TextField}
 
 object DialogFocusTest extends SwingApplicationImpl("Dialog Focus Test") {
   type Document = Unit
@@ -24,13 +24,13 @@ object DialogFocusTest extends SwingApplicationImpl("Dialog Focus Test") {
   }
   lazy val label = new Label("Label reacts to Control-L")
 
-  lazy val action = new Action("Foo") {
+  lazy val action: Action = new Action("Foo") {
     accelerator = Some(KeyStrokes.ctrl + Key.L)
 
     def apply(): Unit = label.text = s"${label.text}!"
   }
 
-  lazy val frame = new WindowImpl {
+  lazy val frame: Window = new WindowImpl {
     title           = "Dialog Test"
     contents        = new FlowPanel(button, label)
     closeOperation  = Window.CloseExit
@@ -51,7 +51,7 @@ object DialogFocusTest extends SwingApplicationImpl("Dialog Focus Test") {
     lbKey.horizontalAlignment = Alignment.Trailing
     lbVal.horizontalAlignment = Alignment.Trailing
 
-    val box = new GridBagPanel {
+    val box: GridBagPanel = new GridBagPanel {
       val cons = new Constraints()
       import cons._
       gridx = 0; gridy = 0

@@ -24,11 +24,11 @@ object LogWindowTest extends SwingApplicationImpl("Log Test") {
     new WindowImpl {
       def handler: WindowHandler = LogWindowTest.windowHandler
 
-      val but1 = Button("Print Something") {
+      val but1: Button = Button("Print Something") {
         println("Yes.")
       }
 
-      val but2 = Button("Who?")(println(System.out))
+      val but2: Button = Button("Who?")(println(System.out))
 
       contents = new FlowPanel(but1, but2)
 
