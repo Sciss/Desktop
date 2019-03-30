@@ -6,7 +6,7 @@
 ## statement
 
 Desktop is an application framework for Scala on the desktop, including support for Swing.
-It is (C)opyright 2013&ndash;2018 by Hanns Holger Rutz. All rights reserved. Desktop is released under
+It is (C)opyright 2013&ndash;2019 by Hanns Holger Rutz. All rights reserved. Desktop is released under
 the [GNU Lesser General Public License](https://git.iem.at/sciss/Desktop/raw/master/LICENSE) v2.1+ and comes
 with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`
 
@@ -21,7 +21,7 @@ Furthermore, if you want to support a particular platform, also add some of the 
     "de.sciss" %% "desktop-mac" % v
     "de.sciss" %% "desktop-linux" % v
 
-The current version `v` is `"0.10.0"`.
+The current version `v` is `"0.10.1"`.
 
 ## building
 

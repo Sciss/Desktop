@@ -85,6 +85,12 @@ class PathField extends Component {
     tx.tooltip = value
   }
 
+  override def enabled_=(value: Boolean): Unit = {
+    super.enabled_=(value)
+    tx.enabled = value
+    bt.enabled = value
+  }
+
   override def requestFocus()         : Unit    = tx.requestFocus()
   override def requestFocusInWindow() : Boolean = tx.requestFocusInWindow()
 
