@@ -13,6 +13,7 @@
 
 package de.sciss.desktop
 
+import java.awt.Paint
 import java.io.File
 
 import javax.swing.{BoxLayout, JComponent, JPanel}
@@ -21,9 +22,8 @@ import scala.swing.event.{EditDone, ValueChanged}
 import scala.swing.{Button, Component, TextField}
 
 class PathField extends Component {
-
   // they have to be lazy because super class refers to them in `peer`
-  private[this] lazy val tx = new TextField(24)
+  private[this] lazy val tx = new TextFieldWithPaint(24)
   private[this] lazy val bt = new PathButton
 
   /** The default mode is `Open`. */
@@ -55,6 +55,13 @@ class PathField extends Component {
   def valueOption: Option[File] = bt.valueOption
 
   def valueOption_=(opt: Option[File]): Unit = value = opt.getOrElse(new File(""))
+
+  /** Custom paint on top of the text field.
+    * Use a low alpha value (e.x. 48) to make the underlying widget still shine through.
+    */
+  def paint: Option[Paint] = tx.paint
+
+  def paint_=(value: Option[Paint]): Unit = tx.paint = value
 
   override def tooltip_=(value: String): Unit = {
     super.tooltip_=(value)
