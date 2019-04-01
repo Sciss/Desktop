@@ -21,8 +21,6 @@ object TextFieldWithPaint {
   val RedOverlay    = new Color(0xFF, 0x00, 0x00, 0x2F)
   val GreenOverlay  = new Color(0x00, 0xFF, 0x00, 0x2F)
   val BlueOverlay   = new Color(0x00, 0x00, 0xFF, 0x2F)
-
-  def NoOverlay: Color = null
 }
 /** Extends `TextField` with a `paint` getter/setter for adding a tone. */
 class TextFieldWithPaint(text0: String, columns0: Int) extends TextField(text0, columns0) {
