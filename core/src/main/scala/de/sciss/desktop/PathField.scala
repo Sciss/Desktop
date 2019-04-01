@@ -23,7 +23,7 @@ import scala.swing.{Button, Component, TextField}
 
 class PathField extends Component {
   // they have to be lazy because super class refers to them in `peer`
-  private[this] lazy val tx = new TextFieldWithPaint(24)
+  private[this] lazy val tx = new TextFieldWithPaint(27)
   private[this] lazy val bt = new PathButton
 
   /** The default mode is `Open`. */

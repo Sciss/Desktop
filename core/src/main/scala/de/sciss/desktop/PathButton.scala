@@ -59,16 +59,16 @@ class PathButton extends Button(null: String) {
   // ---- constructor ----
 
   {
-    tooltip = "Show File Chooser"
-
     val p = peer
     p.setTransferHandler(TransferHandlerImpl)
     p.addMouseListener      (MouseImpl)
     p.addMouseMotionListener(MouseImpl)
 
-    action = Action("…") {
+    val a = Action("…") {
       showFileChooser()
     }
+    a.toolTip = "Show File Chooser"
+    action = a
   }
 
   // ---- private ----
