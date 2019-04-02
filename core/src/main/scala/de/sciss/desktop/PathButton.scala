@@ -49,8 +49,10 @@ class PathButton extends Button(null: String) {
 
   def value: File = _value
 
-  /** Does not fire */
-  def value_=(f: File): Unit = _value = f
+  def value_=(f: File): Unit = if (_value != f) {
+    _value = f
+    publish(new ValueChanged(this))
+  }
 
   /** Treats empty file as `None` */
   def valueOption: Option[File] = if (_value.getPath == "") None else Some(_value)
@@ -73,18 +75,12 @@ class PathButton extends Button(null: String) {
 
   // ---- private ----
 
-  private def setValue(newValue: File): Unit =
-    if (newValue != _value) {
-      _value = newValue
-      publish(new ValueChanged(this))
-    }
-
   private def showFileChooser(): Unit = {
     val dlg   = FileDialog()
     dlg.mode  = mode
     dlg.file  = valueOption
     dlg.title = title
-    dlg.show(Window.find(this)).flatMap(accept).foreach(setValue)
+    dlg.show(Window.find(this)).flatMap(accept).foreach(value = _)
   }
 
   private object MouseImpl extends MouseInputAdapter {
@@ -141,7 +137,7 @@ class PathButton extends Button(null: String) {
           null
         }
         (newPath != null) && {
-          setValue(newPath)
+          value = newPath
           true
         }
 

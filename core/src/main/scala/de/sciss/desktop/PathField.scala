@@ -18,6 +18,7 @@ import java.io.File
 
 import javax.swing.{BoxLayout, JComponent, JPanel}
 
+import scala.swing.Reactions.Reaction
 import scala.swing.event.{EditDone, ValueChanged}
 import scala.swing.{Button, Component, TextField}
 
@@ -45,10 +46,17 @@ class PathField extends Component {
 
   def value: File = bt.value
 
-  /** Does not fire */
-  def value_=(f: File): Unit = {
-    bt.value  = f
-    tx.text   = f.getPath
+  /* Does not fire */
+  private def setButtonValue(f: File): Unit = {
+    bt.reactions -= BtReaction
+    bt.value      = f
+    bt.reactions += BtReaction
+  }
+
+  def value_=(f: File): Unit = if (value != f) {
+    setButtonValue(f)
+    tx.text = f.getPath
+    fire()
   }
 
   /** Treats empty file as `None` */
@@ -84,15 +92,18 @@ class PathField extends Component {
     case EditDone(_) =>
       val newValue = new File(tx.text)
       if (newValue != value) {
-        bt.value = newValue
+        setButtonValue(newValue)
         fire()
       }
   }
-  bt.reactions += {
+
+  private[this] val BtReaction: Reaction = {
     case ValueChanged(_) =>
       tx.text = bt.value.getPath
       fire()
   }
+
+  bt.reactions += BtReaction
 
   // ---- private and impl ----
 
