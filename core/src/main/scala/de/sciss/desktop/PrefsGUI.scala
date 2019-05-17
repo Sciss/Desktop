@@ -89,6 +89,7 @@ object PrefsGUI {
         // println(s"put($it)")
         prefs.put(it)
     }
+    gg.maximumSize = gg.preferredSize // avoid excessive width
     gg
   }
 

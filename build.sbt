@@ -2,7 +2,7 @@ lazy val baseName        = "Desktop"
 lazy val baseNameL       = baseName.toLowerCase
 lazy val baseDescription = "A library for document based desktop applications"
 
-lazy val projectVersion     = "0.10.3"
+lazy val projectVersion     = "0.10.4-SNAPSHOT"
 lazy val mimaVersion        = "0.10.0"
 
 // ---- dependencies ----
@@ -23,7 +23,7 @@ lazy val commonSettings = Seq(
   version            := projectVersion,
   organization       := "de.sciss",
   scalaVersion       := "2.12.8",
-  crossScalaVersions := Seq("2.12.8", "2.11.12", "2.13.0-RC1"),
+  crossScalaVersions := Seq("2.12.8", "2.11.12", "2.13.0-RC2"),
   homepage           := Some(url(s"https://git.iem.at/sciss/$baseName")),
   licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
   initialCommands in console := """import de.sciss.desktop._; import de.sciss.file._""",

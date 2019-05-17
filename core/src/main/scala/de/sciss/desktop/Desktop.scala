@@ -58,7 +58,7 @@ object Desktop {
 
   /** Reveals a file in the platform's desktop environment. On OS X this shows the file in the Finder. */
   def revealFile     (file: File): Unit = platform revealFile      file
-  /** Tries to move a file to the plaform's symbolic trash can. */
+  /** Tries to move a file to the platform's symbolic trash can. */
   def moveFileToTrash(file: File): Unit = platform moveFileToTrash file
 
   /** Marks the application's icon in the desktop environment's dock with a "badge" string. For example,
