@@ -11,12 +11,12 @@
  *	contact@sciss.de
  */
 
-package de.sciss.desktop
-package impl
+package de.sciss.desktop.impl
 
 import java.io.{OutputStream, PrintStream}
 
 import de.sciss.desktop
+import de.sciss.desktop.{LogPane, Window}
 
 import scala.swing.Swing
 
@@ -28,6 +28,14 @@ abstract class LogWindowImpl extends WindowImpl {
   val log: LogPane = LogPane(rows = 24)
 
   @volatile private[this] var becomeVisible = true
+
+  /** Hides the window so that it will become
+    * visible again when new text is printed.
+    */
+  def hide(): Unit = {
+    frame.visible = false
+    becomeVisible = true
+  }
 
   private[this] val observerOut: OutputStream = new OutputStream {
     override def toString = "observerOut"
@@ -52,41 +60,17 @@ abstract class LogWindowImpl extends WindowImpl {
   }
 
   private[this] val observerPrint: PrintStream = new PrintStream(observerOut, true)
-  //  {
-  //    override def toString = "observerPrint"
-  //  }
 
-  //  private var obsCnt    = 0
-  //  private var writeCnt  = 0
-  //
-  //  private def updateTitle() = title = s"obs = $obsCnt, write = $writeCnt"
-  //
-  //  private def incObsCnt  () = { obsCnt   += 1; updateTitle() }
-  //  private def incWriteCnt() = { writeCnt += 1; updateTitle() }
+  System.setOut(observerPrint)
+  System.setErr(observerPrint)
 
-  // def observe(): Unit = {
-    // incObsCnt()
-    System.setOut(observerPrint)
-    System.setErr(observerPrint)
-  // }
-
-  // observe()
   closeOperation = desktop.Window.CloseIgnore
   reactions += {
-    case Window.Closing(_) =>
-      frame.visible = false
-      // observe()
-      becomeVisible = true
+    case Window.Closing(_) => hide()
   }
 
   contents = log.component
-//  new ScrollPane {
-//    contents  = log.component
-//    border    = BorderFactory.createEmptyBorder()
-//  }
 
   title   = "Log"
   pack()
-  // import LogWindow._
-  // GUI.placeWindow(frame, horizontal = horizontalPlacement, vertical = verticalPlacement, padding = placementPadding)
 }
