@@ -1,7 +1,7 @@
 # Desktop
 
 [![Build Status](https://travis-ci.org/Sciss/Desktop.svg?branch=master)](https://travis-ci.org/Sciss/Desktop)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/desktop_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/desktop_2.11)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/desktop_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/desktop_2.12)
 
 ## statement
 
@@ -21,7 +21,7 @@ Furthermore, if you want to support a particular platform, also add some of the 
     "de.sciss" %% "desktop-mac" % v
     "de.sciss" %% "desktop-linux" % v
 
-The current version `v` is `"0.10.3"`.
+The current version `v` is `"0.10.4"`.
 
 ## building
 
