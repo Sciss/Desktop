@@ -215,12 +215,18 @@ object Util {
     c.peer.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, name)
   }
 
-  /** Adds key controls to a tabbed pane.
-    * On Linux and Windows this is `alt`-`left`/`right`,
-    * on Mac this is `ctrl`-`left`/`right`.
+  /** Adds key controls to a tabbed pane. This uses `alt`-`left`/`right`
     */
   def addTabNavigation(tabs: TabbedPane): Unit = {
-    val mod = if (Desktop.isMac) Key.Modifier.Control else Key.Modifier.Alt
+    /*
+        no longer, because other UI components
+        block ctrl-left/right usage:
+
+        On Linux and Windows this is `alt`-`left`/`right`,
+        on Mac this is `ctrl`-`left`/`right`.
+
+     */
+    val mod = /*if (Desktop.isMac) Key.Modifier.Control else*/ Key.Modifier.Alt
     addGlobalAction(tabs, "prev", KeyStroke.getKeyStroke(Key.Left.id, mod)) {
       val sel   = tabs.selection
       val idx   = sel.index - 1
