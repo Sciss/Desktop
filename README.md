@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/Sciss/Desktop.svg?branch=master)](https://travis-ci.org/Sciss/Desktop)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/desktop_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/desktop_2.12)
+<a href="https://liberapay.com/sciss/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg" height="24"></a>
 
 ## statement
 
@@ -9,6 +10,8 @@ Desktop is an application framework for Scala on the desktop, including support 
 It is (C)opyright 2013&ndash;2019 by Hanns Holger Rutz. All rights reserved. Desktop is released under
 the [GNU Lesser General Public License](https://git.iem.at/sciss/Desktop/raw/master/LICENSE) v2.1+ and comes
 with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`
+
+Please consider supporting this project through Liberapay (see badge above) – thank you!
 
 ## linking
 
