@@ -13,8 +13,7 @@
 
 package de.sciss.desktop.impl
 
-import
-java.io.File
+import java.io.File
 
 import com.apple.eio.FileManager
 import de.sciss.desktop.{Desktop, Platform}
@@ -26,6 +25,7 @@ import com.apple.eawt.AppEvent.{AboutEvent, AppForegroundEvent, AppHiddenEvent, 
 import scala.collection.JavaConverters
 import scala.concurrent.Future
 import scala.swing.Image
+import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
 /** The "classic" Mac platform with full eawt API (including Apple event types). */
@@ -45,17 +45,28 @@ object MacPlatform extends Platform with ModelImpl[Desktop.Update] {
 
   private lazy val _init: Unit = init()
 
+  private def invoke(receiver: AnyRef, method: String, arg0: AnyRef): Unit = {
+    try {
+      val m = receiver.getClass.getMethods.find(_.getName == method).get
+      m.invoke(receiver, arg0)
+    } catch {
+      case NonFatal(_) => // ignore
+    }
+  }
+
   private def init(): Unit = {
     // the following events are fired on the event dispatch thread
-    app.addAppEventListener(new AppForegroundListener {
+    val afl = new AppForegroundListener {
       def appRaisedToForeground(e: AppForegroundEvent): Unit = dispatch(Desktop.ApplicationActivated  )
       def appMovedToBackground (e: AppForegroundEvent): Unit = dispatch(Desktop.ApplicationDeactivated)
-    })
-    app.addAppEventListener(new AppHiddenListener {
+    }
+    invoke(app, "addAppEventListener", afl)
+    val ahl = new AppHiddenListener {
       def appUnhidden          (e: AppHiddenEvent    ): Unit = dispatch(Desktop.ApplicationShown      )
       def appHidden            (e: AppHiddenEvent    ): Unit = dispatch(Desktop.ApplicationHidden     )
-    })
-    app.setOpenFileHandler(new OpenFilesHandler {
+    }
+    invoke(app, "addAppEventListener", ahl)
+    val ofh = new OpenFilesHandler {
       def openFiles(e: OpenFilesEvent): Unit = {
         // println(s"openFiles. EDT? ${java.awt.EventQueue.isDispatchThread}")
         import JavaConverters._
@@ -64,7 +75,8 @@ object MacPlatform extends Platform with ModelImpl[Desktop.Update] {
         val sq = e.getFiles.asScala.toList .asInstanceOf[List[File]]
         dispatch(Desktop.OpenFiles(Option(e.getSearchTerm), sq))
       }
-    })
+    }
+    invoke(app, "setOpenFileHandler", ofh)
 
     // sys.addShutdownHook {
     //   println("Shutdown")
@@ -72,7 +84,7 @@ object MacPlatform extends Platform with ModelImpl[Desktop.Update] {
   }
 
   def setQuitHandler(test: => Future[Unit]): Boolean = {
-    app.setQuitHandler(new QuitHandler {
+    val qh = new QuitHandler {
       def handleQuitRequestWith(e: QuitEvent, response: QuitResponse): Unit = {
         import scala.concurrent.ExecutionContext.Implicits.global
         test.onComplete {
@@ -80,21 +92,24 @@ object MacPlatform extends Platform with ModelImpl[Desktop.Update] {
           case Failure(_)   => response.cancelQuit ()
         }
       }
-    })
+    }
+    invoke(app, "setQuitHandler", qh)
     true
   }
 
   def setAboutHandler(action: => Unit): Boolean = {
-    app.setAboutHandler(new AboutHandler {
+    val ah = new AboutHandler {
       def handleAbout(e: AboutEvent): Unit = action
-    })
+    }
+    invoke(app, "setAboutHandler", ah)
     true
   }
 
   def setPreferencesHandler(action: => Unit): Boolean = {
-    app.setPreferencesHandler(new PreferencesHandler {
+    val ph = new PreferencesHandler {
       def handlePreferences(e: PreferencesEvent): Unit = action
-    })
+    }
+    invoke(app, "setPreferencesHandler", ph)
     true
   }
 
