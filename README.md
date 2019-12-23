@@ -29,7 +29,11 @@ Desktop currently builds against Scala 2.13, 2.12, using sbt. The last version t
 To build sub project `"desktop-mac"`, you need either OS X with Apple's EAWT extensions, or otherwise the
 dummy [OrangeExtensions](http://ymasory.github.io/OrangeExtensions/) are used.
 
+Note that as of 0.10.5, you need Java 9 or newer to compile; however the library can still be used on
+Java 8. Java 9 is needed to compile support for Java 9 `java.awt.Desktop` API.
+
 Some demos are available through `sbt desktop/test:run`. For Mac specific demos, `sbt desktop-mac/test:run`.
+Note that when you run on JDK 11 on macOS, it will use the Java 9 API instead of EAWT.
 
 ## contributing
 

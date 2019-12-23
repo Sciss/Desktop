@@ -105,7 +105,10 @@ lazy val mac = project.withId(s"$baseNameL-mac").in(file("mac"))
     description := "Macintosh specific adaptors for Desktop",
     libraryDependencies ++= {
       val eawt = try {
-          Class.forName("com.apple.eawt.Application")
+        // Note: newer macOS still has `Application` but
+        // no longer the pre-Java 9 Apple event types (which orange-extensions do have)
+//          Class.forName("com.apple.eawt.Application")
+          Class.forName("com.apple.eawt.QuitResponse")
           true
         } catch {
           case _: ClassNotFoundException => false

@@ -13,7 +13,8 @@
 
 package de.sciss.desktop.impl
 
-import java.io.File
+import
+java.io.File
 
 import com.apple.eio.FileManager
 import de.sciss.desktop.{Desktop, Platform}
@@ -27,19 +28,20 @@ import scala.concurrent.Future
 import scala.swing.Image
 import scala.util.{Failure, Success}
 
+/** The "classic" Mac platform with full eawt API (including Apple event types). */
 object MacPlatform extends Platform with ModelImpl[Desktop.Update] {
   override def toString = "MacPlatform"
 
   private lazy val app = eawt.Application.getApplication
 
-  def revealFile     (file: File): Unit = FileManager revealInFinder file
-  def moveFileToTrash(file: File): Unit = FileManager moveToTrash    file
+  def revealFile     (file: File): Unit = FileManager.revealInFinder(file)
+  def moveFileToTrash(file: File): Unit = FileManager.moveToTrash   (file)
 
-  def setDockBadge(label: Option[String]): Unit = app setDockIconBadge label.orNull
-  def setDockImage(image: Image         ): Unit = app setDockIconImage image
+  def setDockBadge(label: Option[String]): Unit = app.setDockIconBadge(label.orNull)
+  def setDockImage(image: Image         ): Unit = app.setDockIconImage(image)
 
-  def requestUserAttention (repeat    : Boolean): Unit = app requestUserAttention repeat
-  def requestForeground    (allWindows: Boolean): Unit = app requestForeground    allWindows
+  def requestUserAttention (repeat    : Boolean): Unit = app.requestUserAttention(repeat)
+  def requestForeground    (allWindows: Boolean): Unit = app.requestForeground   (allWindows)
 
   private lazy val _init: Unit = init()
 
@@ -70,7 +72,6 @@ object MacPlatform extends Platform with ModelImpl[Desktop.Update] {
   }
 
   def setQuitHandler(test: => Future[Unit]): Boolean = {
-    // if (true) return false  // simulate non-support
     app.setQuitHandler(new QuitHandler {
       def handleQuitRequestWith(e: QuitEvent, response: QuitResponse): Unit = {
         import scala.concurrent.ExecutionContext.Implicits.global
@@ -84,7 +85,6 @@ object MacPlatform extends Platform with ModelImpl[Desktop.Update] {
   }
 
   def setAboutHandler(action: => Unit): Boolean = {
-    // if (true) return false  // simulate non-support
     app.setAboutHandler(new AboutHandler {
       def handleAbout(e: AboutEvent): Unit = action
     })
@@ -92,7 +92,6 @@ object MacPlatform extends Platform with ModelImpl[Desktop.Update] {
   }
 
   def setPreferencesHandler(action: => Unit): Boolean = {
-    // if (true) return false  // simulate non-support
     app.setPreferencesHandler(new PreferencesHandler {
       def handlePreferences(e: PreferencesEvent): Unit = action
     })

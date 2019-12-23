@@ -34,21 +34,52 @@ object Desktop {
   /** `true` when running the application on a Windows system. */
   val isWindows: Boolean = osName.contains("Windows")
 
-  private def getModule[A](name: String): A = Class.forName(name + "$").getField("MODULE$").get(null).asInstanceOf[A]
+  private def getModule[A](name: String): A = {
+    val clz = Class.forName(s"de.sciss.desktop.impl.$name$$")
+    clz.getField("MODULE$").get(null).asInstanceOf[A]
+  }
+
+  /** The major part of the Java runtime version, such as `8` or `11`. */
+  val majorJavaVersion: Int = {
+    val s = sys.props("java.version")
+    val m = if (s.startsWith("1.")) {
+      s.substring(2, 3)
+    } else {
+      val i = s.indexOf(".")
+      if (i > 0) s.substring(0, i) else s
+    }
+    try {
+      m.toInt
+    } catch {
+      case _: NumberFormatException => 0
+    }
+  }
 
   private[desktop] lazy val platform: Platform =
     try {
-      if      (isLinux)          getModule[Platform]("de.sciss.desktop.impl.LinuxPlatform")
-      else if (isMac && hasEAWT) getModule[Platform]("de.sciss.desktop.impl.MacPlatform"  )
-      // else if (isLinux) ...
-      // else if (isWindows) ...
-      else       impl.DummyPlatform
+      // Note: we don't have any Desktop API on Linux (OpenJDK 11) that we could use.
+      // (otherwise, we could add a LinuxJava9Platform)
+      if      (isLinux)                 getModule[Platform]("LinuxPlatform")
+      else if (isMac && hasEAWT) {
+        if      (hasClassicEAWT)        getModule[Platform]("MacPlatform")
+        else if (majorJavaVersion >= 9) getModule[Platform]("MacJava9Platform")
+        else                            impl.DummyPlatform
+      } else if (majorJavaVersion >= 9) getModule[Platform]("Java9Platform")
+      else impl.DummyPlatform
+
     } catch {
       case _: Throwable => impl.DummyPlatform
     }
 
   private[this] def hasEAWT: Boolean = try {
     Class.forName("com.apple.eawt.Application")
+    true
+  } catch {
+    case _: ClassNotFoundException => false
+  }
+
+  private[this] def hasClassicEAWT: Boolean = try {
+    Class.forName("com.apple.eawt.QuitResponse")
     true
   } catch {
     case _: ClassNotFoundException => false
@@ -73,14 +104,14 @@ object Desktop {
     *
     * @param image  the new image to use in the dock
     */
-  def setDockImage(image: Image         ): Unit = platform setDockImage image
+  def setDockImage(image: Image): Unit = platform setDockImage image
 
   /** Requests that the desktop environment signalize that the user should pay attention to the application.
     *
     * @param repeat if `true`, the signalization is continuous until the user confirms the request, if `false`
     *               the signalization is a one time action and less intrusive
     */
-  def requestUserAttention (repeat    : Boolean = false): Unit = platform requestUserAttention repeat
+  def requestUserAttention(repeat: Boolean = false): Unit = platform requestUserAttention repeat
 
   /** Requests that the application be brought to the foreground.
     *

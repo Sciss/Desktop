@@ -11,10 +11,10 @@
  *	contact@sciss.de
  */
 
-package de.sciss.desktop
-package impl
+package de.sciss.desktop.impl
 
 import de.sciss.desktop.Desktop.Update
+import de.sciss.desktop.Platform
 import de.sciss.file.File
 import de.sciss.model.Model
 
