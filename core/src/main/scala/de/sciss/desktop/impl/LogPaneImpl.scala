@@ -14,6 +14,7 @@
 package de.sciss.desktop
 package impl
 
+import java.awt.EventQueue
 import java.io.{OutputStream, PrintStream, Writer}
 
 import de.sciss.swingplus.PopupMenu
@@ -28,9 +29,12 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
 
   override def toString = s"LogPane@${hashCode.toHexString}"
 
-  private[this] val textPane: TextArea = new TextArea(rows0, cols0) {
+  private[this] object textPane extends TextArea(rows0, cols0) with Runnable with Function1[String, Unit] {
     me =>
 
+    private[this] val sb          = new java.lang.StringBuilder()
+    private[this] val lock        = new AnyRef
+    private[this] var invoked     = false
     private[this] var totalLength = 0
 
     // setFont(Helper.createFont(config.font))
@@ -51,6 +55,25 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
       super.append(str)
       totalLength += str.length
       updateCaret()
+    }
+
+    def apply(str: String): Unit =
+      lock.synchronized {
+        sb.append(str)
+        if (!invoked) {
+          invoked = true
+          EventQueue.invokeLater(this)
+        }
+      }
+
+    def run(): Unit = {
+      val str = lock.synchronized {
+        val res = sb.toString
+        sb.setLength(0)
+        invoked = false
+        res
+      }
+      append(str)
     }
 
     override def text_=(str: String): Unit = {
@@ -77,7 +100,7 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
 
     def write(ch: Array[Char], off: Int, len: Int): Unit = {
       val str = new String(ch, off, len)
-      textPane.append(str)
+      textPane(str)
     }
   }
 
@@ -85,9 +108,11 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
   val outputStream: OutputStream = new OutputStream {
     override def toString = s"$pane.outputStream"
 
+    // the trick to avoid clogged performance is to defer to the EDT
+    // in any case, and in the meantime buffer to a string builder.
     override def write(b: Array[Byte], off: Int, len: Int): Unit = {
       val str = new String(b, off, len)
-      textPane.append(str)
+      textPane(str)
     }
 
     def write(b: Int): Unit = write(Array(b.toByte), 0, 1)
