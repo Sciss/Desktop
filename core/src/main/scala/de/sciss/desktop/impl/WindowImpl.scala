@@ -255,7 +255,7 @@ trait WindowStub extends Window {
   // 				if( jf != null ) {
   // 					jf.setJMenuBar( bar );
   // 				} else if( jif != null ) {
-  // 					handler.getMasterFrame().setJMenuBar( bar );
+  // 					handler.getMainFrame().setJMenuBar( bar );
   // 				} else {
   // 					throw new IllegalStateException();
   // 				}
