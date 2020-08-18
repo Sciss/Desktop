@@ -90,7 +90,10 @@ class RecentFilesImpl(entry: Preferences.Entry[List[File]], maxItems: Int, actio
         // TODO: while this is how OS X does it, it would be smarter to look for
         // different components of the parent folder, because we can still end up
         // with two identical entries this way. Or add a tool tip?
-        ac.title    = if (multi) s"$name — ${file.getParentFile.getName}" else name
+        ac.title    = if (multi) {
+          val par = file.getParentFile
+          if (par == null) name else s"$name — ${par.getName}"
+        } else name
         it.visible  = true
 
       } else {
