@@ -123,20 +123,20 @@ object Window {
   private final class ShowAction(window: Window) extends Action(window.title) {
     window.reactions += {
       case Window.Activated(_) =>
-//				if( !disposed ) {
-          // ((BasicApplication) AbstractApplication.getApplication()).getMenuFactory().setSelectedWindow( ShowWindowAction.this );
-          // XXX TODO
-//			  }
+        // if( !disposed ) {
+        //   ((BasicApplication) AbstractApplication.getApplication()).getMenuFactory().setSelectedWindow( ShowWindowAction.this );
+        //   XXX TODO
+        // }
     }
 
-	  def apply(): Unit = {
+    def apply(): Unit = {
       window.visible = true
       window.front()
     }
 
 //    def dispose(): Unit =
 //      w.reactions -= ...
-	}
+  }
 }
 /** Interface that unites functionality
   *	from inhomogeneous classes such as JFrame, JDialog, JInternalFrame

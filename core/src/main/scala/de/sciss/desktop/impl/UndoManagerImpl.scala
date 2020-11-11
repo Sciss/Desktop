@@ -28,42 +28,42 @@ class UndoManagerImpl extends UndoManager {
   /** Subclasses may override this. */
   protected var dirty: Boolean = false
 
-	/*
-	 *	The concept of pendingEdits is that
-	 *	insignificant (visual only) edits
-	 *	should not destroy the redo tree
-	 *	(which they do in the standard undo manager).
-	 *	Imagine the user places a marker on the timeline,
-	 *	hits undo, then accidentally or by intention
-	 *	moves the timeline position. This will render
-	 *	the redo of the marker add impossible. Now the
-	 *	timeline position is insignificant and hence
-	 *	will be placed on the pendingEdits stack.
-	 *	This is a &quot;lazy&quot; thing because these
-	 *	pendingEdits will only be added to the real
-	 *	undo history when the next significant edit comes in.
-	 */
-	private[this] var pendingEditCount  = 0  // have to count separately, because CompoundEdit hasn't got getter methods
+  /*
+   *	The concept of pendingEdits is that
+   *	insignificant (visual only) edits
+   *	should not destroy the redo tree
+   *	(which they do in the standard undo manager).
+   *	Imagine the user places a marker on the timeline,
+   *	hits undo, then accidentally or by intention
+   *	moves the timeline position. This will render
+   *	the redo of the marker add impossible. Now the
+   *	timeline position is insignificant and hence
+   *	will be placed on the pendingEdits stack.
+   *	This is a &quot;lazy&quot; thing because these
+   *	pendingEdits will only be added to the real
+   *	undo history when the next significant edit comes in.
+   */
+  private[this] var pendingEditCount  = 0  // have to count separately, because CompoundEdit hasn't got getter methods
   private[this] var pendingEdits      = new CompoundEdit()
 
   object peer extends j.undo.UndoManager {
     override def redo(): Unit =
-  		try {
-  			undoPending()
-  			super.redo()
-  		}
-  		finally {
-  			updateStates()
-  		}
+      try {
+        undoPending()
+        super.redo()
+      }
+      finally {
+        updateStates()
+      }
 
-  	override def undo(): Unit =
-  		try {
-  			undoPending()
-  			super.undo()
-  		}
-  		finally {
-  			updateStates()
-  		}
+    override def undo(): Unit =
+      try {
+        undoPending()
+        super.undo()
+      }
+      finally {
+        updateStates()
+      }
 
     override def editToBeUndone: UndoableEdit = super.editToBeUndone
     override def editToBeRedone: UndoableEdit = super.editToBeRedone
@@ -93,13 +93,13 @@ class UndoManagerImpl extends UndoManager {
 
     override def discardAllEdits(): Unit = {
       pendingEdits.synchronized {
-   			pendingEdits.die()
-   			pendingEdits = new CompoundEdit()
-   			pendingEditCount = 0
-   		}
-   		super.discardAllEdits()
-   		updateStates()
-   	}
+        pendingEdits.die()
+        pendingEdits = new CompoundEdit()
+        pendingEditCount = 0
+      }
+      super.discardAllEdits()
+      updateStates()
+    }
   }
 
   peer.setLimit(1000)
@@ -125,40 +125,40 @@ class UndoManagerImpl extends UndoManager {
     * current undo history to the console.
     *
     * @return action suitable for attaching to a menu item
-	  */
-	final def debugDumpAction: Action = ActionDebugDump
+    */
+  final def debugDumpAction: Action = ActionDebugDump
 
-	/** Adds a new edit to the undo history.
-	  * This behaves just like the normal
-	  * UndoManager, i.e. it tries to replace
-	  * the previous edit if possible. When
-	  * the edits `isSignificant()`
-	  * method returns true, the main application
-	  * is informed about this edit by calling
-	  * the `setModified` method.
-	  * Also the undo and redo action's enabled
-	  * / disabled states are updated.
-	  *
-	  *	Insignificant edits are saved in a pending
-	  *	compound edit that gets added with the
-	  *	next significant edit to allow redo as
-	  *	long as possible.
-	  *
-	  * @see	javax.swing.undo.UndoableEdit#isSignificant()
-	  * @see	javax.swing.Action#setEnabled( boolean )
-	  */
+  /** Adds a new edit to the undo history.
+    * This behaves just like the normal
+    * UndoManager, i.e. it tries to replace
+    * the previous edit if possible. When
+    * the edits `isSignificant()`
+    * method returns true, the main application
+    * is informed about this edit by calling
+    * the `setModified` method.
+    * Also the undo and redo action's enabled
+    * / disabled states are updated.
+    *
+    *	Insignificant edits are saved in a pending
+    *	compound edit that gets added with the
+    *	next significant edit to allow redo as
+    *	long as possible.
+    *
+    * @see	javax.swing.undo.UndoableEdit#isSignificant()
+    * @see	javax.swing.Action#setEnabled( boolean )
+    */
 
-	private def undoPending(): Unit =
+  private def undoPending(): Unit =
     pendingEdits.synchronized {
-			if( pendingEditCount > 0 ) {
-				pendingEdits.end()
-				pendingEdits.undo()
-				pendingEdits = new CompoundEdit()
-				pendingEditCount = 0
-			}
-		}
+      if( pendingEditCount > 0 ) {
+        pendingEdits.end()
+        pendingEdits.undo()
+        pendingEdits = new CompoundEdit()
+        pendingEditCount = 0
+      }
+    }
 
-	/** Purges the undo history and updates the undo / redo actions enabled / disabled state. */
+  /** Purges the undo history and updates the undo / redo actions enabled / disabled state. */
   final def clear(): Unit = peer.discardAllEdits()
 
   final def add(edit: UndoableEdit): Boolean = peer.addEdit(edit)
@@ -173,7 +173,7 @@ class UndoManagerImpl extends UndoManager {
 
   final def significant   : Boolean = peer.isSignificant
 
-	private def updateStates(): Unit = {
+  private def updateStates(): Unit = {
     val cu = peer.canUndo
     if (undoAction.enabled != cu) {
       undoAction.enabled  = cu
@@ -202,45 +202,45 @@ class UndoManagerImpl extends UndoManager {
     accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Window.menuShortcut))
 
     def apply(): Unit =
-			try {
-				undo()
-			} catch{
+      try {
+        undo()
+      } catch{
         case e1: CannotUndoException => Console.err.println(e1.getLocalizedMessage)
       }
-	}
+  }
 
-	object redoAction extends Action("Redo") {
+  object redoAction extends Action("Redo") {
     accelerator = Some(if (Desktop.isWindows)
       KeyStroke.getKeyStroke(KeyEvent.VK_Y, Window.menuShortcut)
     else  // Mac and Linux both use shift-Z
       KeyStroke.getKeyStroke(KeyEvent.VK_Z, Window.menuShortcut | InputEvent.SHIFT_MASK)
     )
 
-		def apply(): Unit =
-			try {
-				redo()
-			} catch {
+    def apply(): Unit =
+      try {
+        redo()
+      } catch {
         case e1: CannotRedoException => Console.err.println(e1.getLocalizedMessage)
-			}
-	}
+      }
+  }
 
-	private object ActionDebugDump extends Action("Debug Undo History") {
-		def apply(): Unit = {
-			val num			  = manager.peer._edits.size
-			val redoEdit	= manager.peer.editToBeRedone()
-			val undoEdit	= manager.peer.editToBeUndone()
+  private object ActionDebugDump extends Action("Debug Undo History") {
+    def apply(): Unit = {
+      val num			  = manager.peer._edits.size
+      val redoEdit	= manager.peer.editToBeRedone()
+      val undoEdit	= manager.peer.editToBeUndone()
 
-			Console.err.println(s"Undo buffer contains $num edits.")
+      Console.err.println(s"Undo buffer contains $num edits.")
 
-			for (i <- 0 until num) {
-				val edit = manager.peer._edits.get(i)
-				Console.err.print(
-					if      (edit == redoEdit) "R"
-				  else if (edit == undoEdit) "U"
+      for (i <- 0 until num) {
+        val edit = manager.peer._edits.get(i)
+        Console.err.print(
+          if      (edit == redoEdit) "R"
+          else if (edit == undoEdit) "U"
           else                       " "
-				)
-				Console.err.println(s" edit #${i + 1} = ${edit.getPresentationName}")
-			}
-		}
-	}
+        )
+        Console.err.println(s" edit #${i + 1} = ${edit.getPresentationName}")
+      }
+    }
+  }
 }

@@ -20,7 +20,7 @@ import javax.swing.{JDesktopPane, JFrame, JInternalFrame}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 
-/* final */ class WindowHandlerImpl[Document](val application: SwingApplication[Document], val menuFactory: Menu.Root)
+class WindowHandlerImpl[Document](val application: SwingApplication[Document], val menuFactory: Menu.Root)
   extends WindowHandler {
 
   impl =>
@@ -30,19 +30,19 @@ import scala.collection.immutable.{IndexedSeq => Vec}
   javax.swing.JFrame.setDefaultLookAndFeelDecorated(!usesNativeDecoration)
 
   def showDialog[A](window: Option[Window], source: DialogSource[A]): A = {
- 		// temporarily disable alwaysOnTop
- 		val wasOnTop = if (!usesInternalFrames && usesFloatingPalettes) windows.filter { w =>
+    // temporarily disable alwaysOnTop
+    val wasOnTop = if (!usesInternalFrames && usesFloatingPalettes) windows.filter { w =>
        val res = w.alwaysOnTop
        if (res) w.alwaysOnTop = false
        res
     } .toList else Nil
 
- 		try {
- 			source.show(window)
- 		} finally { // make sure to restore original state
+    try {
+      source.show(window)
+    } finally { // make sure to restore original state
        wasOnTop.foreach(_.alwaysOnTop = true)
- 		}
- 	}
+    }
+  }
 
   def addWindow(w: Window): Unit = {
     _windows :+= w
@@ -65,7 +65,7 @@ import scala.collection.immutable.{IndexedSeq => Vec}
 
   if (usesInternalFrames || Desktop.isMac) mainWindow.front()
 
-  private object MainWindowImpl extends WindowStub {
+  private object MainWindowImpl extends WindowStub { me =>
     import WindowImpl._
 
     // protected def style = Window.Regular
@@ -81,7 +81,7 @@ import scala.collection.immutable.{IndexedSeq => Vec}
       bounds      = new Rectangle(Short.MaxValue, Short.MaxValue, 0, 0)
     } else {
       bounds      = Window.availableSpace
-      title       = application.name
+      title       = me.application.name
     }
 
     private[this] val desktop: Option[JDesktopPane] =
@@ -110,7 +110,7 @@ import scala.collection.immutable.{IndexedSeq => Vec}
     // handler.mainWindow = this
     closeOperation = Window.CloseIgnore
     reactions += {
-      case Window.Closing(_) => application.quit()
+      case Window.Closing(_) => me.application.quit()
     }
   }
 }

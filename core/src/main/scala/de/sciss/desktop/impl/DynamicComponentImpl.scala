@@ -21,7 +21,7 @@ import javax.swing.event.{AncestorEvent, AncestorListener}
 import scala.swing.Component
 
 trait DynamicComponentImpl {
-  _: Component =>
+  self: Component =>
 
   private[this] var listening   = false
   private[this] var win         = Option.empty[awt.Window]
@@ -68,7 +68,7 @@ trait DynamicComponentImpl {
 
   private object listener extends WindowListener with ComponentListener with AncestorListener {
     def windowOpened     (e: WindowEvent): Unit = startListening()
- 		def windowClosed     (e: WindowEvent): Unit = stopListening ()
+    def windowClosed     (e: WindowEvent): Unit = stopListening ()
 
     def windowClosing    (e: WindowEvent): Unit = ()
     def windowIconified  (e: WindowEvent): Unit = ()

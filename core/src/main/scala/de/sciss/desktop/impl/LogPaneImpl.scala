@@ -38,8 +38,8 @@ class LogPaneImpl(rows0: Int, cols0: Int) extends LogPane {
     private[this] var totalLength = 0
 
     // setFont(Helper.createFont(config.font))
-    editable  = false
-    lineWrap  = true
+    me.editable  = false
+    me.lineWrap  = true
     // setBackground(config.style.background)
     // setForeground(config.style.foreground)
 
