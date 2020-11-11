@@ -65,7 +65,7 @@ class WindowHandlerImpl[Document](val application: SwingApplication[Document], v
 
   if (usesInternalFrames || Desktop.isMac) mainWindow.front()
 
-  private object MainWindowImpl extends WindowStub { me =>
+  private object MainWindowImpl extends WindowStub {
     import WindowImpl._
 
     // protected def style = Window.Regular
@@ -81,7 +81,7 @@ class WindowHandlerImpl[Document](val application: SwingApplication[Document], v
       bounds      = new Rectangle(Short.MaxValue, Short.MaxValue, 0, 0)
     } else {
       bounds      = Window.availableSpace
-      title       = me.application.name
+      title       = MainWindowImpl.application.name
     }
 
     private[this] val desktop: Option[JDesktopPane] =
@@ -110,7 +110,7 @@ class WindowHandlerImpl[Document](val application: SwingApplication[Document], v
     // handler.mainWindow = this
     closeOperation = Window.CloseIgnore
     reactions += {
-      case Window.Closing(_) => me.application.quit()
+      case Window.Closing(_) => MainWindowImpl.application.quit()
     }
   }
 }

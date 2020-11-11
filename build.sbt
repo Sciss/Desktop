@@ -2,7 +2,7 @@ lazy val baseName        = "Desktop"
 lazy val baseNameL       = baseName.toLowerCase
 lazy val baseDescription = "A library for document based desktop applications"
 
-lazy val projectVersion     = "0.11.0-SNAPSHOT"
+lazy val projectVersion     = "0.11.0"
 lazy val mimaVersion        = "0.11.0"
 
 // ---- dependencies ----
@@ -28,6 +28,9 @@ lazy val commonSettings = Seq(
   licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
   initialCommands in console := """import de.sciss.desktop._; import de.sciss.file._""",
   scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xsource:2.13"),
+  sources in (Compile, doc) := {
+    if (isDotty.value) Nil else (sources in (Compile, doc)).value // dottydoc is currently broken
+  },
   // ---- publishing ----
   publishMavenStyle := true,
   publishTo := {
