@@ -8,5 +8,4 @@ scala:
   - 3.0.0-M1
 
 jdk:
-  - openjdk8
   - openjdk11
