@@ -81,7 +81,7 @@ class WindowHandlerImpl[Document](val application: SwingApplication[Document], v
       bounds      = new Rectangle(Short.MaxValue, Short.MaxValue, 0, 0)
     } else {
       bounds      = Window.availableSpace
-      title       = MainWindowImpl.application.name
+      title       = impl.application.name
     }
 
     private[this] val desktop: Option[JDesktopPane] =
@@ -110,7 +110,7 @@ class WindowHandlerImpl[Document](val application: SwingApplication[Document], v
     // handler.mainWindow = this
     closeOperation = Window.CloseIgnore
     reactions += {
-      case Window.Closing(_) => MainWindowImpl.application.quit()
+      case Window.Closing(_) => impl.application.quit()
     }
   }
 }

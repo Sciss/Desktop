@@ -24,11 +24,12 @@ Furthermore, if you want to support a particular platform, also add some of the 
     "de.sciss" %% "desktop-mac" % v
     "de.sciss" %% "desktop-linux" % v
 
-The current version `v` is `"0.11.0"`.
+The current version `v` is `"0.11.1"`.
 
 ## building
 
-Desktop currently builds against Scala 2.13, 2.12, using sbt. The last version to support Scala 2.11 was 0.10.4.
+This project builds with sbt against Scala 2.13, 2.12, Dotty. The last version to support Scala 2.11 was 0.10.4.
+
 To build sub project `"desktop-mac"`, you need either OS X with Apple's EAWT extensions, or otherwise the
 dummy [OrangeExtensions](http://ymasory.github.io/OrangeExtensions/) are used.
 
