@@ -53,7 +53,7 @@ object LinuxPlatform extends Platform {
           cmd     <- findExec("xdg-open")
           parent  <- fileAbs.parentOption
         } {
-          Seq(cmd.path, parent.path).!
+          Seq(cmd.path, parent.path).run()
         }
     }
   }
