@@ -47,7 +47,7 @@ object LinuxPlatform extends Platform {
     val fileAbs = file.absolute
     import sys.process._
     findExec("nautilus") match {
-      case Some(cmd) => Seq(cmd.path, fileAbs.path).!
+      case Some(cmd) => Seq(cmd.path, fileAbs.path).run()
       case None =>
         for {
           cmd     <- findExec("xdg-open")
