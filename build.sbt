@@ -19,11 +19,15 @@ lazy val deps = new {
   }
 }
 
+// sonatype plugin requires that these are in global
+ThisBuild / version      := projectVersion
+ThisBuild / organization := "de.sciss"
+
 lazy val commonSettings = Seq(
-  version            := projectVersion,
-  organization       := "de.sciss",
+//  version            := projectVersion,
+//  organization       := "de.sciss",
   scalaVersion       := "2.13.4",
-  crossScalaVersions := Seq("3.0.0-M1", "2.13.4", "2.12.12"),
+  crossScalaVersions := Seq("3.0.0-M2", "2.13.4", "2.12.12"),
   homepage           := Some(url(s"https://git.iem.at/sciss/$baseName")),
   licenses           := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt")),
   initialCommands in console := """import de.sciss.desktop._; import de.sciss.file._""",
@@ -31,31 +35,7 @@ lazy val commonSettings = Seq(
   sources in (Compile, doc) := {
     if (isDotty.value) Nil else (sources in (Compile, doc)).value // dottydoc is currently broken
   },
-  // ---- publishing ----
-  publishMavenStyle := true,
-  publishTo := {
-    Some(if (isSnapshot.value)
-      "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
-    else
-      "Sonatype Releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-    )
-  },
-  publishArtifact in Test := false,
-  pomIncludeRepository := { _ => false },
-  pomExtra := { val n = baseName
-    <scm>
-      <url>git@git.iem.at:sciss/{n}.git</url>
-      <connection>scm:git:git@git.iem.at.com:sciss/{n}.git</connection>
-    </scm>
-    <developers>
-      <developer>
-        <id>sciss</id>
-        <name>Hanns Holger Rutz</name>
-        <url>http://www.sciss.de</url>
-      </developer>
-    </developers>
-  }
-)
+) ++ publishSettings
 
 lazy val root = project.withId(baseNameL).in(file("."))
   .aggregate(core, linux, mac)
@@ -120,3 +100,23 @@ lazy val mac = project.withId(s"$baseNameL-mac").in(file("mac"))
     },
     mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-mac" % mimaVersion)
   )
+
+lazy val publishSettings = Seq(
+  publishMavenStyle := true,
+  publishArtifact in Test := false,
+  pomIncludeRepository := { _ => false },
+  developers := List(
+    Developer(
+      id    = "sciss",
+      name  = "Hanns Holger Rutz",
+      email = "contact@sciss.de",
+      url   = url("https://www.sciss.de")
+    )
+  ),
+  scmInfo := {
+    val h = "git.iem.at"
+    val a = s"sciss/$baseName"
+    Some(ScmInfo(url(s"https://$h/$a"), s"scm:git@$h:$a.git"))
+  },
+)
+
