@@ -1,14 +1,14 @@
 # Desktop
 
-[![Build Status](https://travis-ci.org/Sciss/Desktop.svg?branch=main)](https://travis-ci.org/Sciss/Desktop)
+[![Build Status](https://github.com/Sciss/Desktop/workflows/Scala%20CI/badge.svg?branch=main)](https://github.com/Sciss/Desktop/actions?query=workflow%3A%22Scala+CI%22)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/desktop_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/desktop_2.13)
 <a href="https://liberapay.com/sciss/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg" height="24"></a>
 
 ## statement
 
 Desktop is an application framework for Scala on the desktop, including support for Swing.
-It is (C)opyright 2013&ndash;2020 by Hanns Holger Rutz. All rights reserved. Desktop is released under
-the [GNU Lesser General Public License](https://git.iem.at/sciss/Desktop/raw/main/LICENSE) v2.1+ and comes
+It is (C)opyright 2013&ndash;2021 by Hanns Holger Rutz. All rights reserved. Desktop is released under
+the [GNU Lesser General Public License](https://github.com/Sciss/Desktop/raw/main/LICENSE) v2.1+ and comes
 with absolutely no warranties. To contact the author, send an e-mail to `contact at sciss.de`.
 
 Please consider supporting this project through Liberapay (see badge above) – thank you!
@@ -24,7 +24,7 @@ Furthermore, if you want to support a particular platform, also add some of the 
     "de.sciss" %% "desktop-mac" % v
     "de.sciss" %% "desktop-linux" % v
 
-The current version `v` is `"0.11.3"`.
+The current version `v` is `"0.11.4"`.
 
 ## building
 

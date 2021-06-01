@@ -2,7 +2,7 @@
  *  RecentFilesImpl.scala
  *  (Desktop)
  *
- *  Copyright (c) 2013-2020 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2021 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -14,11 +14,10 @@
 package de.sciss.desktop
 package impl
 
-import java.awt.EventQueue
-import javax.swing.{JFileChooser, KeyStroke}
-
 import de.sciss.file.File
 
+import java.awt.EventQueue
+import javax.swing.{JFileChooser, KeyStroke}
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.{Action, Swing}
 
@@ -44,9 +43,10 @@ class RecentFilesImpl(entry: Preferences.Entry[List[File]], maxItems: Int, actio
   private[this] val actions: Vec[FileAction] = Vec.fill(maxItems)(new FileAction)
   actions(0).accelerator = keyStroke
 
-  // cf http://nadeausoftware.com/node/89
+  // cf https://web.archive.org/web/20160306235144/http://nadeausoftware.com/node/89
 
-  private[this] lazy val chooser = new JFileChooser()
+  private[this] var chooser: JFileChooser = null
+  private[this] var chooserBug = false
 
   private[this] val l = entry.addListener {
     case Some(entries) => fork(updateEntries(entries))
@@ -73,8 +73,16 @@ class RecentFilesImpl(entry: Preferences.Entry[List[File]], maxItems: Int, actio
 
   // runs on EDT!
   private def updateEntries(entries: List[File]): Unit = {
-    val v   = entries.toVector
+    val v = entries.toVector
     // val fsv = FileSystemView.getFileSystemView
+    if (!chooserBug && chooser == null) {
+      try {
+        chooser = new JFileChooser()
+      } catch {
+        case _: Exception => // bloody xstream reflection problems sometimes
+          chooserBug = true
+      }
+    }
 
     for (i <- 0 until maxItems) {
       val ac = actions(i)
@@ -85,7 +93,7 @@ class RecentFilesImpl(entry: Preferences.Entry[List[File]], maxItems: Int, actio
         ac.enabled  = file.canRead
         val name    = file.getName
         val multi   = v.count(_.getName == name) > 1
-        ac.icon     = chooser.getIcon(file) // fsv.getSystemIcon(file)
+        if (chooser != null) ac.icon = chooser.getIcon(file) // fsv.getSystemIcon(file)
         // if there is more than one file with the same name, append parent folder.
         // TODO: while this is how OS X does it, it would be smarter to look for
         // different components of the parent folder, because we can still end up
